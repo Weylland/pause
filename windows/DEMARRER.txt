@@ -1,0 +1,43 @@
+PAUSE 1.4.3 • WINDOWS + ANDROID
+
+Sur Windows
+Décompresse cette archive dans un dossier que tu peux garder. Ouvre Pause.exe.
+L’application est autonome sur Windows x64.
+Pour une mise à jour, ferme Pause et remplace Pause.exe au même emplacement pour que ton client MCP retrouve son chemin.
+
+Sur Android
+Installe Pause-1.4.3.apk par-dessus la version précédente. Garde l’application existante installée pour retrouver tes données.
+L’onglet PC apparaît après la mise à jour.
+
+Première synchro
+1. Connecte le téléphone et le PC au même réseau local.
+2. Sur Windows, ouvre Pause et clique sur Associer Android.
+3. Sur Android, ouvre PC puis Scanner le QR code et photographie le code affiché à l’écran. Tu peux aussi coller le code depuis le PC.
+4. Si la Sécurité Windows demande une autorisation réseau, affiche les options et sélectionne uniquement le réseau privé.
+
+Ensuite, laisse Pause ouvert sur le PC pendant l’échange et appuie sur Synchroniser maintenant dans l’onglet PC du téléphone.
+Tu peux saisir et modifier tes entrées hors ligne des deux côtés. Les changements sur des entrées différentes sont réunis. Si une même entrée diffère, le téléphone affiche les deux versions avant d’appliquer ton choix.
+Si l’adresse locale du PC change, tu peux la corriger dans l’onglet PC ou scanner à nouveau le QR code. Garde le code d’association pour toi.
+
+Connecteur MCP
+Sur Windows, clique sur Connecteur MCP, choisis ton client et copie la configuration.
+Avec Claude Desktop, ajoute l’entrée pause_pc à mcpServers dans %APPDATA%\Claude\claude_desktop_config.json, ou crée le fichier avec le bloc complet. Ferme complètement Claude Desktop et relance-le. Le connecteur apparaît dans Claude Desktop, sous + puis Connecteurs.
+Avec Claude Code ou Codex, exécute la commande affichée dans PowerShell et ouvre une nouvelle session.
+Pour un autre client MCP stdio, indique le chemin complet de Pause.exe comme commande et --mcp comme argument.
+Le connecteur travaille avec le journal Windows, même si la fenêtre Pause est fermée. Après la mise à jour, ouvre une nouvelle session de ton client MCP ou relance Claude Desktop pour charger les outils.
+Tu peux dire « Ajoute 82,4 kg et 250 kcal pour aujourd’hui », « Fixe mon poids cible à 80 kg » ou « Enregistre ce bilan dans Pause ». Les corrections d’aliments visent une entrée existante avec sa date et son identifiant.
+La demande « Fais mon bilan des 30 derniers jours » produit une réponse dans la conversation. Si tu demandes aussi à l’IA de l’enregistrer, il apparaît dans Bilans sur Windows et dans Bilan IA sur Android après la prochaine synchro.
+
+Objectifs et rappels
+Sur Windows, ouvre Objectifs poids et calories dans le journal. Sur Android, règle le poids cible dans Poids et les calories quotidiennes dans Calories. Synchronise pour retrouver les objectifs sur les deux appareils.
+Sur Android, ouvre Rappel dans l’onglet Pause, choisis l’heure et active les notifications. Pause envoie un rappel si la journée reste à renseigner. Android peut décaler l’heure de notification.
+L’option Me rappeler aussi la pesée utilise la même heure et vérifie si une pesée a été saisie.
+
+Repas sans code-barres
+Sur Android, ouvre Calories puis Décrire un repas. Écris ou dicte ta saisie avec le micro du clavier. Vérifie les quantités et les calories proposées à partir de Ciqual. Si une référence manque, saisis une valeur connue ou choisis À estimer. Tu peux copier une demande pour l’IA de ton choix.
+Un code-barres scanné sans calories est gardé automatiquement dans les repas à estimer. Après avoir mis un repas en attente, synchronise Android avec Pause sur Windows. Dans Claude connecté au MCP, demande « Affiche mes repas à estimer et propose les calories ». Vérifie sa proposition, puis demande l’enregistrement. Synchronise à nouveau pour retrouver les aliments sur Android.
+Sur Windows, le sélecteur de graphique montre le poids, les calories ou les jours de pause. Sur Android, la page Calories affiche un graphique sur sept jours.
+
+Données
+Windows conserve le journal et une sauvegarde dans %LOCALAPPDATA%\Pause. Le téléphone conserve sa propre copie.
+La synchronisation passe par une connexion TLS sur le réseau local. Aucun compte n’est nécessaire. Le port est 43183/TCP.

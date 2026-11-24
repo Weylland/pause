@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>Pause</AssemblyName>
+    <Version>1.4.3</Version>
+    <ApplicationIcon>Pause.ico</ApplicationIcon>
+  </PropertyGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="../nutrition/ciqual.tsv" LogicalName="Pause.ciqual.tsv" />
+    <PackageReference Include="QRCoder" Version="1.7.0" />
+  </ItemGroup>
+</Project>

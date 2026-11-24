@@ -1,0 +1,33 @@
+# Outils et compilation
+.gradle/
+.idea/
+.vs/
+bin/
+obj/
+build/
+out/
+local.properties
+*.user
+*.suo
+*.iml
+
+# Configuration et données locales
+.env
+.env.*
+.pause-mcp.json
+journal.json
+journal.json.*
+pause-bilan.json
+pairing.key
+password.txt
+
+# Clés privées et signatures
+*.jks
+*.keystore
+*.p12
+*.pfx
+
+# Les binaires distribués sont joints aux versions GitHub
+*.apk
+*.aab
+*.zip

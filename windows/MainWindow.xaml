@@ -1,0 +1,308 @@
+<Window x:Class="Pause.MainWindow" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Pause" Width="1180" Height="795" MinWidth="1000" MinHeight="650"
+        WindowStartupLocation="CenterScreen" Background="{StaticResource Paper}" Foreground="{StaticResource Ink}"
+        FontFamily="Segoe UI" FontSize="14" TextOptions.TextFormattingMode="Display">
+    <Window.Resources>
+        <Style x:Key="MetricLabel" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="{StaticResource Accent}"/>
+        </Style>
+        <Style x:Key="MetricValue" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="26"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Margin" Value="0,4,0,3"/>
+        </Style>
+        <Style x:Key="MetricNote" TargetType="TextBlock" BasedOn="{StaticResource MutedText}">
+            <Setter Property="FontSize" Value="12"/>
+        </Style>
+        <Style x:Key="RowBadge" TargetType="Border">
+            <Setter Property="CornerRadius" Value="7"/>
+            <Setter Property="Padding" Value="8,3"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+            <Setter Property="Background" Value="#EBEEE8"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding StatusLabel}" Value="Tenu">
+                    <Setter Property="Background" Value="{StaticResource Mint}"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding StatusLabel}" Value="Non tenu">
+                    <Setter Property="Background" Value="{StaticResource Apricot}"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding StatusLabel}" Value="—">
+                    <Setter Property="Background" Value="Transparent"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="RowBadgeText" TargetType="TextBlock">
+            <Setter Property="Foreground" Value="{StaticResource Muted}"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding StatusLabel}" Value="Tenu">
+                    <Setter Property="Foreground" Value="{StaticResource Accent}"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding StatusLabel}" Value="Non tenu">
+                    <Setter Property="Foreground" Value="{StaticResource ApricotInk}"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="26,16,26,12">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Border BorderBrush="{StaticResource Line}" BorderThickness="0,0,0,1" Padding="0,0,0,13">
+            <Grid>
+                <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <Border Width="35" Height="35" CornerRadius="10" Background="{StaticResource Forest}" Margin="0,0,9,0">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <Border Width="4" Height="14" CornerRadius="2" Background="{StaticResource Lime}" Margin="0,0,3,0"/>
+                            <Border Width="4" Height="14" CornerRadius="2" Background="{StaticResource Lime}"/>
+                        </StackPanel>
+                    </Border>
+                    <TextBlock Text="Pause" FontSize="21" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                </StackPanel>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button x:Name="PendingMealsButton" Content="Repas à estimer" Style="{StaticResource QuietButton}" Click="OpenMealDrafts" Margin="0,0,8,0"/>
+                    <Button Content="Bilans" Style="{StaticResource QuietButton}" Click="OpenSavedReports" Margin="0,0,8,0"/>
+                    <Button Style="{StaticResource QuietButton}" Click="OpenMcp" Margin="0,0,8,0"
+                            AutomationProperties.Name="Connecteur MCP">
+                        <StackPanel Orientation="Horizontal">
+                            <Path Data="M1,6 L6,1 M5,10 L10,5 M3,8 L8,3" Stroke="{StaticResource Accent}" StrokeThickness="1.5"
+                                  StrokeStartLineCap="Round" StrokeEndLineCap="Round" Width="11" Height="12" Margin="0,0,6,0"/>
+                            <TextBlock Text="Connecteur MCP"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Style="{StaticResource Primary}" Click="OpenPairing" AutomationProperties.Name="Associer Android">
+                        <StackPanel Orientation="Horizontal">
+                            <Path Data="M3,1 L9,1 Q11,1 11,3 L11,12 Q11,14 9,14 L3,14 Q1,14 1,12 L1,3 Q1,1 3,1 Z M5,11 L7,11"
+                                  Stroke="{StaticResource Lime}" StrokeThickness="1.45" Width="12" Height="15" Margin="0,0,6,0"/>
+                            <TextBlock Text="Associer Android"/>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <Grid Grid.Row="1" Margin="0,15,0,0">
+            <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="319"/></Grid.ColumnDefinitions>
+            <Grid Margin="0,0,14,0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Grid Margin="0,0,0,13">
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                    <StackPanel>
+                        <TextBlock Text="Tableau de bord" FontFamily="Georgia" FontSize="35"/>
+                        <TextBlock x:Name="RangeText" Style="{StaticResource MutedText}" Margin="0,4,0,0"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Bottom">
+                        <Button x:Name="Days7" Tag="7" Content="7 j" Click="SelectRange" Margin="0,0,4,0" AutomationProperties.Name="7 jours"/>
+                        <Button x:Name="Days30" Tag="30" Content="30 j" Click="SelectRange" Margin="0,0,4,0" AutomationProperties.Name="30 jours"/>
+                        <Button x:Name="Days90" Tag="90" Content="90 j" Click="SelectRange" AutomationProperties.Name="90 jours"/>
+                    </StackPanel>
+                </Grid>
+
+                <Grid Grid.Row="1" Margin="0,0,0,11">
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="1.18*"/><ColumnDefinition/><ColumnDefinition/></Grid.ColumnDefinitions>
+                    <Border Background="{StaticResource ForestGradient}" CornerRadius="19" Padding="14,12,14,12" Margin="0,0,9,0" MinHeight="121">
+                        <Grid ClipToBounds="True">
+                            <Ellipse HorizontalAlignment="Right" VerticalAlignment="Top" Width="122" Height="122"
+                                     Margin="0,-64,-34,0" Stroke="#5F916F" StrokeThickness="1" Opacity=".55" IsHitTestVisible="False"/>
+                            <Ellipse HorizontalAlignment="Right" VerticalAlignment="Top" Width="95" Height="95"
+                                     Margin="0,-46,-28,0" Stroke="#5F916F" StrokeThickness="1" Opacity=".65" IsHitTestVisible="False"/>
+                            <StackPanel VerticalAlignment="Center">
+                                <Grid>
+                                    <Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                                    <TextBlock Text="Ma pause" Style="{StaticResource MetricLabel}" Foreground="{StaticResource Lime}" VerticalAlignment="Center"/>
+                                    <Border Grid.Column="1" x:Name="StreakBadge" Margin="5,0,6,0" CornerRadius="11"
+                                            Padding="7,3" RenderTransformOrigin=".5,.5" Visibility="Collapsed">
+                                        <Border.RenderTransform><ScaleTransform x:Name="StreakScale"/></Border.RenderTransform>
+                                        <TextBlock x:Name="StreakLabel" FontSize="11" FontWeight="SemiBold"/>
+                                    </Border>
+                                </Grid>
+                                <TextBlock x:Name="PauseValue" Style="{StaticResource MetricValue}" Foreground="White" FontSize="24"/>
+                                <TextBlock x:Name="PauseDetail" Style="{StaticResource MetricNote}" Foreground="#E4EFE4"/>
+                                <Grid x:Name="PauseTrack" Height="4" Margin="0,8,0,0">
+                                    <Grid.ColumnDefinitions><ColumnDefinition x:Name="PauseDone"/><ColumnDefinition x:Name="PauseRest"/></Grid.ColumnDefinitions>
+                                    <Border Grid.ColumnSpan="2" CornerRadius="2" Background="#537763"/>
+                                    <Border x:Name="PauseFill" CornerRadius="2" Background="{StaticResource Lime}"/>
+                                </Grid>
+                                <DockPanel x:Name="PauseDates" Margin="0,8,0,0">
+                                    <Button x:Name="ExtendPause" DockPanel.Dock="Right" Content="Prolonger" Click="ExtendGoal"
+                                            AutomationProperties.Name="Prolonger la pause" Background="#375D45" Foreground="#E4EFE4"
+                                            FontSize="11" MinHeight="27" Padding="7,3" Margin="5,0,0,0"/>
+                                    <TextBlock x:Name="PauseEnd" Style="{StaticResource MetricNote}" Foreground="#E4EFE4" VerticalAlignment="Center"/>
+                                </DockPanel>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                    <Border Grid.Column="1" Style="{StaticResource Card}" Background="{StaticResource Mint}"
+                            Padding="14,12,14,12" Margin="0,0,9,0" MinHeight="121">
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="Dernier poids" Style="{StaticResource MetricLabel}"/>
+                            <TextBlock x:Name="WeightValue" Style="{StaticResource MetricValue}"/>
+                            <TextBlock x:Name="WeightDetail" Style="{StaticResource MetricNote}"/>
+                            <TextBlock x:Name="WeightTargetNote" Style="{StaticResource MetricNote}" Margin="0,4,0,0"/>
+                        </StackPanel>
+                    </Border>
+                    <Border Grid.Column="2" Style="{StaticResource Card}" Background="{StaticResource Apricot}" BorderBrush="#EFDFCC"
+                            Padding="14,12,14,12" MinHeight="121">
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="Calories notées" Style="{StaticResource MetricLabel}" Foreground="{StaticResource ApricotInk}"/>
+                            <TextBlock x:Name="CaloriesValue" Style="{StaticResource MetricValue}"/>
+                            <TextBlock x:Name="CaloriesDetail" Style="{StaticResource MetricNote}" Foreground="{StaticResource ApricotInk}"/>
+                            <TextBlock x:Name="CaloriesTargetNote" Style="{StaticResource MetricNote}" Foreground="{StaticResource ApricotInk}" Margin="0,4,0,0"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+
+                <Border Grid.Row="2" Style="{StaticResource Card}" Padding="14,10,14,10" Margin="0,0,0,11">
+                    <Grid>
+                        <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="70"/></Grid.RowDefinitions>
+                        <DockPanel>
+                            <ComboBox DockPanel.Dock="Right" x:Name="ChartKind" Width="138" MinHeight="26"
+                                      SelectedIndex="0" SelectionChanged="ChangeChart" AutomationProperties.Name="Graphique">
+                                <ComboBoxItem Content="Poids"/>
+                                <ComboBoxItem Content="Calories"/>
+                                <ComboBoxItem Content="Pause"/>
+                            </ComboBox>
+                            <TextBlock x:Name="ChartTitle" Text="Évolution du poids" FontSize="15" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                        </DockPanel>
+                        <Canvas x:Name="WeightChart" Grid.Row="1" SizeChanged="ChartSizeChanged" ClipToBounds="True"/>
+                        <TextBlock Grid.Row="1" x:Name="NoChart" Style="{StaticResource MutedText}"
+                                   VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="13"/>
+                    </Grid>
+                </Border>
+
+                <Border Grid.Row="3" Style="{StaticResource Card}" Padding="10">
+                    <Grid>
+                        <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+                        <DockPanel Margin="5,0,3,5">
+                            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                                <Button Content="Objectifs poids et calories" Style="{StaticResource QuietButton}" Click="EditTargets"
+                                        MinHeight="28" Padding="8,3" FontSize="12" Margin="0,0,6,0"/>
+                                <Button Content="Objectif de pause" Style="{StaticResource QuietButton}" Click="EditGoal"
+                                        MinHeight="28" Padding="8,3" FontSize="12"/>
+                            </StackPanel>
+                            <TextBlock Text="Journal" Style="{StaticResource SectionTitle}" VerticalAlignment="Center"/>
+                        </DockPanel>
+                        <DataGrid Grid.Row="1" x:Name="DaysGrid" IsReadOnly="True" AutoGenerateColumns="False"
+                                  SelectionMode="Single" SelectionUnit="FullRow" HeadersVisibility="Column" Background="{StaticResource Surface}"
+                                  BorderThickness="0" GridLinesVisibility="Horizontal" HorizontalGridLinesBrush="#E9EDE4"
+                                  RowHeight="34" ColumnHeaderHeight="30" CanUserAddRows="False" CanUserResizeRows="False"
+                                  CanUserReorderColumns="False" CanUserSortColumns="False" SelectionChanged="ChooseDay">
+                            <DataGrid.ColumnHeaderStyle>
+                                <Style TargetType="DataGridColumnHeader">
+                                    <Setter Property="Background" Value="#EEF2EA"/>
+                                    <Setter Property="Foreground" Value="{StaticResource Muted}"/>
+                                    <Setter Property="Padding" Value="9,4"/>
+                                    <Setter Property="FontSize" Value="12"/>
+                                    <Setter Property="FontWeight" Value="SemiBold"/>
+                                </Style>
+                            </DataGrid.ColumnHeaderStyle>
+                            <DataGrid.RowStyle>
+                                <Style TargetType="DataGridRow">
+                                    <Setter Property="Background" Value="{StaticResource Surface}"/>
+                                    <Setter Property="Foreground" Value="{StaticResource Ink}"/>
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True"><Setter Property="Background" Value="#F2F5EC"/></Trigger>
+                                        <Trigger Property="IsSelected" Value="True"><Setter Property="Background" Value="#E2EFDC"/></Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </DataGrid.RowStyle>
+                            <DataGrid.CellStyle>
+                                <Style TargetType="DataGridCell">
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="DataGridCell">
+                                                <Border Padding="9,0" Background="Transparent">
+                                                    <ContentPresenter VerticalAlignment="Center"/>
+                                                </Border>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </DataGrid.CellStyle>
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Width="1.17*" Header="Date" Binding="{Binding DateLabel}"/>
+                                <DataGridTemplateColumn Width="1.22*" Header="Pause">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Border Style="{StaticResource RowBadge}">
+                                                <TextBlock Text="{Binding StatusLabel}" Style="{StaticResource RowBadgeText}" TextTrimming="CharacterEllipsis"/>
+                                            </Border>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridTextColumn Width=".75*" Header="Poids" Binding="{Binding WeightLabel}"/>
+                                <DataGridTextColumn Width="*" Header="Calories" Binding="{Binding CaloriesLabel}"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Grid>
+                </Border>
+            </Grid>
+
+            <Border Grid.Column="1" Style="{StaticResource Card}">
+                <Grid>
+                    <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+                    <StackPanel>
+                        <DockPanel>
+                            <Button x:Name="DayToday" DockPanel.Dock="Right" Content="Aujourd’hui" Click="GoToToday"
+                                    Background="{StaticResource Mint}" FontSize="11" MinHeight="28" Padding="7,3" Margin="6,0,0,0"/>
+                            <TextBlock x:Name="DayTitle" FontFamily="Georgia" FontSize="24" TextWrapping="Wrap"/>
+                        </DockPanel>
+                        <DatePicker x:Name="DayPicker" Margin="0,11,0,13" SelectedDateChanged="ChooseDate" AutomationProperties.Name="Date à afficher"/>
+                        <Border Background="#F0F4EA" CornerRadius="12" Padding="12">
+                            <StackPanel>
+                                <TextBlock x:Name="DayPause" FontWeight="SemiBold"/>
+                                <TextBlock x:Name="DayWeight" Style="{StaticResource MutedText}" Margin="0,4,0,0"/>
+                            </StackPanel>
+                        </Border>
+                        <Button Content="Modifier la journée" Click="EditDay" Margin="0,9,0,17"/>
+                        <Border BorderBrush="{StaticResource Line}" BorderThickness="0,1,0,0" Padding="0,13,0,7">
+                            <DockPanel>
+                                <TextBlock DockPanel.Dock="Right" x:Name="DayCalories" FontWeight="SemiBold" Foreground="{StaticResource Accent}" VerticalAlignment="Center"/>
+                                <TextBlock Text="Aliments" FontSize="17" FontWeight="SemiBold"/>
+                            </DockPanel>
+                        </Border>
+                        <TextBlock x:Name="NoMeals" Style="{StaticResource MutedText}" FontSize="13"/>
+                    </StackPanel>
+                    <ListBox Grid.Row="1" x:Name="MealsList" BorderThickness="0" Padding="0" Background="{StaticResource Surface}"
+                             MouseDoubleClick="EditMeal" SelectionChanged="MealSelected">
+                        <ListBox.ItemContainerStyle>
+                            <Style TargetType="ListBoxItem">
+                                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                <Setter Property="Padding" Value="5,8"/>
+                            </Style>
+                        </ListBox.ItemContainerStyle>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <DockPanel>
+                                    <TextBlock DockPanel.Dock="Right" Text="{Binding CaloriesLabel}" Foreground="{StaticResource Accent}" Margin="7,0,0,0"/>
+                                    <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis"/>
+                                </DockPanel>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                    <UniformGrid Grid.Row="2" Columns="2" Margin="0,9,0,0">
+                        <Button Content="Ajouter un aliment" Click="AddMeal" Style="{StaticResource Primary}" Margin="0,0,4,0" Padding="5,8"/>
+                        <Button x:Name="EditMealButton" Content="Modifier" Click="EditMeal" Margin="4,0,0,0"/>
+                    </UniformGrid>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="1,10,0,0">
+            <Ellipse x:Name="SyncDot" Width="7" Height="7" Margin="0,0,7,0" VerticalAlignment="Center"/>
+            <TextBlock x:Name="SyncStatus" Style="{StaticResource MutedText}" FontSize="12"/>
+        </StackPanel>
+    </Grid>
+</Window>
