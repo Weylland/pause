@@ -2,36 +2,77 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              ShutdownMode="OnMainWindowClose">
     <Application.Resources>
-        <SolidColorBrush x:Key="Paper" Color="#F6F3EB"/>
-        <SolidColorBrush x:Key="Surface" Color="#FFFEFA"/>
-        <SolidColorBrush x:Key="Ink" Color="#182F25"/>
-        <SolidColorBrush x:Key="Muted" Color="#52675A"/>
-        <SolidColorBrush x:Key="Line" Color="#DEE4D8"/>
-        <SolidColorBrush x:Key="Forest" Color="#164332"/>
-        <SolidColorBrush x:Key="Accent" Color="#285C44"/>
-        <SolidColorBrush x:Key="Mint" Color="#E5EFE1"/>
-        <SolidColorBrush x:Key="Lime" Color="#DCEAAE"/>
-        <SolidColorBrush x:Key="Apricot" Color="#FAEADB"/>
-        <SolidColorBrush x:Key="ApricotInk" Color="#714527"/>
-        <LinearGradientBrush x:Key="ForestGradient" StartPoint="0,1" EndPoint="1,0">
-            <GradientStop Color="#133B2D" Offset="0"/>
-            <GradientStop Color="#275B3F" Offset="1"/>
-        </LinearGradientBrush>
+        <SolidColorBrush x:Key="Paper" Color="#F3E6CF"/>
+        <SolidColorBrush x:Key="Surface" Color="#FFF8EA"/>
+        <SolidColorBrush x:Key="Field" Color="#FFFDF6"/>
+        <SolidColorBrush x:Key="Ink" Color="#3B2A1E"/>
+        <SolidColorBrush x:Key="Muted" Color="#5C4633"/>
+        <SolidColorBrush x:Key="Line" Color="#D6BF98"/>
+        <SolidColorBrush x:Key="Brand" Color="#B8431F"/>
+        <SolidColorBrush x:Key="Accent" Color="#9A3412"/>
+        <SolidColorBrush x:Key="Mint" Color="#D5EBC6"/>
+        <SolidColorBrush x:Key="Gold" Color="#FBE3A0"/>
+        <SolidColorBrush x:Key="Blue" Color="#CFE5F3"/>
+        <SolidColorBrush x:Key="BlueInk" Color="#1F526D"/>
+        <SolidColorBrush x:Key="Apricot" Color="#F6D3C4"/>
+        <SolidColorBrush x:Key="ApricotInk" Color="#5A2412"/>
+        <SolidColorBrush x:Key="GreenInk" Color="#22401A"/>
+        <FontFamily x:Key="TitleFont">pack://application:,,,/Pause;component/Fonts/#Fredoka</FontFamily>
+        <FontFamily x:Key="BodyFont">pack://application:,,,/Pause;component/Fonts/#Nunito</FontFamily>
+        <DrawingBrush x:Key="PaperGrain" TileMode="Tile" Viewport="0,0,9,9" ViewportUnits="Absolute">
+            <DrawingBrush.Drawing>
+                <DrawingGroup>
+                    <GeometryDrawing Brush="{StaticResource Paper}" Geometry="M0,0 H9 V9 H0 Z"/>
+                    <GeometryDrawing Brush="#08674625" Geometry="M2,2 H3 V2.6 H2 Z M6,6 H7 V6.6 H6 Z"/>
+                </DrawingGroup>
+            </DrawingBrush.Drawing>
+        </DrawingBrush>
+        <DataTemplate x:Key="FeltLandscape">
+            <Canvas Width="344" Height="51" IsHitTestVisible="False" ClipToBounds="True">
+                <Ellipse Canvas.Left="285" Canvas.Top="2" Width="33" Height="33" Fill="#DDBE6C"/>
+                <Ellipse Canvas.Left="285" Canvas.Top="0" Width="33" Height="32" Fill="{StaticResource Gold}" Stroke="#AC8435"
+                         StrokeDashArray="2,3" StrokeThickness="1.5"/>
+                <Path Fill="#9CC3DC" Data="M161,21 C161,16 168,14 173,16 C176,6 189,6 193,14 C198,12 205,16 205,21 Q187,28 161,21 Z"/>
+                <Path Fill="{StaticResource Blue}" Stroke="#759DB8" StrokeDashArray="2,3" StrokeThickness="1.2"
+                      Data="M161,20 C162,15 168,13 174,15 C176,5 189,5 193,13 C199,11 205,15 205,20 Q187,24 161,20 Z"/>
+                <Path Fill="#8DBB73" Data="M0,48 C48,23 99,47 163,36 C222,22 267,30 344,23 V51 H0 Z"/>
+                <Path Stroke="#567646" StrokeDashArray="3,4" StrokeThickness="1.2" Data="M2,48 C48,27 99,50 163,39 C222,26 267,33 342,26"/>
+                <Path Fill="#C09A65" Stroke="#805D37" StrokeThickness="1" Data="M71,46 L72,24 L79,24 L77,46 Z"/>
+                <Path Fill="#A6CC8E" Stroke="#648650" StrokeThickness="1.2" Data="M55,27 Q52,21 59,18 Q60,12 67,11 Q69,3 78,4 Q86,4 87,13 Q98,16 95,25 Q91,31 80,28 Q66,34 55,27 Z"/>
+                <Path Stroke="#648650" StrokeDashArray="2,3" StrokeThickness="1" Data="M59,25 Q58,20 63,20 Q63,15 70,14 Q72,7 78,7 Q84,7 84,15 Q93,17 92,23 Q89,28 80,25 Q68,30 59,25 Z"/>
+                <Path Fill="#E2C597" Stroke="#8A6A3A" StrokeThickness="1.1"
+                      Data="M112,38 L142,37 L143,41 L113,42 Z M115,47 L115,35 L118,32 L121,35 L120,47 Z M126,46 L126,34 L129,31 L132,34 L131,46 Z M137,46 L137,33 L140,30 L143,33 L142,46 Z"/>
+                <Path Fill="#A6CC8E" Data="M0,51 C61,41 111,52 180,46 C239,38 277,49 344,41 V51 Z"/>
+                <Path Stroke="#648650" StrokeDashArray="3,4" StrokeThickness="1.1" Data="M4,51 C61,43 111,54 180,48 C239,40 277,51 340,43"/>
+                <Path Fill="#FFF8EA" Stroke="#B98A65" StrokeThickness="1" Data="M221,43 L222,34 L226,34 L227,43 Z"/>
+                <Path Fill="#F6D3C4" Stroke="#AD6C53" StrokeThickness="1" Data="M214,36 Q215,27 224,27 Q232,28 234,35 Q226,39 214,36 Z"/>
+                <Ellipse Canvas.Left="219" Canvas.Top="30" Width="3" Height="2.5" Fill="#FFF8EA"/>
+                <Ellipse Canvas.Left="226" Canvas.Top="31" Width="3" Height="2.5" Fill="#FFF8EA"/>
+                <Path Stroke="#648650" StrokeThickness="1.4" Data="M32,45 L31,36 M253,46 L255,36"/>
+                <Ellipse Canvas.Left="25" Canvas.Top="28" Width="11" Height="10" Fill="#E3DDF5" Stroke="#A89ACF"/>
+                <Ellipse Canvas.Left="250" Canvas.Top="29" Width="11" Height="10" Fill="#FBE3A0" Stroke="#CAA55A"/>
+                <Path Stroke="#765832" StrokeThickness="1.4" StrokeStartLineCap="Round" StrokeEndLineCap="Round"
+                      Data="M29,33 L29.3,33 M32,33 L32.3,33 M254,34 L254.3,34 M257,34 L257.3,34"/>
+                <Path Fill="#DDBE6C" Data="M266,8 L267.5,12 L272,13.4 L268,15 L266,19 L264.5,15 L260,13.4 L264.5,12 Z"/>
+            </Canvas>
+        </DataTemplate>
 
         <Style x:Key="MutedText" TargetType="TextBlock">
             <Setter Property="Foreground" Value="{StaticResource Muted}"/>
             <Setter Property="TextWrapping" Value="Wrap"/>
         </Style>
         <Style x:Key="SectionTitle" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="{StaticResource TitleFont}"/>
             <Setter Property="FontSize" Value="20"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
         </Style>
         <Style TargetType="Button">
-            <Setter Property="Background" Value="{StaticResource Mint}"/>
+            <Setter Property="Background" Value="{StaticResource Surface}"/>
+            <Setter Property="FontFamily" Value="{StaticResource TitleFont}"/>
             <Setter Property="Foreground" Value="{StaticResource Accent}"/>
             <Setter Property="FontWeight" Value="SemiBold"/>
             <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="BorderBrush" Value="Transparent"/>
+            <Setter Property="BorderBrush" Value="{StaticResource Line}"/>
             <Setter Property="Padding" Value="13,8"/>
             <Setter Property="MinHeight" Value="36"/>
             <Setter Property="Cursor" Value="Hand"/>
@@ -39,7 +80,7 @@
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
                         <Border x:Name="Surface" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
-                                BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="10" Padding="{TemplateBinding Padding}">
+                                BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="14" Padding="{TemplateBinding Padding}">
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" RecognizesAccessKey="True"
                                               TextElement.Foreground="{TemplateBinding Foreground}"/>
                         </Border>
@@ -47,15 +88,17 @@
                             <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="Surface" Property="Opacity" Value=".83"/></Trigger>
                             <Trigger Property="IsPressed" Value="True"><Setter TargetName="Surface" Property="Opacity" Value=".68"/></Trigger>
                             <Trigger Property="IsEnabled" Value="False"><Setter TargetName="Surface" Property="Opacity" Value=".45"/></Trigger>
-                            <Trigger Property="IsKeyboardFocused" Value="True"><Setter TargetName="Surface" Property="BorderBrush" Value="#69A47C"/></Trigger>
+                            <Trigger Property="IsKeyboardFocused" Value="True"><Setter TargetName="Surface" Property="BorderBrush" Value="{StaticResource Accent}"/></Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
         </Style>
         <Style x:Key="Primary" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
-            <Setter Property="Background" Value="{StaticResource Forest}"/>
+            <Setter Property="Background" Value="{StaticResource Brand}"/>
+            <Setter Property="BorderBrush" Value="#9E3519"/>
             <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Effect"><Setter.Value><DropShadowEffect Color="#9E3519" Direction="270" ShadowDepth="3" BlurRadius="0" Opacity="1"/></Setter.Value></Setter>
         </Style>
         <Style x:Key="QuietButton" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
             <Setter Property="Background" Value="{StaticResource Surface}"/>
@@ -65,22 +108,144 @@
             <Setter Property="Background" Value="{StaticResource Surface}"/>
             <Setter Property="BorderBrush" Value="{StaticResource Line}"/>
             <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="CornerRadius" Value="19"/>
+            <Setter Property="CornerRadius" Value="22,18,24,16"/>
             <Setter Property="Padding" Value="18"/>
+            <Setter Property="Effect"><Setter.Value><DropShadowEffect Color="#D6BF98" Direction="270" ShadowDepth="3" BlurRadius="0" Opacity="1"/></Setter.Value></Setter>
         </Style>
         <Style TargetType="TextBox">
-            <Setter Property="Background" Value="White"/>
+            <Setter Property="Background" Value="{StaticResource Field}"/>
             <Setter Property="Foreground" Value="{StaticResource Ink}"/>
             <Setter Property="BorderBrush" Value="{StaticResource Line}"/>
-            <Setter Property="Padding" Value="8,6"/>
-            <Setter Property="MinHeight" Value="32"/>
+            <Setter Property="Padding" Value="10,7"/>
+            <Setter Property="MinHeight" Value="38"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border x:Name="FieldEdge" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="1" CornerRadius="11" Padding="{TemplateBinding Padding}">
+                            <ScrollViewer x:Name="PART_ContentHost"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsKeyboardFocusWithin" Value="True">
+                                <Setter TargetName="FieldEdge" Property="BorderBrush" Value="{StaticResource Accent}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
         <Style TargetType="ComboBox">
-            <Setter Property="MinHeight" Value="34"/>
-            <Setter Property="Padding" Value="7,5"/>
+            <Setter Property="MinHeight" Value="42"/>
+            <Setter Property="Background" Value="{StaticResource Field}"/>
+            <Setter Property="Foreground" Value="{StaticResource Ink}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource Line}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBox">
+                        <Grid>
+                            <ToggleButton IsChecked="{Binding IsDropDownOpen, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
+                                          Focusable="False" ClickMode="Press" Cursor="Hand">
+                                <ToggleButton.Template>
+                                    <ControlTemplate TargetType="ToggleButton"><Border Background="Transparent"/></ControlTemplate>
+                                </ToggleButton.Template>
+                            </ToggleButton>
+                            <Border x:Name="Edge" CornerRadius="11" BorderThickness="1" BorderBrush="{TemplateBinding BorderBrush}"
+                                    Background="{TemplateBinding Background}" IsHitTestVisible="False" Padding="12,6,6,6">
+                                <DockPanel>
+                                    <Border DockPanel.Dock="Right" Width="28" Height="27" Margin="7,0,0,0"
+                                            CornerRadius="7" Background="{StaticResource Paper}">
+                                        <Path Data="M1,1 L5,5 L9,1" Width="10" Height="6" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                              Stroke="{StaticResource Accent}" StrokeThickness="1.6" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+                                    </Border>
+                                    <ContentPresenter VerticalAlignment="Center" Content="{TemplateBinding SelectionBoxItem}"
+                                                      ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"/>
+                                </DockPanel>
+                            </Border>
+                            <Popup x:Name="PART_Popup" Placement="Bottom" IsOpen="{TemplateBinding IsDropDownOpen}" AllowsTransparency="True" PopupAnimation="Fade">
+                                <Border Background="{StaticResource Surface}" BorderBrush="{StaticResource Line}" BorderThickness="1"
+                                        CornerRadius="11" Padding="4" Margin="0,4" MinWidth="{Binding ActualWidth, RelativeSource={RelativeSource TemplatedParent}}"
+                                        MaxHeight="{TemplateBinding MaxDropDownHeight}">
+                                    <ScrollViewer VerticalScrollBarVisibility="Auto"><ItemsPresenter KeyboardNavigation.DirectionalNavigation="Contained"/></ScrollViewer>
+                                </Border>
+                            </Popup>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsKeyboardFocusWithin" Value="True"><Setter TargetName="Edge" Property="BorderBrush" Value="{StaticResource Accent}"/></Trigger>
+                            <Trigger Property="IsDropDownOpen" Value="True"><Setter TargetName="Edge" Property="BorderBrush" Value="{StaticResource Accent}"/></Trigger>
+                            <Trigger Property="IsEnabled" Value="False"><Setter TargetName="Edge" Property="Opacity" Value=".55"/></Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style TargetType="ComboBoxItem">
+            <Setter Property="Foreground" Value="{StaticResource Ink}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBoxItem">
+                        <Border x:Name="Option" Background="Transparent" CornerRadius="7" Padding="10,7">
+                            <ContentPresenter/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsHighlighted" Value="True"><Setter TargetName="Option" Property="Background" Value="{StaticResource Paper}"/></Trigger>
+                            <Trigger Property="IsSelected" Value="True"><Setter TargetName="Option" Property="Background" Value="{StaticResource Gold}"/></Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="CalendarPaper" TargetType="Calendar">
+            <Style.Resources>
+                <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FBE3A0"/>
+                <SolidColorBrush x:Key="{x:Static SystemColors.HighlightTextBrushKey}" Color="#3B2A1E"/>
+            </Style.Resources>
+            <Setter Property="Background" Value="{StaticResource Surface}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource Line}"/>
+        </Style>
+        <Style x:Key="DateText" TargetType="DatePickerTextBox">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="DatePickerTextBox">
+                        <Grid Background="Transparent" Margin="11,4,0,4">
+                            <ScrollViewer x:Name="PART_ContentHost" VerticalAlignment="Center"/>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
         <Style TargetType="DatePicker">
-            <Setter Property="MinHeight" Value="34"/>
+            <Setter Property="MinHeight" Value="42"/>
+            <Setter Property="Background" Value="{StaticResource Field}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource Line}"/>
+            <Setter Property="Foreground" Value="{StaticResource Ink}"/>
+            <Setter Property="CalendarStyle" Value="{StaticResource CalendarPaper}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="DatePicker">
+                        <Grid x:Name="PART_Root">
+                            <Border x:Name="DateEdge" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="1" CornerRadius="11">
+                                <DockPanel>
+                                    <Button x:Name="PART_Button" DockPanel.Dock="Right" Width="31" Height="30" MinHeight="0"
+                                            Margin="5,5,5,5" Padding="0" Background="{StaticResource Paper}"
+                                            BorderThickness="0" AutomationProperties.Name="Ouvrir le calendrier">
+                                        <Path Data="M2,4 L14,4 L14,14 L2,14 Z M2,7 L14,7 M5,2 L5,5 M11,2 L11,5"
+                                              Width="16" Height="16" Stroke="{StaticResource Accent}" StrokeThickness="1.25"
+                                              StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round"/>
+                                    </Button>
+                                    <DatePickerTextBox x:Name="PART_TextBox" Style="{StaticResource DateText}" Foreground="{TemplateBinding Foreground}"/>
+                                </DockPanel>
+                            </Border>
+                            <Popup x:Name="PART_Popup" Placement="Bottom" StaysOpen="False" AllowsTransparency="True" PopupAnimation="Fade"/>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsKeyboardFocusWithin" Value="True"><Setter TargetName="DateEdge" Property="BorderBrush" Value="{StaticResource Accent}"/></Trigger>
+                            <Trigger Property="IsDropDownOpen" Value="True"><Setter TargetName="DateEdge" Property="BorderBrush" Value="{StaticResource Accent}"/></Trigger>
+                            <Trigger Property="IsEnabled" Value="False"><Setter TargetName="DateEdge" Property="Opacity" Value=".55"/></Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
         </Style>
     </Application.Resources>
 </Application>

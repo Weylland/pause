@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.IO;
+using System.Net.Http;
 using System.Net.Sockets;
 using System.Text.Json;
 using System.Text.Json.Nodes;
@@ -21,10 +22,15 @@ public partial class MainWindow : Window
     private readonly JournalStore store;
     private readonly FileSystemWatcher journalChanges;
     private readonly DispatcherTimer refreshTimer = new() { Interval = TimeSpan.FromMilliseconds(120) };
+    private readonly DispatcherTimer driveTimer = new() { Interval = TimeSpan.FromMinutes(2) };
+    private readonly DispatcherTimer driveAfterEdit = new() { Interval = TimeSpan.FromSeconds(4) };
+    private readonly DriveSync drive;
+    private readonly ChatGptPlan chatgpt = new();
     private SyncServer? server;
     private string? serverError;
     private DateOnly selected = DateOnly.FromDateTime(DateTime.Today);
     private int range = 30;
+    private int chartSection;
     private bool rendering;
     private DayRow[] chartRows = [];
     private DayRow[] historyRows = [];
@@ -32,11 +38,18 @@ public partial class MainWindow : Window
     private double? chartCalorieTarget;
     private DateOnly? streakStart;
     private int streakTier;
+    private TrackerWindow? trackerWindow;
+    private readonly CancellationTokenSource estimateLifetime = new();
+    private bool estimating, estimateAgain;
+    private string? estimateError;
+    private event Action? EstimatesChanged;
 
     internal MainWindow(JournalStore store)
     {
         this.store = store;
+        drive = new DriveSync(store);
         InitializeComponent();
+        MarkCurrentChart();
         DayPicker.DisplayDateEnd = DateTime.Today;
         refreshTimer.Tick += (_, _) =>
         {
@@ -47,19 +60,37 @@ public partial class MainWindow : Window
         {
             NotifyFilter = NotifyFilters.FileName | NotifyFilters.LastWrite | NotifyFilters.Size
         };
-        journalChanges.Changed += (_, _) => QueueRefresh();
-        journalChanges.Created += (_, _) => QueueRefresh();
-        journalChanges.Renamed += (_, _) => QueueRefresh();
+        journalChanges.Changed += (_, _) => QueueJournalChange();
+        journalChanges.Created += (_, _) => QueueJournalChange();
+        journalChanges.Renamed += (_, _) => QueueJournalChange();
         journalChanges.EnableRaisingEvents = true;
         if (File.Exists(IOPath.Combine(JournalStore.DirectoryPath, "pairing.key"))) StartSync();
         Closed += (_, _) =>
         {
             journalChanges.Dispose();
             refreshTimer.Stop();
+            driveTimer.Stop();
+            driveAfterEdit.Stop();
             server?.Dispose();
+            estimateLifetime.Cancel();
         };
         Activated += (_, _) => QueueRefresh();
+        driveTimer.Tick += async (_, _) => await SyncDriveAsync();
+        driveAfterEdit.Tick += async (_, _) => { driveAfterEdit.Stop(); await SyncDriveAsync(); };
+        Loaded += async (_, _) => { driveTimer.Start(); await SyncDriveAsync(); };
         Refresh();
+    }
+
+    private void QueueJournalChange()
+    {
+        QueueRefresh();
+        if (Dispatcher.HasShutdownStarted) return;
+        Dispatcher.BeginInvoke(() =>
+        {
+            if (!drive.Connected) return;
+            driveAfterEdit.Stop();
+            driveAfterEdit.Start();
+        });
     }
 
     private void QueueRefresh()
@@ -79,7 +110,11 @@ public partial class MainWindow : Window
         {
             server = new SyncServer(store);
             server.Start();
-            server.Synced += QueueRefresh;
+            server.Synced += () => Dispatcher.BeginInvoke(() =>
+            {
+                QueueRefresh();
+                _ = PrepareEstimatesAsync();
+            });
             serverError = null;
             return true;
         }
@@ -100,12 +135,16 @@ public partial class MainWindow : Window
         try
         {
             JournalState state = store.Snapshot();
+            trackerWindow?.Refresh(state);
             DateOnly first = Today.AddDays(1 - range);
             JournalReport report = JournalReport.Build(state, first, Today, Today);
             historyRows = report.Rows;
             chartGoal = report.Goal;
             chartCalorieTarget = state.CaloriesTarget;
-            PendingMealsButton.Visibility = state.MealDrafts().Length > 0 ? Visibility.Visible : Visibility.Collapsed;
+            MealDraft[] pending = state.MealDrafts();
+            PendingMealsButton.Visibility = pending.Length > 0 ? Visibility.Visible : Visibility.Collapsed;
+            int ready = pending.Count(draft => MealEstimate.Read(draft)?.Foods.Length > 0);
+            PendingMealsButton.Content = ready == 0 ? "Repas à estimer" : $"Propositions · {ready}";
             RangeText.Text = $"Du {first.ToString("d MMMM", French)} au {Today.ToString("d MMMM yyyy", French)}";
             foreach (Button button in new[] { Days7, Days30, Days90 })
             {
@@ -113,13 +152,15 @@ public partial class MainWindow : Window
                 button.Style = (Style)FindResource(active ? "Primary" : "QuietButton");
             }
 
-            PauseValue.Text = report.Goal is null ? "À définir" : $"{report.Kept}/{report.Due} jour{(report.Due > 1 ? "s" : "")} tenu{(report.Kept > 1 ? "s" : "")}";
+            Goal? activeGoal = report.Goal;
+            var (due, kept, notKept) = activeGoal is null ? (0, 0, 0) : state.PauseProgress(activeGoal, Today);
+            PauseValue.Text = activeGoal is null ? "À définir" : $"{kept}/{activeGoal.Duration} jour{(activeGoal.Duration == 1 ? "" : "s")} tenus";
             PauseDetail.Text = report.Goal is null ? "Choisis une date et une durée."
-                : $"{report.NotKept} non tenu{(report.NotKept > 1 ? "s" : "")} · {report.Due - report.Kept - report.NotKept} sans réponse";
+                : $"{due} écoulé{(due > 1 ? "s" : "")} · {notKept} non tenu{(notKept > 1 ? "s" : "")} · {due - kept - notKept} sans réponse";
             PauseTrack.Visibility = report.Goal is null ? Visibility.Collapsed : Visibility.Visible;
-            PauseDone.Width = new GridLength(report.Kept, GridUnitType.Star);
-            PauseRest.Width = new GridLength(Math.Max(1, report.Due) - report.Kept, GridUnitType.Star);
-            PauseFill.Visibility = report.Kept > 0 ? Visibility.Visible : Visibility.Collapsed;
+            PauseDone.Width = new GridLength(kept, GridUnitType.Star);
+            PauseRest.Width = new GridLength((activeGoal?.Duration ?? 1) - kept, GridUnitType.Star);
+            PauseFill.Visibility = kept > 0 ? Visibility.Visible : Visibility.Collapsed;
             RefreshStreak(state.Streak(Today), report.Goal);
             PauseDates.Visibility = report.Goal is null ? Visibility.Collapsed : Visibility.Visible;
             if (report.Goal is Goal goal)
@@ -155,7 +196,7 @@ public partial class MainWindow : Window
             DaysGrid.SelectedItem = rows.FirstOrDefault(row => row.Date == selected);
             DayPicker.SelectedDate = selected.ToDateTime(TimeOnly.MinValue);
             RefreshDay(state);
-            SyncStatus.Text = serverError ?? (state.LastSync is DateTimeOffset lastSync
+            SyncStatus.Text = drive.Connected ? drive.Status : serverError ?? (state.LastSync is DateTimeOffset lastSync
                 ? $"Dernière synchro Android · {lastSync.ToLocalTime().ToString("d MMM à HH:mm", French)} · Journal local sur ce PC"
                 : "Aucune synchro Android · Ouvre Associer Android pour relier ton téléphone");
             SyncDot.Fill = serverError is not null ? (Brush)FindResource("ApricotInk")
@@ -165,6 +206,110 @@ public partial class MainWindow : Window
         {
             rendering = false;
         }
+    }
+
+    private async Task SyncDriveAsync(DriveConflict? conflict = null, JsonNode? choice = null)
+    {
+        if (!drive.Connected || drive.Busy) return;
+        try { await drive.SyncAsync(estimateLifetime.Token, conflict, choice); }
+        catch (OperationCanceledException) when (estimateLifetime.IsCancellationRequested) { return; }
+        SyncStatus.Text = drive.Status;
+        SyncDot.Fill = (Brush)FindResource(drive.Conflicts.Count == 0 ? "BlueInk" : "ApricotInk");
+        if (drive.ReceivedDraft && !estimateLifetime.IsCancellationRequested) _ = PrepareEstimatesAsync();
+    }
+
+    private void OpenDrive(object sender, RoutedEventArgs args)
+    {
+        var editor = new Editor(this, "Google Drive");
+        if (drive.Busy) { editor.Note("Une connexion ou une synchro est en cours."); editor.Show(); return; }
+        var status = new TextBlock { Text = drive.Status, Style = (Style)FindResource("MutedText"), Margin = new Thickness(0, 0, 0, 8) };
+        editor.Content.Children.Add(status);
+        async Task AuthorizeAsync(string? path)
+        {
+            if (drive.Busy) return;
+            status.Text = "Autorisation dans ton navigateur…";
+            try
+            {
+                await drive.ConnectAsync(path, estimateLifetime.Token);
+                await SyncDriveAsync();
+                status.Text = drive.Status;
+            }
+            catch (Exception error) when (error is IOException or OperationCanceledException or UnauthorizedAccessException or
+                System.ComponentModel.Win32Exception or InvalidOperationException or JsonException or System.Security.Cryptography.CryptographicException)
+            {
+                if (!estimateLifetime.IsCancellationRequested) status.Text = error is OperationCanceledException
+                    ? "La connexion Google a expiré. Réessaie." : "Connexion Google impossible. Vérifie le fichier et l’autorisation Drive.";
+            }
+        }
+        if (!drive.Connected)
+        {
+            editor.Note("Relie ce PC et ton téléphone au même compte Google. Les saisies sont synchronisées dans l’espace privé de Fil des jours.");
+            editor.Note("La première connexion sur Windows demande le fichier JSON du client de bureau Fil des jours, téléchargé depuis Google Cloud.");
+            editor.AddAction("Ouvrir les clients dans Google Cloud", () =>
+                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo("https://console.cloud.google.com/auth/clients") { UseShellExecute = true }));
+            editor.AddAction("Importer le fichier Google (.json)", async () =>
+            {
+                string downloads = IOPath.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads");
+                var open = new Microsoft.Win32.OpenFileDialog { Filter = "Configuration Google (*.json)|*.json", Title = "Importer le fichier JSON du client Google Windows",
+                    InitialDirectory = Directory.Exists(downloads) ? downloads : "" };
+                if (open.ShowDialog(this) == true) await AuthorizeAsync(open.FileName);
+            });
+        }
+        else
+        {
+            editor.AddAction("Synchroniser maintenant", async () => { await SyncDriveAsync(); status.Text = drive.Status; });
+            foreach (DriveConflict conflict in drive.Conflicts)
+                editor.AddAction("Vérifier · " + DriveEntryLabel(conflict.Key), () => ResolveDriveConflict(conflict));
+            editor.AddAction("Reconnecter le compte", async () => await AuthorizeAsync(null));
+            editor.AddAction("Déconnecter ce PC", () =>
+            {
+                drive.Disconnect();
+                status.Text = drive.Status;
+                QueueRefresh();
+            });
+        }
+        editor.Show();
+    }
+
+    private static string DriveEntryLabel(string key)
+    {
+        string[] parts = key.Split('/');
+        return parts[0] switch
+        {
+            "goal" => "Objectif de pause", "pause" => "Pause du " + parts[1], "weight" => "Poids du " + parts[1],
+            "meal" => "Aliment du " + parts[1], "track" => "Suivi", "target" => "Objectif", "report" => "Bilan", _ => "Repas à estimer"
+        };
+    }
+
+    private void ResolveDriveConflict(DriveConflict conflict)
+    {
+        var editor = new Editor(this, DriveEntryLabel(conflict.Key));
+        foreach (var (label, value) in new[] { ("Ce PC", conflict.Local), ("Drive", conflict.Cloud) }
+            .Concat(conflict.Alternatives.Select(value => ("Autre version", value))))
+        {
+            string text = DriveEntryValue(conflict.Key, value);
+            if (text.Length > 52) text = text[..49] + "…";
+            editor.AddAction($"Garder {label} · {text}", async () => { await SyncDriveAsync(conflict, value); editor.Note(drive.Status); });
+        }
+        editor.Show();
+    }
+
+    private static string DriveEntryValue(string key, JsonNode? value)
+    {
+        if (value is null) return "entrée vide";
+        if (value is JsonObject row)
+        {
+            if (key == "goal") return $"{row["duration"]} jours dès le {row["start"]}";
+            if (key.StartsWith("meal/", StringComparison.Ordinal)) return $"{row["name"]} · {Kcal(row["kcal"]!.GetValue<double>())}";
+            if (key.StartsWith("track/", StringComparison.Ordinal)) return $"{row["name"]} · {row["duration"]} j · {row["restDays"] ?? JsonValue.Create(0)} repos";
+            if (key.StartsWith("report/", StringComparison.Ordinal)) return $"{row["title"]} · {row["text"]}";
+            return row["description"]?.ToString() ?? "";
+        }
+        if (key == "target/calories") return Kcal(value.GetValue<double>());
+        if (key == "target/weight" || key.StartsWith("weight/", StringComparison.Ordinal)) return Kg(value.GetValue<double>());
+        string text = value.ToString();
+        return text switch { "true" => "Fait", "false" => "Non fait", "tenu" => "Tenu", "rest" => "Repos",
+            JournalState.NotKeptStatus => "Non tenu", _ => text };
     }
 
     private void RefreshStreak(int days, Goal? goal)
@@ -184,13 +329,13 @@ public partial class MainWindow : Window
         string label = $"Série · {days} jour{(days == 1 ? "" : "s")}";
         StreakLabel.Text = tier == 0 ? label : new string('✦', tier) + "  " + label;
         System.Windows.Automation.AutomationProperties.SetName(StreakLabel, label);
-        StreakLabel.Foreground = new SolidColorBrush(tier == 0 ? Color.FromRgb(228, 239, 228) : Color.FromRgb(34, 56, 43));
+        StreakLabel.Foreground = (Brush)FindResource("Ink");
         StreakBadge.Background = tier switch
         {
-            3 => new LinearGradientBrush(Color.FromRgb(255, 217, 146), Color.FromRgb(255, 237, 179), -30),
-            2 => new LinearGradientBrush(Color.FromRgb(190, 218, 135), Color.FromRgb(232, 239, 174), -30),
-            1 => new LinearGradientBrush(Color.FromRgb(171, 205, 181), Color.FromRgb(221, 235, 206), -30),
-            _ => new SolidColorBrush(Color.FromRgb(55, 93, 69))
+            3 => new LinearGradientBrush(Color.FromRgb(251, 227, 160), Color.FromRgb(255, 248, 234), -30),
+            2 => new LinearGradientBrush(Color.FromRgb(227, 221, 245), Color.FromRgb(242, 237, 249), -30),
+            1 => new LinearGradientBrush(Color.FromRgb(213, 235, 198), Color.FromRgb(227, 241, 216), -30),
+            _ => (Brush)FindResource("Surface")
         };
         if (!reached || !IsLoaded || !SystemParameters.ClientAreaAnimation) return;
 
@@ -260,14 +405,33 @@ public partial class MainWindow : Window
         EditMealButton.IsEnabled = MealsList.SelectedItem is not null;
 
     private void ChartSizeChanged(object sender, SizeChangedEventArgs args) => DrawChart();
-    private void ChangeChart(object sender, SelectionChangedEventArgs args) => DrawChart();
+    private void ChangeChart(object sender, RoutedEventArgs args)
+    {
+        if (sender is not Button { Tag: string selectedSection }
+            || !int.TryParse(selectedSection, CultureInfo.InvariantCulture, out int index) || index == chartSection) return;
+        chartSection = index;
+        MarkCurrentChart();
+        DrawChart();
+    }
+
+    private void MarkCurrentChart()
+    {
+        (Button Button, string Color)[] charts = [(WeightGraph, "Blue"), (CalorieGraph, "Apricot"), (PauseGraph, "Gold")];
+        for (int i = 0; i < charts.Length; i++)
+        {
+            var (button, color) = charts[i];
+            bool active = i == chartSection;
+            button.Background = (Brush)FindResource(active ? color : "Surface");
+            System.Windows.Automation.AutomationProperties.SetItemStatus(button, active ? "Affiché" : "");
+        }
+    }
 
     private void DrawChart()
     {
         if (WeightChart is null || NoChart is null || ChartTitle is null) return;
         WeightChart.Children.Clear();
-        if (ChartKind.SelectedIndex == 1) { DrawDailyCalories(); return; }
-        if (ChartKind.SelectedIndex == 2) { DrawPauseDays(); return; }
+        if (chartSection == 1) { DrawDailyCalories(); return; }
+        if (chartSection == 2) { DrawPauseDays(); return; }
         ChartTitle.Text = "Évolution du poids";
         bool available = chartRows.Length >= 2;
         NoChart.Text = available ? "" : "Deux pesées suffisent pour afficher la courbe.";
@@ -283,11 +447,12 @@ public partial class MainWindow : Window
         low -= padding;
         high += padding;
         int span = Math.Max(1, chartRows[^1].Date.DayNumber - chartRows[0].Date.DayNumber);
-        Brush accent = (Brush)FindResource("Accent");
+        Brush accent = (Brush)FindResource("BlueInk");
         for (int i = 0; i <= 2; i++)
         {
             double y = top + (bottom - top) * i / 2;
-            WeightChart.Children.Add(new Line { X1 = left, X2 = right, Y1 = y, Y2 = y, Stroke = (Brush)FindResource("Line") });
+            WeightChart.Children.Add(new Line { X1 = left, X2 = right, Y1 = y, Y2 = y,
+                Stroke = (Brush)FindResource("Line"), StrokeDashArray = new DoubleCollection([3, 4]) });
             AddChartLabel(Kg(high - (high - low) * i / 2), 0, y - 7);
         }
         var curve = new Polyline { Stroke = accent, StrokeThickness = 2.5, StrokeLineJoin = PenLineJoin.Round };
@@ -300,7 +465,7 @@ public partial class MainWindow : Window
         var areaPoints = new PointCollection(curve.Points);
         areaPoints.Insert(0, new Point(left, bottom));
         areaPoints.Add(new Point(right, bottom));
-        var shade = new LinearGradientBrush(Color.FromArgb(78, 91, 144, 94), Color.FromArgb(8, 91, 144, 94), 90);
+        var shade = new LinearGradientBrush(Color.FromArgb(179, 156, 195, 220), Color.FromArgb(16, 156, 195, 220), 90);
         WeightChart.Children.Add(new Polygon { Points = areaPoints, Fill = shade });
         WeightChart.Children.Add(curve);
         for (int i = 0; i < curve.Points.Count; i++)
@@ -328,7 +493,8 @@ public partial class MainWindow : Window
         for (int i = 0; i <= 2; i++)
         {
             double y = top + (bottom - top) * i / 2;
-            WeightChart.Children.Add(new Line { X1 = left, X2 = right, Y1 = y, Y2 = y, Stroke = (Brush)FindResource("Line") });
+            WeightChart.Children.Add(new Line { X1 = left, X2 = right, Y1 = y, Y2 = y,
+                Stroke = (Brush)FindResource("Line"), StrokeDashArray = new DoubleCollection([3, 4]) });
             AddChartLabel(Format(scale * (2 - i) / 2, "#,##0"), 0, y - 7);
         }
         double slot = (right - left) / historyRows.Length;
@@ -338,7 +504,7 @@ public partial class MainWindow : Window
             if (day.Kcal is not double kcal) continue;
             double height = Math.Max(2, kcal / scale * (bottom - top));
             var bar = new Rectangle { RadiusX = 2, RadiusY = 2, Width = slot * .65, Height = height,
-                Fill = (Brush)FindResource("Accent"), Opacity = i == historyRows.Length - 1 ? 1 : .62,
+                Fill = (Brush)FindResource(i == historyRows.Length - 1 ? "Brand" : "Apricot"),
                 ToolTip = $"{day.Date.ToString("d MMM", French)} · {Kcal(kcal)}" };
             Canvas.SetLeft(bar, left + slot * (i + .175));
             Canvas.SetTop(bar, bottom - height);
@@ -366,7 +532,7 @@ public partial class MainWindow : Window
         for (int i = 0; i < days.Length; i++)
         {
             DayRow day = days[i];
-            string color = day.Status == "tenu" ? "Accent" : day.Status == JournalState.NotKeptStatus ? "ApricotInk" : "Line";
+            string color = day.Status == "tenu" ? "GreenInk" : day.Status == JournalState.NotKeptStatus ? "ApricotInk" : "Line";
             var chip = new Rectangle
             {
                 RadiusX = 3, RadiusY = 3, Height = 22, Width = Math.Min(32, Math.Max(2, slot - 3)),
@@ -377,7 +543,7 @@ public partial class MainWindow : Window
             Canvas.SetLeft(chip, 6 + slot * i);
             WeightChart.Children.Add(chip);
         }
-        AddChartLabel("Vert · tenu     Brun · non tenu     Gris · sans réponse", 6, 40);
+        AddChartLabel("Vert · tenu     Brun · non tenu     Papier · sans réponse", 6, 40);
     }
 
     private void AddChartLabel(string value, double x, double y, bool alignRight = false)
@@ -520,15 +686,213 @@ public partial class MainWindow : Window
         dialog.Show();
     }
 
+    private async Task PrepareEstimatesAsync()
+    {
+        if (estimating) { estimateAgain = true; return; }
+        estimating = true;
+        estimateError = null;
+        try
+        {
+            do
+            {
+                estimateAgain = false;
+                foreach (MealDraft draft in store.Snapshot().MealDrafts())
+                {
+                    estimateLifetime.Token.ThrowIfCancellationRequested();
+                    if (MealEstimate.Read(draft) is not null) continue;
+                    try
+                    {
+                        MealEstimate? estimate = await MealEstimate.MakeAsync(draft, estimateLifetime.Token);
+                        if (estimate is null || !store.Snapshot().MealDrafts().Contains(draft) || MealEstimate.Read(draft) is not null) continue;
+                        estimate.Remember(draft);
+                        EstimatesChanged?.Invoke();
+                    }
+                    catch (Exception error) when (!estimateLifetime.IsCancellationRequested && error is
+                        HttpRequestException or OperationCanceledException or JsonException or InvalidDataException or
+                        InvalidOperationException or ArgumentException or KeyNotFoundException)
+                    {
+                        estimateError = "Certaines estimations sont indisponibles. Pause réessaiera à la prochaine synchro.";
+                    }
+                }
+            } while (estimateAgain);
+        }
+        catch (OperationCanceledException) when (estimateLifetime.IsCancellationRequested) { }
+        catch (Exception error) when (error is IOException or UnauthorizedAccessException or InvalidDataException)
+        {
+            estimateError = "Certaines estimations sont indisponibles. Pause réessaiera à la prochaine synchro.";
+        }
+        finally
+        {
+            estimating = false;
+            if (!estimateLifetime.IsCancellationRequested) QueueRefresh();
+            EstimatesChanged?.Invoke();
+        }
+    }
+
+    private void OpenTrackers(object sender, RoutedEventArgs args)
+    {
+        trackerWindow = new TrackerWindow(this, store);
+        try { trackerWindow.ShowDialog(); }
+        finally { trackerWindow = null; }
+    }
+
     private void OpenMealDrafts(object sender, RoutedEventArgs args)
     {
         MealDraft[] drafts = store.Snapshot().MealDrafts();
+        if (drafts.Length == 0) return;
         var dialog = new Editor(this, "Repas à estimer", 615);
-        dialog.Note("Dans Claude connecté à Pause, demande : « Affiche mes repas à estimer et propose les calories. »");
-        var list = new ListBox { MaxHeight = 270,
+        var list = new ListBox { MaxHeight = 160,
             ItemsSource = drafts.Select(draft => $"{draft.Date.ToString("d MMM yyyy", French)} · {draft.Description}") };
         dialog.Content.Children.Add(list);
-        dialog.Show();
+        var details = new TextBlock { TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 10, 0, 6),
+            Style = (Style)FindResource("MutedText") };
+        dialog.Content.Children.Add(details);
+        var form = new StackPanel();
+        dialog.Content.Children.Add(new ScrollViewer { MaxHeight = 305, Content = form,
+            VerticalScrollBarVisibility = ScrollBarVisibility.Auto });
+        var fields = new List<(TextBox Name, TextBox Grams, TextBox Energy)>();
+        MealDraft? shown = null;
+        MealEstimate? proposal = null;
+        bool edited = false, updating = false, asking = false;
+        using var estimation = CancellationTokenSource.CreateLinkedTokenSource(estimateLifetime.Token);
+
+        void ShowTotal()
+        {
+            if (proposal is null || fields.Count == 0) return;
+            double total = 0;
+            foreach (var (_, grams, energy) in fields)
+            {
+                if (!TryNumber(grams.Text, out double amount) || amount is not (>= .0001 and <= 10000)
+                    || !TryNumber(energy.Text, out double per100) || per100 is not (>= 0 and <= 1000))
+                {
+                    details.Text = proposal.Source == "Saisie" && estimateError is not null ? estimateError
+                        : proposal.Source + " · Vérifie les quantités. ChatGPT ou Claude peuvent chercher les calories manquantes.";
+                    return;
+                }
+                total += amount * per100 / 100;
+            }
+            details.Text = $"{proposal.Source} · Total estimé {Format(total, "0.#")} kcal";
+        }
+
+        void ShowEstimate(bool reload = false)
+        {
+            if (list.SelectedIndex < 0) return;
+            MealDraft draft = drafts[list.SelectedIndex];
+            if (shown != draft) { shown = draft; proposal = null; edited = false; }
+            MealEstimate next = MealEstimate.Read(draft) ?? MealEstimate.Manual(draft);
+            if (!reload && proposal is not null && (edited || (proposal.Source == next.Source && proposal.Foods.SequenceEqual(next.Foods)))) return;
+            proposal = next;
+            fields.Clear();
+            form.Children.Clear();
+            updating = true;
+            foreach (EstimatedFood food in next.Foods)
+            {
+                var name = new TextBox { Text = food.Name, MaxLength = 90, Margin = new Thickness(0, 4, 0, 5) };
+                System.Windows.Automation.AutomationProperties.SetName(name, "Nom de l’aliment");
+                form.Children.Add(name);
+                var quantities = new Grid { Margin = new Thickness(0, 0, 0, 6) };
+                quantities.ColumnDefinitions.Add(new ColumnDefinition());
+                quantities.ColumnDefinitions.Add(new ColumnDefinition());
+                bool barcode = next.Source == "Open Food Facts";
+                TextBox grams = AddEstimateField(quantities, 0, barcode ? "Quantité (g ou ml)" : "Quantité (g)", food.Grams);
+                TextBox energy = AddEstimateField(quantities, 1, barcode ? "kcal pour 100 g ou 100 ml" : "kcal pour 100 g", food.Per100);
+                foreach (TextBox field in new[] { name, grams, energy })
+                    field.TextChanged += (_, _) => { if (!updating) edited = true; ShowTotal(); };
+                form.Children.Add(quantities);
+                fields.Add((name, grams, energy));
+            }
+            updating = false;
+            edited = false;
+            ShowTotal();
+        }
+
+        var sources = new WrapPanel { Margin = new Thickness(0, 10, 0, 2) };
+        dialog.Content.Children.Add(sources);
+        Button SourceButton(string label)
+        {
+            var button = new Button { Content = label, Margin = new Thickness(0, 0, 6, 4) };
+            sources.Children.Add(button);
+            return button;
+        }
+        Button useChatGpt = SourceButton("Compléter avec ChatGPT");
+        SourceButton("Claude via MCP").Click += (_, _) =>
+        {
+            var help = new Editor(this, "Estimer avec Claude");
+            help.Note("Dans Claude Desktop ou Claude Code avec le connecteur Fil des jours, demande : estime mon repas en attente et dépose une proposition à vérifier. Elle sera disponible ici.");
+            help.Show();
+            ShowEstimate();
+        };
+        SourceButton("Recharger la proposition").Click += (_, _) => ShowEstimate(reload: true);
+        useChatGpt.Click += async (_, _) =>
+        {
+            if (asking || shown is not MealDraft draft) return;
+            EstimatedFood[] foods = fields.Select(field => new EstimatedFood(field.Name.Text.Trim(),
+                TryNumber(field.Grams.Text, out double grams) ? grams : null,
+                TryNumber(field.Energy.Text, out double energy) ? energy : null)).ToArray();
+            if (!foods.Any(food => !food.Per100.HasValue)) { details.Text = "Les calories sont déjà renseignées."; return; }
+            if (foods.Any(food => !food.Per100.HasValue && food.Name.Length == 0)) { details.Text = "Indique le nom du produit pour que ChatGPT puisse l’identifier."; return; }
+            asking = true;
+            useChatGpt.IsEnabled = false;
+            try
+            {
+                list.IsEnabled = false;
+                form.IsEnabled = false;
+                details.Text = chatgpt.Connected ? "Estimation ChatGPT en cours…" : "Autorise ton abonnement ChatGPT dans le navigateur…";
+                if (!chatgpt.Connected) await chatgpt.SignInAsync(estimation.Token);
+                details.Text = "Estimation ChatGPT en cours…";
+                EstimatedFood[] completed = await chatgpt.CompleteAsync(foods, estimation.Token);
+                if (completed.SequenceEqual(foods)) { details.Text = "ChatGPT n’a pas proposé de valeur pour ces aliments."; return; }
+                if (store.Snapshot().MealDrafts().Contains(draft)) new MealEstimate("ChatGPT", completed).Remember(draft);
+                if (shown == draft) ShowEstimate(reload: true);
+            }
+            catch (Exception error) when (error is IOException or HttpRequestException or JsonException or InvalidOperationException or
+                OperationCanceledException or System.ComponentModel.Win32Exception or System.Security.Cryptography.CryptographicException or FormatException or UnauthorizedAccessException)
+            {
+                if (!estimation.IsCancellationRequested) details.Text = error is IOException ? error.Message : "ChatGPT n’a pas terminé cette estimation. Les valeurs sont conservées.";
+            }
+            finally { asking = false; useChatGpt.IsEnabled = true; list.IsEnabled = true; form.IsEnabled = true; }
+        };
+
+        void RefreshProposal() => ShowEstimate();
+        list.SelectionChanged += (_, _) => ShowEstimate();
+        list.SelectedIndex = 0;
+        EstimatesChanged += RefreshProposal;
+        _ = PrepareEstimatesAsync();
+        try
+        {
+            dialog.Show(() =>
+            {
+                if (shown is null || proposal is null || fields.Count == 0) return "Aucune estimation à ajouter.";
+                var completed = new List<EstimatedFood>();
+                if (asking) return "Attends la fin de l’estimation ChatGPT.";
+                foreach (var (name, grams, energy) in fields)
+                {
+                    string food = name.Text.Trim();
+                    if (food.Length == 0) { name.Focus(); return "Indique le nom de l’aliment."; }
+                    if (!TryNumber(grams.Text, out double amount) || amount is not (>= .0001 and <= 10000))
+                    { grams.Focus(); return $"Indique la quantité pour {food}."; }
+                    if (!TryNumber(energy.Text, out double per100) || per100 is not (>= 0 and <= 1000))
+                    { energy.Focus(); return $"Indique les calories pour 100 g de {food} ou choisis ChatGPT ou Claude."; }
+                    completed.Add(new(food, amount, per100));
+                }
+                try { store.SaveEstimate(shown, completed, proposal.Source == "Claude" ? "Estimation IA" : proposal.Source); }
+                catch (Exception error) when (error is IOException or InvalidOperationException or InvalidDataException) { return error.Message; }
+                Refresh();
+                return null;
+            }, saveLabel: "Ajouter au journal");
+        }
+        finally { estimation.Cancel(); EstimatesChanged -= RefreshProposal; }
+    }
+
+    private static TextBox AddEstimateField(Grid grid, int column, string title, double? value)
+    {
+        var input = new TextBox { Text = value is double number ? Format(number, "0.####") : "", MaxLength = 12 };
+        var field = new StackPanel { Margin = new Thickness(column == 0 ? 0 : 6, 0, 0, 0) };
+        field.Children.Add(new Label { Content = title, Target = input, FontSize = 12, Padding = new Thickness(0, 0, 0, 2) });
+        field.Children.Add(input);
+        Grid.SetColumn(field, column);
+        grid.Children.Add(field);
+        return input;
     }
 
     private void AddMeal(object sender, RoutedEventArgs args) => ShowMealEditor(null);

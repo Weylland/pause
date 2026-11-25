@@ -4,7 +4,6 @@ import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
 import android.animation.ValueAnimator;
 import android.content.Context;
-import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
 import android.widget.TextView;
 
@@ -19,10 +18,10 @@ final class StreakBadge extends TextView {
         super(context);
         int tier = tier(days);
         int[] colors = switch (tier) {
-            case 3 -> new int[]{0xFFFFD992, 0xFFFFEDB3};
-            case 2 -> new int[]{0xFFBEDA87, 0xFFE8EFAE};
-            case 1 -> new int[]{0xFFABCDB5, 0xFFDDEBCE};
-            default -> new int[]{0xFF375D45, 0xFF375D45};
+            case 3 -> new int[]{0xFFFBE3A0, 0xFFFFF8EA};
+            case 2 -> new int[]{0xFFE3DDF5, 0xFFF2EDF9};
+            case 1 -> new int[]{0xFFD5EBC6, 0xFFE3F1D8};
+            default -> new int[]{0xFFFFF8EA, 0xFFFFF8EA};
         };
         String label = "Série · " + days + (days == 1 ? " jour" : " jours");
         String stars = switch (tier) {
@@ -34,10 +33,11 @@ final class StreakBadge extends TextView {
         setText(stars + label);
         setContentDescription(label);
         setTextSize(12);
-        setTextColor(tier == 0 ? 0xFFE4EFE4 : 0xFF22382B);
-        setTypeface(Typeface.create("sans-serif-medium", Typeface.NORMAL));
+        setTextColor(0xFF3B2A1E);
+        setTypeface(PaperStyle.title(context));
         GradientDrawable background = new GradientDrawable(GradientDrawable.Orientation.BL_TR, colors);
         background.setCornerRadius(dp(12));
+        background.setStroke(dp(1), 0xFFD6BF98);
         setBackground(background);
         setPadding(dp(9), dp(4), dp(9), dp(4));
         if (reached && ValueAnimator.areAnimatorsEnabled()) post(this::celebrate);

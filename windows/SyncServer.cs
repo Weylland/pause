@@ -131,6 +131,7 @@ internal sealed class SyncServer : IDisposable
         if (root["v"]?.GetValue<int>() != 1) return (new { error = "version" }, false);
         bool extended = root["extended"]?.GetValue<bool>() == true;
         bool drafts = root["drafts"]?.GetValue<bool>() == true;
+        bool trackers = root["trackers"]?.GetValue<bool>() == true;
         string? journalId = root["journalId"]?.GetValue<string>();
         var changes = new List<Change>();
         var keys = new HashSet<string>(StringComparer.Ordinal);
@@ -144,9 +145,10 @@ internal sealed class SyncServer : IDisposable
                 changes.Add(new Change(key, JournalStore.Normalize(key, item["before"]), JournalStore.Normalize(key, item["after"])));
             }
         }
-        AddChanges(root["changes"]!.AsArray(), key => !JournalStore.IsExtendedKey(key) && !JournalStore.IsDraftKey(key));
+        AddChanges(root["changes"]!.AsArray(), key => !JournalStore.IsExtendedKey(key) && !JournalStore.IsDraftKey(key) && !JournalTracker.IsKey(key));
         if (extended && root["extendedChanges"] is JsonArray additional) AddChanges(additional, JournalStore.IsExtendedKey);
         if (drafts && root["draftChanges"] is JsonArray draftChanges) AddChanges(draftChanges, JournalStore.IsDraftKey);
+        if (trackers && root["trackerChanges"] is JsonArray trackerChanges) AddChanges(trackerChanges, JournalTracker.IsKey);
 
         MergeResult outcome = store.Merge(journalId, changes);
         if (outcome.DifferentJournal) return (new { error = "journal" }, false);
@@ -154,10 +156,12 @@ internal sealed class SyncServer : IDisposable
         {
             return (new { journalId = store.Snapshot().Id, conflicts = outcome.Conflicts.Select(item => new { key = item.Key, pc = item.Before, phone = item.After }) }, false);
         }
-        IDictionary<string, JsonNode> entries = extended && drafts ? outcome.State.Entries : outcome.State.Entries
+        IDictionary<string, JsonNode> entries = extended && drafts && trackers ? outcome.State.Entries : outcome.State.Entries
             .Where(entry => (extended || !JournalStore.IsExtendedKey(entry.Key))
-                && (drafts || !JournalStore.IsDraftKey(entry.Key))).ToDictionary();
-        return (new { journalId = outcome.State.Id, extended, drafts, entries }, true);
+                && (drafts || !JournalStore.IsDraftKey(entry.Key)) && (trackers || !JournalTracker.IsKey(entry.Key))).ToDictionary();
+        int ready = drafts ? outcome.State.MealDrafts().Count(draft => MealEstimate.Read(draft)?.Foods.Length > 0) : 0;
+        return (new { journalId = outcome.State.Id, extended, drafts, trackers, entries,
+            estimationPc = new { propositions = ready } }, true);
     }
 
     internal static string[] Addresses()

@@ -21,7 +21,8 @@ final class FoodDescription {
     private static final Pattern PREFIX = Pattern.compile("^" + AMOUNT + "\\s*(.+)$", Pattern.CASE_INSENSITIVE);
     private static final Pattern SUFFIX = Pattern.compile("^(.+?)\\s+" + AMOUNT + "$", Pattern.CASE_INSENSITIVE);
     private static final Pattern SEPARATOR = Pattern.compile("\\s+(?:et|avec)\\s+|[;\\n+]|(?<!\\d),|,(?!\\d)", Pattern.CASE_INSENSITIVE);
-    private static final Pattern ARTICLE = Pattern.compile("^(?:(?:de la|des|du|de|une|un|la|le|les)\\s+|(?:de\\s+)?[dl]['’]\\s*)", Pattern.CASE_INSENSITIVE);
+    private static final Pattern ARTICLE = Pattern.compile("^(?:(?:un\\s+)?peu\\s+de\\s+|(?:de la|des|du|de|une|un|la|le|les)\\s+|(?:de\\s+)?[dl]['’]\\s*)+", Pattern.CASE_INSENSITIVE);
+    private static final Pattern CORRECTION = Pattern.compile("^(.+?)\\s*:\\s*" + AMOUNT + "$", Pattern.CASE_INSENSITIVE);
 
     record Reference(String name, double per100, List<String> keys) {}
     record Portion(String name, Double grams, Reference reference, List<Reference> options) {}
@@ -31,7 +32,15 @@ final class FoodDescription {
     static List<Portion> parse(String phrase, List<Reference> table) {
         List<Portion> portions = new ArrayList<>();
         String spaced = phrase.replace('\u00a0', ' ').replace('\u202f', ' ').trim();
-        for (String piece : SEPARATOR.split(spaced)) {
+        String[] lines = spaced.split("\\n");
+        StringBuilder description = new StringBuilder(lines[0]);
+        var overrides = new java.util.HashMap<String, Double>();
+        for (int i = 1; i < lines.length; i++) {
+            Matcher correction = CORRECTION.matcher(lines[i].trim());
+            if (correction.matches()) overrides.put(normalize(foodName(correction.group(1))), grams(correction.group(2), correction.group(3)));
+            else description.append('\n').append(lines[i]);
+        }
+        for (String piece : SEPARATOR.split(description.toString())) {
             String name = piece.trim();
             if (name.isEmpty()) continue;
             Double grams = null;
@@ -43,15 +52,18 @@ final class FoodDescription {
                 grams = grams(trailing.group(2), trailing.group(3));
                 name = trailing.group(1);
             }
-            name = ARTICLE.matcher(name.trim()).replaceFirst("").trim();
+            name = foodName(name);
             if (name.isEmpty()) continue;
             String query = normalize(name);
+            if (overrides.get(query) != null) grams = overrides.get(query);
             List<Reference> exact = table.stream().filter(item -> item.keys().contains(query)).collect(java.util.stream.Collectors.toList());
             List<Reference> options = exact.isEmpty() ? candidates(table, query) : exact;
             portions.add(new Portion(name, grams, exact.size() == 1 ? exact.get(0) : null, options));
         }
         return portions;
     }
+
+    private static String foodName(String name) { return ARTICLE.matcher(name.trim()).replaceFirst("").trim(); }
 
     private static List<Reference> candidates(List<Reference> table, String query) {
         if (query.length() < 2) return java.util.Collections.emptyList();

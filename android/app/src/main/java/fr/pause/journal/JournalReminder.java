@@ -93,7 +93,7 @@ public final class JournalReminder extends BroadcastReceiver {
             Settings settings = settings(context);
             if (settings.enabled() && canNotify(context) && day.equals(intent.getStringExtra("day"))
                     && !day.equals(values.getString("delivered", ""))) {
-                Journal journal = new Journal(context);
+                Journal journal = Journal.open(context);
                 LocalDate date = LocalDate.parse(day);
                 boolean journalMissing = journal.needsReminder(date);
                 boolean weightMissing = settings.weight() && journal.weightAt(date) == null;
@@ -115,7 +115,7 @@ public final class JournalReminder extends BroadcastReceiver {
                 PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
         Notification notification = new Notification.Builder(context, CHANNEL)
                 .setSmallIcon(R.drawable.ic_reminder)
-                .setContentTitle("Pause")
+                .setContentTitle(context.getString(R.string.app_name))
                 .setContentText(weight ? (journal ? "Pense à compléter ton journal et à noter ta pesée."
                         : "Pense à noter ta pesée.") : "Pense à compléter ton journal.")
                 .setVisibility(Notification.VISIBILITY_PRIVATE)

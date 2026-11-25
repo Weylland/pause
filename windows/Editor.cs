@@ -1,5 +1,6 @@
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 
 namespace Pause;
 
@@ -7,7 +8,9 @@ internal sealed class Editor
 {
     private readonly Window window;
     private readonly StackPanel footer = new() { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Right };
-    private readonly TextBlock error = new() { TextWrapping = TextWrapping.Wrap, Foreground = System.Windows.Media.Brushes.Maroon };
+    private readonly TextBlock error = new() { TextWrapping = TextWrapping.Wrap };
+    private readonly Border errorCard = new() { Visibility = Visibility.Collapsed, CornerRadius = new CornerRadius(10),
+        Padding = new Thickness(10, 7, 10, 7), Margin = new Thickness(0, 9, 0, 0) };
     internal StackPanel Content { get; } = new();
 
     internal Editor(Window owner, string title, int width = 410)
@@ -16,13 +19,18 @@ internal sealed class Editor
         {
             Owner = owner, Title = title, ShowInTaskbar = false, WindowStartupLocation = WindowStartupLocation.CenterOwner,
             Width = width, SizeToContent = SizeToContent.Height, ResizeMode = ResizeMode.NoResize,
-            FontSize = 14, Background = (System.Windows.Media.Brush)Application.Current.FindResource("Paper"),
-            Foreground = (System.Windows.Media.Brush)Application.Current.FindResource("Ink")
+            FontSize = 15, Background = (Brush)Application.Current.FindResource("PaperGrain"),
+            FontFamily = (FontFamily)Application.Current.FindResource("BodyFont"),
+            Foreground = (Brush)Application.Current.FindResource("Ink")
         };
         var root = new StackPanel { Margin = new Thickness(20) };
-        root.Children.Add(new TextBlock { Text = title, Style = (Style)Application.Current.FindResource("SectionTitle"), Margin = new Thickness(0, 0, 0, 10) });
-        root.Children.Add(Content);
-        root.Children.Add(error);
+        root.Children.Add(new TextBlock { Text = title, Style = (Style)Application.Current.FindResource("SectionTitle"),
+            FontSize = 24, TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 0, 0, 12) });
+        root.Children.Add(new Border { Style = (Style)Application.Current.FindResource("Card"), Child = Content });
+        error.Foreground = (Brush)Application.Current.FindResource("ApricotInk");
+        errorCard.Background = (Brush)Application.Current.FindResource("Apricot");
+        errorCard.Child = error;
+        root.Children.Add(errorCard);
         root.Children.Add(footer);
         window.Content = root;
     }
@@ -48,15 +56,14 @@ internal sealed class Editor
         Content.Children.Add(button);
     }
 
-    internal void Show(Func<string?>? save = null, Func<string?>? remove = null)
+    internal void Show(Func<string?>? save = null, Func<string?>? remove = null, string saveLabel = "Enregistrer")
     {
-        error.Margin = new Thickness(0, 8, 0, 2);
         if (remove is not null) FooterButton("Supprimer", () => Run(remove));
         Button close = FooterButton(save is null ? "Fermer" : "Annuler", () => window.Close());
         close.IsCancel = true;
         if (save is not null)
         {
-            Button confirm = FooterButton("Enregistrer", () => Run(save));
+            Button confirm = FooterButton(saveLabel, () => Run(save));
             confirm.IsDefault = true;
             confirm.Style = (Style)Application.Current.FindResource("Primary");
         }
@@ -67,7 +74,11 @@ internal sealed class Editor
     {
         string? message = operation();
         if (message is null) window.Close();
-        else error.Text = message;
+        else
+        {
+            error.Text = message;
+            errorCard.Visibility = Visibility.Visible;
+        }
     }
 
     private Button FooterButton(string label, Action operation)

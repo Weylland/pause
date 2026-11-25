@@ -19,6 +19,7 @@ final class DailyCaloriesChart extends View {
         this.dates = dates;
         this.amounts = amounts;
         this.target = target;
+        paint.setTypeface(PaperStyle.body(context));
         StringBuilder description = new StringBuilder("Calories par jour. ");
         for (int i = 0; i < amounts.size(); i++) {
             Double kcal = amounts.get(i);
@@ -43,9 +44,11 @@ final class DailyCaloriesChart extends View {
         paint.setTextAlign(Paint.Align.LEFT);
         for (int i = 0; i <= 2; i++) {
             float y = top + (bottom - top) * i / 2;
-            paint.setColor(0xFFE2E6DB);
+            paint.setColor(PaperStyle.LINE);
+            paint.setPathEffect(new DashPathEffect(new float[]{3 * density, 4 * density}, 0));
             canvas.drawLine(left, y, right, y, paint);
-            paint.setColor(0xFF53685D);
+            paint.setPathEffect(null);
+            paint.setColor(PaperStyle.MUTED);
             canvas.drawText(Long.toString(Math.round(scale * (2 - i) / 2)), 0, y + 3 * density, paint);
         }
         float slot = (right - left) / amounts.size();
@@ -54,11 +57,11 @@ final class DailyCaloriesChart extends View {
             Double value = amounts.get(i);
             if (value != null) {
                 float height = Math.max(2 * density, (float) (value / scale * (bottom - top)));
-                paint.setColor(i == amounts.size() - 1 ? 0xFF24563D : 0xFF87A98E);
+                paint.setColor(i == amounts.size() - 1 ? 0xFFB8431F : 0xFFD9A28C);
                 canvas.drawRoundRect(x - slot * .25f, bottom - height, x + slot * .25f, bottom,
                         3 * density, 3 * density, paint);
             }
-            paint.setColor(0xFF53685D);
+            paint.setColor(PaperStyle.MUTED);
             paint.setTextAlign(Paint.Align.CENTER);
             canvas.drawText(dates.get(i), x, bottom + 17 * density, paint);
         }

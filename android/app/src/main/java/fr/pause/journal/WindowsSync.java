@@ -79,6 +79,10 @@ final class WindowsSync {
         return key.startsWith("draft/");
     }
 
+    static boolean trackerKey(String key) {
+        return key.startsWith("track/");
+    }
+
     static boolean same(Object first, Object second) {
         if (first == JSONObject.NULL) first = null;
         if (second == JSONObject.NULL) second = null;
@@ -127,17 +131,19 @@ final class WindowsSync {
         SSLContext ssl = SSLContext.getInstance("TLS");
         ssl.init(null, new TrustManager[]{new PinnedCertificate(pin)}, null);
 
-        JSONArray basic = new JSONArray(), extended = new JSONArray(), drafts = new JSONArray();
+        JSONArray basic = new JSONArray(), extended = new JSONArray(), drafts = new JSONArray(), trackers = new JSONArray();
         for (int i = 0; i < changes.length(); i++) {
             JSONObject change = changes.getJSONObject(i);
             String key = change.getString("key");
-            if (draftKey(key)) drafts.put(change);
+            if (trackerKey(key)) trackers.put(change);
+            else if (draftKey(key)) drafts.put(change);
             else if (extendedKey(key)) extended.put(change);
             else basic.put(change);
         }
         JSONObject request = new JSONObject().put("v", 1).put("token", pairing.token()).put("changes", basic)
                 .put("extended", true).put("extendedChanges", extended)
-                .put("drafts", true).put("draftChanges", drafts);
+                .put("drafts", true).put("draftChanges", drafts)
+                .put("trackers", true).put("trackerChanges", trackers);
         if (journalId != null) request.put("journalId", journalId);
         byte[] bytes = request.toString().getBytes(StandardCharsets.UTF_8);
         if (bytes.length > MAX_BYTES) throw new IOException("Journal trop volumineux pour la synchro.");

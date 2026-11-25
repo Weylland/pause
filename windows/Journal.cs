@@ -76,6 +76,19 @@ internal sealed record JournalState(string Id, SortedDictionary<string, JsonNode
 
     private string? StatusOn(DateOnly day) => Entries.GetValueOrDefault("pause/" + Iso(day))?.GetValue<string>();
 
+    internal (int Due, int Kept, int NotKept) PauseProgress(Goal goal, DateOnly today)
+    {
+        int due = Math.Clamp(today.DayNumber - goal.Start.DayNumber + 1, 0, goal.Duration);
+        int kept = 0, notKept = 0;
+        for (int i = 0; i < due; i++)
+        {
+            string? status = StatusOn(goal.Start.AddDays(i));
+            if (status == "tenu") kept++;
+            if (status == NotKeptStatus) notKept++;
+        }
+        return (due, kept, notKept);
+    }
+
     internal Meal[] Meals(DateOnly date)
     {
         string prefix = "meal/" + Iso(date) + "/";
@@ -149,6 +162,42 @@ internal sealed class JournalStore
             SaveEdits(state, edits.Select(edit => (edit.Key, edit.After)));
             return true;
         });
+
+    internal void ApplyDriveChanges(IReadOnlyList<Change> edits) => WithWriteLock(() =>
+    {
+        JournalState state = Read();
+        SaveEdits(state, edits.Where(edit => JsonNode.DeepEquals(state.Entries.GetValueOrDefault(edit.Key), edit.Before))
+            .Select(edit => (edit.Key, edit.After)));
+        return true;
+    });
+
+    internal double SaveEstimate(MealDraft draft, IReadOnlyList<EstimatedFood> foods, string source)
+    {
+        string key = "draft/" + draft.Id;
+        JsonNode? before = Snapshot().Entries.GetValueOrDefault(key);
+        if (before is null || before["description"]?.GetValue<string>() != draft.Description
+            || before["date"]?.GetValue<string>() != JournalState.Iso(draft.Date))
+            throw new InvalidDataException("Repas en attente introuvable ou déjà traité.");
+        if (draft.Date > DateOnly.FromDateTime(DateTime.Today)) throw new InvalidDataException("Date du repas invalide.");
+        if (foods.Count is < 1 or > 20) throw new InvalidDataException("Indique entre 1 et 20 aliments.");
+        var changes = new List<Change> { new(key, before, null) };
+        double total = 0;
+        foreach (EstimatedFood food in foods)
+        {
+            if (food.Grams is not double grams || grams is not (>= .0001 and <= 10000)
+                || food.Per100 is not double per100 || per100 is not (>= 0 and <= 1000))
+                throw new InvalidDataException("Complète la quantité et les calories pour 100 de chaque aliment.");
+            double kcal = grams * per100 / 100;
+            string mealKey = $"meal/{JournalState.Iso(draft.Date)}/{Guid.NewGuid():D}";
+            var value = new JsonObject { ["name"] = food.Name.Trim(), ["source"] = source,
+                ["kcal"] = kcal, ["amount"] = grams, ["kcalPer100"] = per100 };
+            changes.Add(new Change(mealKey, null, Normalize(mealKey, value)));
+            total += kcal;
+        }
+        if (!TryUpdate(changes)) throw new InvalidDataException("Ce repas a changé pendant la saisie. Relis les repas en attente.");
+        MealEstimate.Forget(draft);
+        return Math.Round(total, 1);
+    }
 
     internal MergeResult Merge(string? journalId, IReadOnlyList<Change> changes) =>
         WithWriteLock<MergeResult>(() =>
@@ -241,6 +290,7 @@ internal sealed class JournalStore
 
     internal static JsonNode? Normalize(string key, JsonNode? value)
     {
+        if (JournalTracker.IsKey(key)) return JournalTracker.Normalize(key, value);
         if (key is "target/weight" or "target/calories")
             return value is null ? null : JsonValue.Create(Number(value, double.Epsilon, key == "target/weight" ? 1000 : 100000));
         if (key == "goal")

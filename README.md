@@ -1,6 +1,6 @@
-# Pause
+# Fil des jours
 
-Pause est un journal personnel pour Android et Windows. Il permet de définir un objectif de pause, de suivre les pesées et les calories, et de conserver des bilans.
+Fil des jours, auparavant Pause, est un journal personnel pour Android et Windows. Il regroupe habitudes, pauses, pesées, repas et bilans.
 
 ## Installer
 
@@ -9,15 +9,22 @@ Télécharge la version qui convient depuis les [versions GitHub](https://github
 - **Android 8 ou plus récent**. Ouvre le fichier APK. Pour une mise à jour, installe-le par-dessus la version précédente.
 - **Windows x64**. Décompresse l’archive Windows, puis ouvre `Pause.exe`. Le guide livré avec le ZIP explique la mise à jour et la configuration MCP.
 
-## Utiliser Pause
+## Utiliser Fil des jours
 
 - **Calendrier**. Choisis la date et la durée de ta pause, puis note ta réponse quotidienne avec **Tenu** ou **Non tenu**. Le badge de série évolue après 7, 14 et 30 jours tenus d’affilée. Utilise **Prolonger** pour ajouter des jours à ton objectif en gardant tes réponses et ta date de départ.
+- **Mes suivis**. Crée plusieurs pauses ou habitudes, par exemple **Anglais** ou **Vélo**, avec ou sans date de fin. Tu peux réserver des jours de repos. Avec 30 jours et 6 repos, l’objectif est de 24 jours cochés. Un repos dans le quota préserve la série. Les suivis se synchronisent entre Android et Windows et restent accessibles via le MCP Windows.
 - **Poids et calories**. Saisis tes pesées, fixe tes objectifs et ajoute des aliments à la main, par code-barres, par photo du tableau nutritionnel ou en décrivant un repas. Les produits scannés sans calories passent dans **À estimer** pour la prochaine synchro. Les graphiques montrent l’évolution du poids, les calories et, sur Windows, les jours de pause.
 - **Rappels**. Sur Android, choisis l’heure du rappel de journal. Active **Me rappeler aussi la pesée** pour recevoir un rappel si le poids du jour manque.
-- **Synchro**. Sur le même réseau local, ouvre **Associer Android** sur Windows, puis scanne le QR code dans l’onglet **PC** d’Android.
-- **MCP**. Sur Windows, le bouton **Connecteur MCP** donne la configuration pour Claude Desktop, Claude Code et Codex. Le connecteur peut lire le journal, ajouter ou corriger des saisies et enregistrer un bilan à la demande. Les repas laissés **À estimer** remontent sur Windows à la synchro. Demande à ton IA une estimation, vérifie-la, puis demande l’enregistrement. Les bilans et repas validés apparaissent sur Android après la synchro.
+- **Synchro**. L’onglet **Synchro** sur Android et le bouton **Google Drive** sur Windows permettent de connecter le même compte Google. L’app synchronise les entrées à l’ouverture, après une saisie et périodiquement tant qu’elle reste ouverte. Le bouton **Associer Android** donne accès à la synchro Wi-Fi avec un QR code.
+- **Estimations**. Sur Android, **À la synchro** garde le repas en un appui. Tu peux reprendre un brouillon avec **Estimer ici**. Sur Windows, Fil des jours prépare une proposition à partir de Ciqual ou d’Open Food Facts après la réception du brouillon. Ouvre **Repas à estimer**, complète les quantités manquantes et valide avec **Ajouter au journal**.
+- **ChatGPT sur Android**. Dans **Calories**, utilise **Continuer avec ChatGPT** et autorise l’usage de ton abonnement éligible. Lorsque Ciqual ne reconnaît pas un aliment, seuls les noms inconnus sont envoyés pour l’estimation. Tu peux vérifier les valeurs avant de les enregistrer. L’estimation Ciqual fonctionne aussi hors connexion.
+- **MCP**. Sur Windows, le bouton **Connecteur MCP** donne la configuration pour Claude Desktop, Claude Code et Codex. Le connecteur peut lire le journal, ajouter ou corriger des saisies et enregistrer un bilan à la demande.
 
-Le journal est stocké sur les appareils. La synchronisation utilise TLS sur le réseau local. La recherche d’un produit envoie son code-barres à [Open Food Facts](https://world.openfoodfacts.org/). Les références de repas en texte libre proviennent de la [table Ciqual](nutrition/README.md), embarquée dans l’application.
+Le journal est stocké sur les appareils. Avec l’accord du titulaire du compte, Drive conserve aussi un historique des changements dans le [dossier privé de l’application](https://developers.google.com/workspace/drive/api/guides/appdata). La synchronisation Wi-Fi utilise TLS sur le réseau local. La recherche d’un produit envoie son code-barres à [Open Food Facts](https://world.openfoodfacts.org/). Les références de repas en texte libre proviennent de la [table Ciqual](nutrition/README.md), embarquée dans l’application.
+
+## Configurer Google Drive
+
+Active l’API Google Drive dans un projet Google Cloud, déclare `https://www.googleapis.com/auth/drive.appdata` et crée deux [clients OAuth](https://developers.google.com/workspace/guides/create-credentials) dans le même projet. Le client Android utilise le package `fr.pause.journal` et le SHA-1 du certificat qui signe l’APK. Le client de bureau fournit un fichier JSON à sélectionner lors de la première connexion sur Windows. Garde ce fichier privé. Si le projet est en mode Test, l’accès expire après sept jours. Le niveau Standard de Drive suffit et peut être utilisé sans compte de facturation.
 
 ## Compiler depuis les sources
 

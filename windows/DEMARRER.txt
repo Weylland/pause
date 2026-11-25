@@ -1,23 +1,28 @@
-PAUSE 1.4.3 • WINDOWS + ANDROID
+FIL DES JOURS 1.6.1 • WINDOWS + ANDROID
 
 Sur Windows
 Décompresse cette archive dans un dossier que tu peux garder. Ouvre Pause.exe.
 L’application est autonome sur Windows x64.
-Pour une mise à jour, ferme Pause et remplace Pause.exe au même emplacement pour que ton client MCP retrouve son chemin.
+Pour une mise à jour, ferme Fil des jours et remplace Pause.exe au même emplacement pour que ton client MCP retrouve son chemin.
 
 Sur Android
-Installe Pause-1.4.3.apk par-dessus la version précédente. Garde l’application existante installée pour retrouver tes données.
-L’onglet PC apparaît après la mise à jour.
+Installe Fil-des-jours-1.6.1.apk par-dessus la version précédente. Garde l’application existante installée pour retrouver tes données.
+L’onglet Synchro permet de connecter Google Drive ou ton PC en Wi-Fi.
 
-Première synchro
+Synchro Google Drive
+1. Sur Windows, ouvre Google Drive, clique sur Importer le fichier Google (.json) et sélectionne le fichier du client de bureau téléchargé depuis Google Cloud.
+2. Autorise l’accès dans le navigateur. Sur Android, ouvre Synchro puis Connecter Google Drive avec le même compte.
+3. La synchro se fait à l’ouverture, après une modification et toutes les deux minutes tant que l’app est ouverte. Si une même entrée a changé sur les deux appareils, la page Google Drive affiche les versions à vérifier.
+
+Synchro Wi-Fi
 1. Connecte le téléphone et le PC au même réseau local.
-2. Sur Windows, ouvre Pause et clique sur Associer Android.
-3. Sur Android, ouvre PC puis Scanner le QR code et photographie le code affiché à l’écran. Tu peux aussi coller le code depuis le PC.
+2. Sur Windows, ouvre Fil des jours et clique sur Associer Android.
+3. Sur Android, ouvre Synchro puis Scanner le QR code et photographie le code affiché à l’écran. Tu peux aussi coller le code depuis le PC.
 4. Si la Sécurité Windows demande une autorisation réseau, affiche les options et sélectionne uniquement le réseau privé.
 
-Ensuite, laisse Pause ouvert sur le PC pendant l’échange et appuie sur Synchroniser maintenant dans l’onglet PC du téléphone.
+Ensuite, laisse Fil des jours ouvert sur le PC pendant l’échange et appuie sur Synchroniser en Wi-Fi sur le téléphone.
 Tu peux saisir et modifier tes entrées hors ligne des deux côtés. Les changements sur des entrées différentes sont réunis. Si une même entrée diffère, le téléphone affiche les deux versions avant d’appliquer ton choix.
-Si l’adresse locale du PC change, tu peux la corriger dans l’onglet PC ou scanner à nouveau le QR code. Garde le code d’association pour toi.
+Si l’adresse locale du PC change, tu peux la corriger dans l’onglet Synchro ou scanner à nouveau le QR code. Garde le code d’association pour toi.
 
 Connecteur MCP
 Sur Windows, clique sur Connecteur MCP, choisis ton client et copie la configuration.
@@ -25,6 +30,8 @@ Avec Claude Desktop, ajoute l’entrée pause_pc à mcpServers dans %APPDATA%\Cl
 Avec Claude Code ou Codex, exécute la commande affichée dans PowerShell et ouvre une nouvelle session.
 Pour un autre client MCP stdio, indique le chemin complet de Pause.exe comme commande et --mcp comme argument.
 Le connecteur travaille avec le journal Windows, même si la fenêtre Pause est fermée. Après la mise à jour, ouvre une nouvelle session de ton client MCP ou relance Claude Desktop pour charger les outils.
+
+Dans « Mes suivis », crée une habitude ou une pause nommée. La durée et le quota de repos sont facultatifs. Par exemple, 30 jours de vélo et 6 repos donnent un objectif de 24 jours cochés. Coche « Repos » les jours concernés. Les premiers repos dans le quota préservent la série. Les nouveaux suivis sont synchronisés avec Pause 1.6 sur les deux appareils. Sur MCP, demande par exemple « Combien de jours ai-je pratiqué l’anglais ? » ou « Coche Anglais pour aujourd’hui ».
 Tu peux dire « Ajoute 82,4 kg et 250 kcal pour aujourd’hui », « Fixe mon poids cible à 80 kg » ou « Enregistre ce bilan dans Pause ». Les corrections d’aliments visent une entrée existante avec sa date et son identifiant.
 La demande « Fais mon bilan des 30 derniers jours » produit une réponse dans la conversation. Si tu demandes aussi à l’IA de l’enregistrer, il apparaît dans Bilans sur Windows et dans Bilan IA sur Android après la prochaine synchro.
 
@@ -34,10 +41,13 @@ Sur Android, ouvre Rappel dans l’onglet Pause, choisis l’heure et active les
 L’option Me rappeler aussi la pesée utilise la même heure et vérifie si une pesée a été saisie.
 
 Repas sans code-barres
-Sur Android, ouvre Calories puis Décrire un repas. Écris ou dicte ta saisie avec le micro du clavier. Vérifie les quantités et les calories proposées à partir de Ciqual. Si une référence manque, saisis une valeur connue ou choisis À estimer. Tu peux copier une demande pour l’IA de ton choix.
-Un code-barres scanné sans calories est gardé automatiquement dans les repas à estimer. Après avoir mis un repas en attente, synchronise Android avec Pause sur Windows. Dans Claude connecté au MCP, demande « Affiche mes repas à estimer et propose les calories ». Vérifie sa proposition, puis demande l’enregistrement. Synchronise à nouveau pour retrouver les aliments sur Android.
+Sur Android, ouvre Calories puis Décrire un repas. Écris ou dicte ta saisie avec le micro du clavier. Vérifie les quantités et les calories proposées à partir de Ciqual. Si une référence manque, saisis une valeur connue ou choisis À la synchro.
+Sur Android, « À la synchro » garde un repas décrit en un appui. Un code-barres sans calories est gardé automatiquement. Synchronise depuis la carte « Repas à estimer » sur Android. Sur le PC, Pause prépare la proposition avec Ciqual ou Open Food Facts. Ouvre « Repas à estimer », complète les valeurs manquantes puis clique « Ajouter au journal ». Synchronise à nouveau pour retrouver les aliments sur Android.
+
+Avec un abonnement ChatGPT éligible, « Continuer avec ChatGPT » dans Calories peut chercher les aliments absents de Ciqual directement sur le téléphone. Si les limites de l’abonnement sont atteintes, les champs restent disponibles pour une saisie manuelle. Claude reste utilisable à la demande via le connecteur MCP.
+Sur Android, choisis la source dans Calories. Sur Windows, « Compléter avec ChatGPT » dans Repas à estimer cherche uniquement les références manquantes. La première utilisation ouvre la connexion ChatGPT dans ton navigateur. Avec Claude via MCP, demande de déposer une proposition pour un repas en attente, puis rouvre Repas à estimer ou clique Recharger la proposition pour la relire.
 Sur Windows, le sélecteur de graphique montre le poids, les calories ou les jours de pause. Sur Android, la page Calories affiche un graphique sur sept jours.
 
 Données
 Windows conserve le journal et une sauvegarde dans %LOCALAPPDATA%\Pause. Le téléphone conserve sa propre copie.
-La synchronisation passe par une connexion TLS sur le réseau local. Aucun compte n’est nécessaire. Le port est 43183/TCP.
+Google Drive conserve un historique dans l’espace privé de Fil des jours après autorisation. La synchronisation Wi-Fi utilise une connexion TLS sur le réseau local, via le port 43183/TCP.

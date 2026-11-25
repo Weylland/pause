@@ -2,6 +2,7 @@ package fr.pause.journal;
 
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.DashPathEffect;
 import android.graphics.LinearGradient;
 import android.graphics.Paint;
 import android.graphics.Path;
@@ -23,6 +24,7 @@ final class WeightChart extends View {
         super(context);
         this.values = values;
         scale = getResources().getDisplayMetrics().density;
+        paint.setTypeface(PaperStyle.body(context));
         number.setMaximumFractionDigits(1);
         setImportantForAccessibility(IMPORTANT_FOR_ACCESSIBILITY_NO);
     }
@@ -45,14 +47,16 @@ final class WeightChart extends View {
         high += padding;
 
         paint.setShader(null);
-        paint.setColor(0xFFDEE4D8);
         paint.setStrokeWidth(scale);
-        paint.setTextSize(10 * scale);
+        paint.setTextSize(11 * scale);
+        DashPathEffect ruling = new DashPathEffect(new float[]{3 * scale, 4 * scale}, 0);
         for (int i = 0; i < 3; i++) {
             float y = top + (bottom - top) * i / 2;
-            paint.setColor(0xFFDEE4D8);
+            paint.setColor(PaperStyle.LINE);
+            paint.setPathEffect(ruling);
             canvas.drawLine(left, y, right, y, paint);
-            paint.setColor(0xFF52675A);
+            paint.setPathEffect(null);
+            paint.setColor(PaperStyle.MUTED);
             canvas.drawText(number.format(high - (high - low) * i / 2), 0, y + 3 * scale, paint);
         }
         Path path = new Path();
@@ -72,10 +76,10 @@ final class WeightChart extends View {
         area.lineTo(xs[0], bottom);
         area.close();
         paint.setShader(new LinearGradient(0, top, 0, bottom,
-                0x664D8A5E, 0x084D8A5E, Shader.TileMode.CLAMP));
+                0xB39CC3DC, 0x109CC3DC, Shader.TileMode.CLAMP));
         canvas.drawPath(area, paint);
         paint.setShader(null);
-        paint.setColor(0xFF285C44);
+        paint.setColor(PaperStyle.BLUE_INK);
         paint.setStrokeWidth(2.5f * scale);
         paint.setStrokeCap(Paint.Cap.ROUND);
         paint.setStrokeJoin(Paint.Join.ROUND);
@@ -84,9 +88,9 @@ final class WeightChart extends View {
         paint.setStyle(Paint.Style.FILL);
         for (int i = 0; i < values.size(); i++) {
             float radius = (i == values.size() - 1 ? 4.5f : 3) * scale;
-            paint.setColor(0xFF285C44);
+            paint.setColor(PaperStyle.BLUE_INK);
             canvas.drawCircle(xs[i], ys[i], radius, paint);
-            paint.setColor(0xFFFFFEFA);
+            paint.setColor(PaperStyle.SURFACE);
             canvas.drawCircle(xs[i], ys[i], radius - 1.3f * scale, paint);
         }
     }

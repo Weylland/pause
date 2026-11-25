@@ -30,16 +30,22 @@ final class Journal {
     record SyncState(JSONObject base, JSONObject current, String journalId) {}
 
     private final SharedPreferences preferences;
-    private final JSONObject data;
+    private JSONObject data;
+    private static Journal instance;
 
-    Journal(Context context) {
+    static synchronized Journal open(Context context) {
+        if (instance == null) instance = new Journal(context.getApplicationContext());
+        return instance;
+    }
+
+    private Journal(Context context) {
         preferences = context.getSharedPreferences("journal", Context.MODE_PRIVATE);
         try {
             data = new JSONObject(preferences.getString("data", "{}"));
         } catch (JSONException error) {
             throw new IllegalStateException("Le journal ne peut pas être ouvert.", error);
         }
-        for (String section : new String[]{"pauseDays", "weights", "meals", "targets", "reports", "drafts"}) {
+        for (String section : new String[]{"pauseDays", "weights", "meals", "targets", "reports", "drafts", "tracking"}) {
             if (data.optJSONObject(section) == null) put(data, section, new JSONObject());
         }
     }
@@ -207,6 +213,13 @@ final class Journal {
         writeMeals(date, entries);
     }
 
+    synchronized boolean finishDraft(MealDraft draft, List<Meal> additions) {
+        if (!drafts(draft.date()).contains(draft)) return false;
+        section("drafts").remove(draft.id());
+        addMeals(draft.date(), additions);
+        return true;
+    }
+
     synchronized void addDraft(LocalDate day, String description) {
         JSONObject draft = new JSONObject();
         put(draft, "date", day.toString());
@@ -230,6 +243,70 @@ final class Journal {
     synchronized void deleteDraft(String id) {
         section("drafts").remove(id);
         save();
+    }
+
+    synchronized List<Tracker> trackers() {
+        JSONObject tracking = section("tracking");
+        List<Tracker> result = new ArrayList<>();
+        for (Iterator<String> it = tracking.keys(); it.hasNext();) {
+            String key = it.next();
+            if (tracking.optJSONObject(key) == null) continue;
+            try { result.add(Tracker.read(key.substring(Tracker.PREFIX.length()), tracking.getJSONObject(key))); }
+            catch (JSONException error) { throw new IllegalStateException("Suivi illisible.", error); }
+        }
+        result.sort(java.util.Comparator.comparing(Tracker::name, String.CASE_INSENSITIVE_ORDER).thenComparing(Tracker::id));
+        return result;
+    }
+
+    synchronized void saveTracker(Tracker tracker, Tracker previous) throws JSONException {
+        JSONObject value = section("tracking").optJSONObject(tracker.key());
+        if (previous != null && (value == null || !previous.equals(Tracker.read(tracker.id(), value))))
+            throw new JSONException("Ce suivi a changé. Rouvre ses paramètres.");
+        put(section("tracking"), tracker.key(), Tracker.read(tracker.id(), tracker.json()).json());
+        save();
+    }
+
+    synchronized Tracker.Day trackerDay(Tracker tracker, LocalDate date) {
+        return Tracker.Day.read(section("tracking").opt(tracker.dayKey(date)));
+    }
+
+    synchronized boolean setTrackerDay(Tracker tracker, LocalDate date, Tracker.Day status) {
+        JSONObject value = section("tracking").optJSONObject(tracker.key());
+        try {
+            if (value == null || !Tracker.read(tracker.id(), value).includes(date) || date.isAfter(LocalDate.now())) return false;
+        } catch (JSONException error) { return false; }
+        if (status == null) section("tracking").remove(tracker.dayKey(date));
+        else put(section("tracking"), tracker.dayKey(date), status.value());
+        save();
+        return true;
+    }
+
+    synchronized Tracker.Progress trackerProgress(Tracker tracker, LocalDate today) {
+        String prefix = tracker.key() + "/";
+        JSONObject tracking = section("tracking");
+        int count = 0;
+        TreeSet<LocalDate> rests = new TreeSet<>();
+        for (Iterator<String> it = tracking.keys(); it.hasNext();) {
+            String key = it.next();
+            if (!key.startsWith(prefix)) continue;
+            LocalDate date = LocalDate.parse(key.substring(prefix.length()));
+            if (date.isAfter(today) || !tracker.includes(date)) continue;
+            Tracker.Day status = Tracker.Day.read(tracking.opt(key));
+            if (status == Tracker.Day.DONE) count++;
+            else if (status == Tracker.Day.REST) rests.add(date);
+        }
+        int totalRests = rests.size();
+        while (rests.size() > tracker.restDays()) rests.pollLast();
+        LocalDate end = tracker.end();
+        LocalDate day = end != null && end.isBefore(today) ? end : today;
+        if (day.equals(today) && trackerDay(tracker, day) == null) day = day.minusDays(1);
+        int streak = 0;
+        while (tracker.includes(day)) {
+            if (trackerDay(tracker, day) == Tracker.Day.DONE) streak++;
+            else if (!rests.contains(day)) break;
+            day = day.minusDays(1);
+        }
+        return new Tracker.Progress(count, totalRests, streak);
     }
 
     private void writeMeals(LocalDate date, List<Meal> meals) {
@@ -302,6 +379,11 @@ final class Journal {
                 put(entries, prefix + key, values.opt(key));
             }
         }
+        JSONObject tracking = section("tracking");
+        for (Iterator<String> it = tracking.keys(); it.hasNext();) {
+            String key = it.next();
+            put(entries, key, tracking.opt(key));
+        }
         return entries;
     }
 
@@ -309,20 +391,52 @@ final class Journal {
         String identity = response.getString("journalId");
         UUID.fromString(identity);
         JSONObject remote = response.getJSONObject("entries");
+        applyEntries(sent.current(), remote, response.optBoolean("extended"), response.optBoolean("drafts"), response.optBoolean("trackers"));
+        put(data, "desktopPin", pin);
+        put(data, "desktopBase", remote);
+        put(data, "desktopJournal", identity);
+        save();
+    }
+
+    synchronized JSONObject driveEntries() { return syncEntries(); }
+
+    synchronized void applyDrive(JSONObject sent, JSONObject remote) throws JSONException {
+        JSONObject current = syncEntries();
+        boolean changed = false;
+        for (String key : WindowsSync.keys(sent, remote)) {
+            if (WindowsSync.same(current.opt(key), sent.opt(key)) && !WindowsSync.same(sent.opt(key), remote.opt(key))) {
+                changed = true;
+                break;
+            }
+        }
+        if (!changed) return;
+        String before = data.toString();
+        applyEntries(sent, remote, true, true, true);
+        if (!preferences.edit().putString("data", data.toString()).commit()) {
+            data = new JSONObject(before);
+            preferences.edit().putString("data", before).commit();
+            throw new JSONException("Impossible d’enregistrer le journal sur ce téléphone.");
+        }
+    }
+
+    private void applyEntries(JSONObject sent, JSONObject remote, boolean extended, boolean draftSupport, boolean trackerSupport) throws JSONException {
         JSONObject current = syncEntries();
         JSONObject days = new JSONObject(), weights = new JSONObject(), meals = new JSONObject();
         JSONObject targets = new JSONObject(), reports = new JSONObject();
-        JSONObject drafts = new JSONObject();
-        boolean extended = response.optBoolean("extended");
-        boolean draftSupport = response.optBoolean("drafts");
+        JSONObject drafts = new JSONObject(), tracking = new JSONObject();
         String start = null;
         int duration = 30;
         for (String key : WindowsSync.keys(current, remote)) {
             Object local = current.opt(key);
             boolean fromPc = (extended || !WindowsSync.extendedKey(key)) && (draftSupport || !WindowsSync.draftKey(key))
-                    && WindowsSync.same(local, sent.current().opt(key));
+                    && (trackerSupport || !WindowsSync.trackerKey(key))
+                    && WindowsSync.same(local, sent.opt(key));
             Object value = fromPc ? remote.opt(key) : local;
             if (value == null || value == JSONObject.NULL) continue;
+            if (WindowsSync.trackerKey(key)) {
+                put(tracking, key, Tracker.normalize(key, value));
+                continue;
+            }
             if (key.equals("goal")) {
                 JSONObject goal = (JSONObject) value;
                 start = LocalDate.parse(goal.getString("start")).toString();
@@ -368,7 +482,11 @@ final class Journal {
                     if (!status.equals("tenu") && !status.equals(NOT_KEPT_STATUS)) throw new JSONException("État invalide.");
                     put(days, date, status);
                 }
-                case "weight" -> put(weights, date, value);
+                case "weight" -> {
+                    if (!(value instanceof Number kg) || !Double.isFinite(kg.doubleValue()) || kg.doubleValue() <= 0 || kg.doubleValue() > 1000)
+                        throw new JSONException("Pesée invalide.");
+                    put(weights, date, value);
+                }
                 case "meal" -> {
                     if (parts.length != 3) throw new JSONException("Identifiant aliment manquant.");
                     JSONObject meal = new JSONObject(((JSONObject) value).toString());
@@ -391,10 +509,7 @@ final class Journal {
         put(data, "targets", targets);
         put(data, "reports", reports);
         put(data, "drafts", drafts);
-        put(data, "desktopPin", pin);
-        put(data, "desktopBase", remote);
-        put(data, "desktopJournal", identity);
-        save();
+        put(data, "tracking", tracking);
     }
 
     synchronized JSONObject snapshot() {

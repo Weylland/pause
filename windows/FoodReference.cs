@@ -39,6 +39,13 @@ internal static class FoodReference
             .OrderBy(item => item.Name.Length).Take(8).ToArray();
     }
 
+    internal static Item? Exact(string name)
+    {
+        string query = Normalize(name);
+        Item[] matches = Catalog.Value.Where(item => item.Keys.Contains(query)).Take(2).ToArray();
+        return matches.Length == 1 ? matches[0] : null;
+    }
+
     private static string Normalize(string value)
     {
         string plain = string.Concat(value.Normalize(NormalizationForm.FormD)

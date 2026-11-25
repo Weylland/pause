@@ -6,10 +6,12 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <AssemblyName>Pause</AssemblyName>
-    <Version>1.4.3</Version>
+    <Product>Fil des jours</Product>
+    <Version>1.6.1</Version>
     <ApplicationIcon>Pause.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
+    <Resource Include="../design/fonts/*.ttf" Link="Fonts/%(Filename)%(Extension)" />
     <EmbeddedResource Include="../nutrition/ciqual.tsv" LogicalName="Pause.ciqual.tsv" />
     <PackageReference Include="QRCoder" Version="1.7.0" />
   </ItemGroup>
