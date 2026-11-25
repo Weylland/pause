@@ -76,7 +76,7 @@ internal static class Mcp
                     result = Text(string.IsNullOrEmpty(exception.Message)
                         ? "Vérifie les arguments fournis." : exception.Message, true);
                 }
-                catch (Exception exception) when (exception is IOException or InvalidOperationException or ArgumentException or JsonException or FormatException or NullReferenceException)
+                catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or InvalidOperationException or ArgumentException or JsonException or FormatException or NullReferenceException)
                 {
                     result = Text(exception is FileNotFoundException or DirectoryNotFoundException
                         ? "Ouvre d’abord Pause sur le PC et synchronise ton journal, ou ajoute une entrée."

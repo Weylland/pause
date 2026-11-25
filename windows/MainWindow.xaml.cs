@@ -118,7 +118,7 @@ public partial class MainWindow : Window
             serverError = null;
             return true;
         }
-        catch (Exception error) when (error is IOException or SocketException or System.Security.Cryptography.CryptographicException)
+        catch (Exception error) when (JournalStore.IsFailure(error) || error is SocketException or System.Security.Cryptography.CryptographicException)
         {
             server?.Dispose();
             server = null;
@@ -202,6 +202,11 @@ public partial class MainWindow : Window
             SyncDot.Fill = serverError is not null ? (Brush)FindResource("ApricotInk")
                 : (Brush)FindResource(state.LastSync.HasValue ? "Accent" : "Line");
         }
+        catch (Exception error) when (JournalStore.IsFailure(error))
+        {
+            SyncStatus.Text = "Lecture du journal impossible · " + error.Message;
+            SyncDot.Fill = (Brush)FindResource("ApricotInk");
+        }
         finally
         {
             rendering = false;
@@ -234,11 +239,16 @@ public partial class MainWindow : Window
                 await SyncDriveAsync();
                 status.Text = drive.Status;
             }
-            catch (Exception error) when (error is IOException or OperationCanceledException or UnauthorizedAccessException or
+            catch (Exception error) when (JournalStore.IsFailure(error) || error is OperationCanceledException or HttpRequestException or
                 System.ComponentModel.Win32Exception or InvalidOperationException or JsonException or System.Security.Cryptography.CryptographicException)
             {
-                if (!estimateLifetime.IsCancellationRequested) status.Text = error is OperationCanceledException
-                    ? "La connexion Google a expiré. Réessaie." : "Connexion Google impossible. Vérifie le fichier et l’autorisation Drive.";
+                if (!estimateLifetime.IsCancellationRequested) status.Text = error switch
+                {
+                    OperationCanceledException => "La connexion Google a expiré. Réessaie.",
+                    HttpRequestException => "Google est injoignable. Vérifie ta connexion Internet.",
+                    InvalidDataException => error.Message,
+                    _ => "Connexion Google impossible. Vérifie le fichier et l’autorisation Drive."
+                };
             }
         }
         if (!drive.Connected)
@@ -593,7 +603,7 @@ public partial class MainWindow : Window
                 Refresh();
                 return null;
             }
-            catch (IOException error)
+            catch (Exception error) when (JournalStore.IsFailure(error))
             {
                 return "Impossible d’enregistrer. " + error.Message;
             }
@@ -717,7 +727,7 @@ public partial class MainWindow : Window
             } while (estimateAgain);
         }
         catch (OperationCanceledException) when (estimateLifetime.IsCancellationRequested) { }
-        catch (Exception error) when (error is IOException or UnauthorizedAccessException or InvalidDataException)
+        catch (Exception error) when (JournalStore.IsFailure(error))
         {
             estimateError = "Certaines estimations sont indisponibles. Pause réessaiera à la prochaine synchro.";
         }
@@ -845,10 +855,10 @@ public partial class MainWindow : Window
                 if (store.Snapshot().MealDrafts().Contains(draft)) new MealEstimate("ChatGPT", completed).Remember(draft);
                 if (shown == draft) ShowEstimate(reload: true);
             }
-            catch (Exception error) when (error is IOException or HttpRequestException or JsonException or InvalidOperationException or
-                OperationCanceledException or System.ComponentModel.Win32Exception or System.Security.Cryptography.CryptographicException or FormatException or UnauthorizedAccessException)
+            catch (Exception error) when (JournalStore.IsFailure(error) || error is HttpRequestException or JsonException or InvalidOperationException or
+                OperationCanceledException or System.ComponentModel.Win32Exception or System.Security.Cryptography.CryptographicException or FormatException)
             {
-                if (!estimation.IsCancellationRequested) details.Text = error is IOException ? error.Message : "ChatGPT n’a pas terminé cette estimation. Les valeurs sont conservées.";
+                if (!estimation.IsCancellationRequested) details.Text = error is IOException or InvalidDataException ? error.Message : "ChatGPT n’a pas terminé cette estimation. Les valeurs sont conservées.";
             }
             finally { asking = false; useChatGpt.IsEnabled = true; list.IsEnabled = true; form.IsEnabled = true; }
         };
@@ -876,7 +886,7 @@ public partial class MainWindow : Window
                     completed.Add(new(food, amount, per100));
                 }
                 try { store.SaveEstimate(shown, completed, proposal.Source == "Claude" ? "Estimation IA" : proposal.Source); }
-                catch (Exception error) when (error is IOException or InvalidOperationException or InvalidDataException) { return error.Message; }
+                catch (Exception error) when (JournalStore.IsFailure(error) || error is InvalidOperationException) { return error.Message; }
                 Refresh();
                 return null;
             }, saveLabel: "Ajouter au journal");
@@ -970,7 +980,7 @@ public partial class MainWindow : Window
             Refresh();
             return null;
         }
-        catch (Exception error) when (error is IOException or InvalidOperationException or ArgumentException)
+        catch (Exception error) when (JournalStore.IsFailure(error) || error is InvalidOperationException or ArgumentException)
         {
             return "Impossible d’enregistrer. " + error.Message;
         }
@@ -1012,15 +1022,25 @@ public partial class MainWindow : Window
         }
         chooser.SelectionChanged += (_, _) => UpdateQr();
         UpdateQr();
-        dialog.AddAction("Copier le code", () => Clipboard.SetText(active.PairingCode((string)chooser.SelectedItem)));
+        dialog.AddAction("Copier le code", () => Copy(active.PairingCode((string)chooser.SelectedItem)));
         dialog.AddAction("Révoquer l’ancien code", () =>
         {
             if (MessageBox.Show(this, "Générer un nouveau code ? Le téléphone devra être associé à nouveau.",
                 "Pause", MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes) return;
             try { active.Revoke(); UpdateQr(); }
-            catch (IOException error) { MessageBox.Show(this, error.Message, "Pause"); }
+            catch (Exception error) when (JournalStore.IsFailure(error)) { MessageBox.Show(this, error.Message, "Pause"); }
         });
         dialog.Show();
+    }
+
+    private void Copy(string text)
+    {
+        try { Clipboard.SetText(text); }
+        catch (System.Runtime.InteropServices.ExternalException)
+        {
+            MessageBox.Show(this, "Le presse-papiers est utilisé par une autre application. Réessaie.", "Fil des jours",
+                MessageBoxButton.OK, MessageBoxImage.Information);
+        }
     }
 
     private void OpenMcp(object sender, RoutedEventArgs args)
@@ -1042,7 +1062,7 @@ public partial class MainWindow : Window
         dialog.Field("Configuration à copier", configuration);
         dialog.Note("Le connecteur lit le journal du PC. Il peut aussi modifier une entrée ou enregistrer un bilan à ta demande. "
             + "Exemple « Ajoute 82,4 kg pour aujourd’hui ».");
-        dialog.AddAction("Copier la configuration", () => Clipboard.SetText(configuration.Text));
+        dialog.AddAction("Copier la configuration", () => Copy(configuration.Text));
 
         void SelectClient()
         {

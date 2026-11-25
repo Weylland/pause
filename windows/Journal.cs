@@ -257,7 +257,18 @@ internal sealed class JournalStore
         else map[key] = value;
     }
 
+    internal static bool IsFailure(Exception error) => error is IOException or InvalidDataException or UnauthorizedAccessException;
+
     internal static JournalState Read()
+    {
+        try { return Load(); }
+        catch (Exception error) when (error is JsonException or InvalidOperationException or ArgumentException or FormatException or NullReferenceException)
+        {
+            throw new InvalidDataException("Le fichier du journal est illisible. Une sauvegarde se trouve dans le dossier Pause.", error);
+        }
+    }
+
+    private static JournalState Load()
     {
         using var file = new FileStream(FilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
         if (file.Length > SyncServer.MaxBytes) throw new InvalidDataException("Le journal est trop volumineux.");

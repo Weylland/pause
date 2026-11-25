@@ -194,6 +194,6 @@ internal sealed class TrackerWindow : Window
     private string? Save(Action update)
     {
         try { update(); Refresh(store.Snapshot()); return null; }
-        catch (Exception error) when (error is IOException or InvalidDataException or ArgumentException) { return error.Message; }
+        catch (Exception error) when (JournalStore.IsFailure(error) || error is ArgumentException) { return error.Message; }
     }
 }

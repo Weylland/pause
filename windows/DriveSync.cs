@@ -91,13 +91,15 @@ internal sealed class DriveSync(JournalStore store)
             Status = conflicts.Count == 0 ? $"Google Drive · synchronisé à {DateTime.Now:HH:mm}"
                 : $"Google Drive · {conflicts.Count} entrée(s) à vérifier";
         }
-        catch (Exception error) when (error is IOException or HttpRequestException or JsonException or InvalidOperationException or UnauthorizedAccessException)
-        {
-            Status = error is HttpRequestException ? "Google Drive indisponible. Tes saisies restent sur ce PC." : error.Message;
-        }
         catch (OperationCanceledException) when (!cancellation.IsCancellationRequested)
         {
             Status = "Google Drive n’a pas répondu. Nouvelle tentative automatique.";
+        }
+        catch (Exception error) when (error is not OperationCanceledException)
+        {
+            Status = JournalStore.IsFailure(error) ? error.Message
+                : error is HttpRequestException ? "Google Drive indisponible. Tes saisies restent sur ce PC."
+                : "La synchronisation Drive a été interrompue. Tes saisies restent sur ce PC.";
         }
         finally { Busy = false; }
     }

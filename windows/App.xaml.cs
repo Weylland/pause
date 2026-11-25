@@ -6,6 +6,7 @@ namespace Pause;
 public partial class App : Application
 {
     private Mutex? instance;
+    private bool reporting;
 
     protected override void OnStartup(StartupEventArgs args)
     {
@@ -19,6 +20,16 @@ public partial class App : Application
             Shutdown();
             return;
         }
+
+        DispatcherUnhandledException += (_, failure) =>
+        {
+            if (!JournalStore.IsFailure(failure.Exception)) return;
+            failure.Handled = true;
+            if (reporting) return;
+            reporting = true;
+            try { MessageBox.Show(failure.Exception.Message, "Fil des jours", MessageBoxButton.OK, MessageBoxImage.Warning); }
+            finally { reporting = false; }
+        };
 
         string pathId = Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(
             System.Text.Encoding.UTF8.GetBytes(JournalStore.DirectoryPath.ToUpperInvariant())));
