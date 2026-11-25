@@ -26,7 +26,7 @@ final class FoodDescription {
     private static final Pattern SUFFIX = Pattern.compile("^(.+?)(?:\\s*:\\s*|\\s+(de\\s+)?)(" + DIGITS + ")\\s*" + UNIT + "$", FLAGS);
     private static final Pattern COUNT = Pattern.compile("^(?:(" + DIGITS + ")(?:\\s*([x×])(?=[\\s0-9])\\s*|\\s+)|(" + WORDS + "))(.+)$", FLAGS);
     private static final Pattern CORRECTION = Pattern.compile("^.+?\\s*:\\s*(?:" + DIGITS + ")\\s*" + UNIT + "$", FLAGS);
-    private static final Pattern SEPARATOR = Pattern.compile("\\s+(?:et|avec|puis)\\s+|[;+&•]|(?<![0-9]),|,(?![0-9])", FLAGS);
+    private static final Pattern SEPARATOR = Pattern.compile("\\s+(?:et|avec|puis|&)\\s+|[;+•]|(?<![0-9]),|,(?![0-9])", FLAGS);
     private static final Pattern TOLD = Pattern.compile("^(?:(?:hier|aujourd['’]hui|(?:[àa]\\s+|(?:hier|ce|le)\\s+)?(?:matin|midi|soir)|au\\s+(?:petit[\\s-]+d[ée]jeuner|d[ée]jeuner|d[îi]ner|go[ûu]ter))(?:[\\s,:]+|$))?(?:(?:j['’\\s]?\\s*ai\\s+)?(?:mang[ée]+|bu|pris|grignot[ée]+)\\s+)?", FLAGS);
     private static final Pattern LITTLE = Pattern.compile("^((?:un\\s+)?(?:petit\\s+)?peu|beaucoup)\\s+(?:de\\s+|d['’]\\s*)", FLAGS);
     private static final Pattern ARTICLE = Pattern.compile("^(?:(?:des|du|de|une|un|la|les|le|quelques)\\s+|[dl]['’]\\s*)+", FLAGS);
@@ -42,7 +42,7 @@ final class FoodDescription {
     private static final List<String> EXTRAS = Arrays.asList("bio", "chaud", "chaude", "fait", "faite", "frais", "fraiche", "froid", "froide", "maison");
 
     record Reference(String name, double per100, List<String> keys, List<String> stems, Double unit) {}
-    record Serving(String container, List<String> foods, double grams) {}
+    record Serving(String container, List<String> foods, double grams, Double unit) {}
     record Table(List<Reference> references, List<Serving> servings) {}
     record Portion(String name, Double grams, boolean usual, Reference reference, Reference guess, List<Reference> options) {}
 
@@ -212,21 +212,20 @@ final class FoodDescription {
         if (measured) return new Portion(name, grams, false, reference, guess, options);
         List<Double> weights = exact.stream().map(Reference::unit).filter(Objects::nonNull).distinct().collect(Collectors.toList());
         Double unit = weights.size() == 1 ? weights.get(0) : exact.isEmpty() && guess != null ? guess.unit() : null;
-        double weight = container == null && count != null && unit != null ? count * unit
-                : serving(table.servings(), container, said, guess) * (count != null && (container != null || count <= 3) ? count : 1);
+        double weight = weight(table.servings(), container, said, guess, unit, count);
         return new Portion(name, grams(Math.floor(weight * factor * 10 + .5) / 10, "g"), true, reference, guess, options);
     }
 
-    private static double serving(List<Serving> servings, String container, String query, Reference reference) {
+    private static double weight(List<Serving> servings, String container, String query, Reference reference, Double unit, Double count) {
         List<String> texts = new ArrayList<>(Arrays.asList(query, stem(query)));
         if (reference != null) texts.addAll(Arrays.asList(reference.keys().get(0), reference.stems().get(0)));
-        for (Serving serving : servings)
-            if (serving.container().equals(container) && fits(serving, texts)) return serving.grams();
-        for (Serving serving : servings) {
-            if (!serving.container().equals("*") || !fits(serving, texts)) continue;
-            return serving.foods().isEmpty() && reference != null && reference.unit() != null ? reference.unit() : serving.grams();
-        }
-        return 100;
+        Serving held = servings.stream().filter(item -> item.container().equals(container) && fits(item, texts)).findFirst().orElse(null);
+        Serving usual = held != null ? held : servings.stream().filter(item -> item.container().equals("*") && fits(item, texts)).findFirst()
+                .orElse(new Serving("*", new ArrayList<>(), 100, null));
+        Double each = usual.unit() != null ? usual.unit() : unit;
+        if (container == null && count != null && each != null) return count * each;
+        double grams = held == null && usual.foods().isEmpty() && reference != null && reference.unit() != null ? reference.unit() : usual.grams();
+        return grams * (count != null && (container != null || count <= 3) ? count : 1);
     }
 
     private static boolean fits(Serving serving, List<String> texts) {
@@ -301,7 +300,7 @@ final class FoodDescription {
         List<Serving> servings = new ArrayList<>();
         for (String[] columns : rows(portions))
             servings.add(new Serving(columns[0], columns[1].isEmpty() ? new ArrayList<>() : Arrays.asList(columns[1].split("\\|")),
-                    Double.parseDouble(columns[2])));
+                    Double.parseDouble(columns[2]), columns.length > 3 ? Double.valueOf(columns[3]) : null));
         return new Table(references, servings);
     }
 

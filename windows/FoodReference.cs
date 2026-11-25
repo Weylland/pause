@@ -9,7 +9,7 @@ internal static class FoodReference
 {
     internal sealed record Item(string Name, double Per100, string[] Keys, string[] Stems, double? Unit);
     internal sealed record Result(Item? Reference, Item? Guess, Item[] Options, double? Unit);
-    private sealed record Serving(string Container, string[] Foods, double Grams);
+    private sealed record Serving(string Container, string[] Foods, double Grams, double? Unit);
     private static readonly Lazy<Item[]> Catalog = new(Load);
     private static readonly Lazy<Serving[]> Servings = new(LoadServings);
     private static readonly HashSet<string> Ignored = ["a", "au", "aux", "d", "de", "des", "du", "en", "et", "l", "la", "le", "les", "ou"];
@@ -25,7 +25,8 @@ internal static class FoodReference
     }
 
     private static Serving[] LoadServings() => Rows("Pause.portions.tsv")
-        .Select(fields => new Serving(fields[0], fields[1].Split('|', StringSplitOptions.RemoveEmptyEntries), double.Parse(fields[2], CultureInfo.InvariantCulture)))
+        .Select(fields => new Serving(fields[0], fields[1].Split('|', StringSplitOptions.RemoveEmptyEntries), double.Parse(fields[2], CultureInfo.InvariantCulture),
+            fields.Length > 3 ? double.Parse(fields[3], CultureInfo.InvariantCulture) : null))
         .ToArray();
 
     private static Item[] Load()
@@ -120,15 +121,18 @@ internal static class FoodReference
         return tolerant ? Segments(words[1..], true) : null;
     }
 
-    internal static double Portion(string? container, string name, Item? reference)
+    internal static double Portion(string? container, string name, Result match, double? count)
     {
+        Item? reference = match.Guess;
         string query = Normalize(name);
         string[] texts = new[] { query, reference?.Keys[0] ?? "" }.SelectMany(text => new[] { text, Stem(text) }).ToArray();
         bool Fits(Serving serving) => serving.Foods.Length == 0
             || serving.Foods.Any(food => texts.Any(text => (text + " ").StartsWith(food + " ", StringComparison.Ordinal)));
         Serving? held = container is null ? null : Servings.Value.FirstOrDefault(serving => serving.Container == container && Fits(serving));
         Serving usual = held ?? Servings.Value.First(serving => serving.Container == "*" && Fits(serving));
-        return held is null && usual.Foods.Length == 0 && reference?.Unit is double unit ? unit : usual.Grams;
+        if (container is null && count.HasValue && (usual.Unit ?? match.Unit) is double each) return count.Value * each;
+        double grams = held is null && usual.Foods.Length == 0 && reference?.Unit is double unit ? unit : usual.Grams;
+        return grams * (container is not null || count is <= 3 ? count ?? 1 : 1);
     }
 
     internal static string Container(string text)

@@ -1,4 +1,4 @@
-# contenant	aliments	grammes
+# contenant	aliments	grammes	unité
 verre	vin|champagne|cidre	125
 verre	whisky|rhum|vodka|pastis|digestif	40
 verre	biere	250
@@ -72,10 +72,49 @@ cuillere a soupe		15
 cuillere a cafe	huile	4
 cuillere a cafe	sucre	4
 cuillere a cafe		5
+*	kinder bueno|bueno	43
+*	kinder surprise	20
+*	schoko bon	30	6
+*	kinder pingui|pingui	30
+*	kinder delice	42
+*	kinder	21
+*	ferrero|rocher|mon cheri|raffaello	25	12.5
+*	twix	50
+*	kitkat|kit kat|lion	42
+*	mars|snickers	50
+*	bounty	57
+*	barre chocolatee	45
+*	m m|mms|smarties|maltesers	45
+*	oreo	33	11
+*	prince|bn	40	20
+*	granola|petit ecolier	26	13
+*	petit beurre|speculoos|sable|palmito	24	8
+*	barquette	25	6
+*	napolitain|savane	30
+*	pitch|doowap	38
+*	babybel	22
+*	vache qui rit|kiri|st moret|saint moret|apericube	17
+*	boursin|philadelphia	25
+*	yop	180
+*	actimel	100
+*	danette	125
+*	magnum|cornetto|esquimau|cone glace	75
+*	mcflurry|sundae	180
+*	big mac|whopper|royal cheese|mcchicken|double cheese	210
+*	red bull|monster energy	250
+*	ice tea|the glace|lipton	330
+*	fanta|sprite|orangina|schweppes|oasis|pepsi	330
+*	heineken|leffe|1664|kronenbourg|desperados|pelforth|panache	250
+*	chocapic|tresor|coco pops|frosties|corn flakes|special k|miel pops|cheerios	45
+*	pringles|lays|doritos|curly|tuc|belin|cracker|nacho	30
+*	barre proteinee	60
+*	pom potes|pompote|compote a boire	90
+*	panini	220
+*	bonbon|haribo|dragibus|tagada	30	5
+*	nugget	120	18
 *	mcdo|macdo|menu|fast food|burger king	400
 *	repas|resto|restaurant|dejeuner|diner|plat|reste	400
 *	nutella|pate a tartiner	20
-*	bonbon	20
 *	houmous	50
 *	tartine	40
 *	sushi|maki	150
@@ -113,6 +152,7 @@ cuillere a cafe		5
 *	creme	30
 *	jambon beurre	200
 *	pain pita	70
+*	pain au chocolat|pain aux raisins|pain au lait	65
 *	pain|baguette	60
 *	pates bolognaise|pates carbonara|pates a la|spaghetti bolognaise|spaghetti carbonara	300
 *	pates	200

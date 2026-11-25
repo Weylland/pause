@@ -42,7 +42,7 @@ Lait 2e âge, poudre soluble (préparation de suite)	484
 Tapioca ou Perles du Japon, cru	354	
 Pomme de terre, sans peau, rôtie/cuite au four	91.9	
 Pomme de terre, bouillie/cuite à l'eau	80.5	
-Chips de pommes de terre nature ou aromatisées, standard	545	chips	2
+Chips de pommes de terre nature ou aromatisées, standard	545	chips|pringles|lays|lay's	2
 Pomme de terre, sans peau, crue	80.5	
 Pomme de terre, appertisée, égouttée	59.9	
 Pomme de terre noisette, surgelée, crue	181	
@@ -66,7 +66,7 @@ Frites de pommes de terre, surgelées, cuites en friteuse	285	frites	5
 Pomme de terre duchesse, surgelée, cuite	218	
 Pomme de terre noisette, surgelée, cuite	191	
 Pomme de terre sautée/poêlée à la graisse de canard	213	
-Chips de pommes de terre nature ou aromatisées, à l'ancienne	570	
+Chips de pommes de terre nature ou aromatisées, à l'ancienne	570	pringles|lays|lay's
 Chips de pommes de terre et assimilés nature ou aromatisées, allégées en matière grasse	463	
 Rostis ou Galette de pomme de terre	182	
 Aligot (purée de pomme de terre à la tomme fraîche), préemballé	195	
@@ -81,10 +81,10 @@ Fécule de pomme de terre	348
 Patate douce, crue	86.3	
 Patate douce, cuite	62.8	
 Patate douce, purée, cuisinée à la crème	79.8	
-Panaché (limonade et bière)	36.2	
+Panaché (limonade et bière)	36.2	bière|heineken|leffe|1664|kronenbourg|desperados|pelforth|panaché
 Panaché préemballé (<1° alc.)	25.4	
 Cidre doux	37.5	
-Bière blanche	34.6	
+Bière blanche	34.6	bière|heineken|leffe|1664|kronenbourg|desperados|pelforth|panaché
 Cidre bouché demi-sec	48	
 Cidre aromatisé (framboise)	35.4	
 Bière sans alcool (<1,2° alcool)	25.3	
@@ -245,8 +245,8 @@ Pain au lait aux pépites de chocolat, préemballé	369
 Pain aux raisins (viennoiserie)	333	pain aux raisins	100
 Pain au chocolat feuilleté, artisanal	423	pain au chocolat|chocolatine	65
 Pain au chocolat, préemballé	425	
-Brioche (ou briochettes) aux pépites de chocolat, préemballée	348	
-Brioche fourrée au chocolat	351	
+Brioche (ou briochettes) aux pépites de chocolat, préemballée	348	pitch|doowap
+Brioche fourrée au chocolat	351	pitch|doowap
 Brioche fourrée aux fruits, préemballée	346	
 Brioche fourrée crème pâtissière (type "chinois"), préemballée	300	
 Brioche, préemballée	354	
@@ -606,9 +606,9 @@ Parmesan	406
 Fontina	381	
 Grana Padano	396	
 Fromage fondu en tranchettes	246	
-Fromage fondu en portions ou en cubes environ 20% MG	242	fromage fondu
+Fromage fondu en portions ou en cubes environ 20% MG	242	fromage fondu|babybel|vache qui rit|kiri|boursin|st moret|saint moret|philadelphia|apéricube
 Spécialité fromagère non affinée environ 25% MG, type fromage en barquette à tartiner ou coque fromagère	255	
-Fromage fondu double crème, environ 31% MG	311	
+Fromage fondu double crème, environ 31% MG	311	babybel|vache qui rit|kiri|boursin|st moret|saint moret|philadelphia|apéricube
 Cancoillotte (spécialité fromagère fondue)	151	
 Roquefort	384	
 Fourme de Montbrison	365	
@@ -699,7 +699,7 @@ Olive verte, en saumure, égouttée	155	olives vertes	4
 Orange, pulpe, crue	45.5	orange	150
 Papaye, pulpe, crue	42.2	
 Pastèque, pulpe, crue	38.9	pastèque
-Compote de pomme	102	compote de pommes
+Compote de pomme	102	compote de pommes|pom'potes|pompote|compote à boire
 Pomelo (dit Pamplemousse), pulpe, cru	39.8	pamplemousse|pomelo	250
 Prune Reine-Claude, crue	71.3	prune	40
 Pruneau, sec	229	
@@ -735,7 +735,7 @@ Canneberge ou cranberry, séchée, sucrée	333
 Boisson infantile céréales lactées (aliment moyen)	86.3	
 Olive (aliment moyen)	162	olive	4
 Compote ou assimilé, tout type de fruits, teneur en sucre (allégée en sucres ou non, sans sucres ajoutés...) inconnue (aliment moyen)	80.1	
-Purée de pommes, type "compote sans sucres ajoutés"	56.4	compote de pommes sans sucres ajoutés
+Purée de pommes, type "compote sans sucres ajoutés"	56.4	compote de pommes sans sucres ajoutés|pom'potes|pompote|compote à boire
 Poire Conférence, pulpe, crue	53.1	
 Poire Williams, pulpe, crue	54.1	poire	150
 Pomme Chantecler, pulpe, crue	51.8	
@@ -846,12 +846,12 @@ Eau de source, embouteillée (aliment moyen)	0
 Eau minérale, embouteillée, faiblement minéralisée (aliment moyen)	0	
 Eau de coco	15.2	
 Sirop à diluer, sucré	255	
-Cola, sucré	41.8	coca|coca-cola|cola
-Boisson gazeuse aux fruits (de 10 à 50% de jus), sucrée	46.6	
+Cola, sucré	41.8	coca|coca-cola|cola|pepsi
+Boisson gazeuse aux fruits (de 10 à 50% de jus), sucrée	46.6	fanta|sprite|orangina|schweppes|oasis|limonade|soda|red bull|monster|boisson énergisante
 Thé infusé, non sucré	0.063	thé
 Tisane infusée, non sucrée	0.87	tisane|infusion
 Kombucha, préemballé	9.46	
-Boisson gazeuse, sans jus de fruit, sucrée	37.1	
+Boisson gazeuse, sans jus de fruit, sucrée	37.1	fanta|sprite|orangina|schweppes|oasis|limonade|soda|red bull|monster|boisson énergisante
 Lait de coco ou Crème de coco	188	
 Eau minérale (aliment moyen)	0	eau
 Eau minérale, plate (aliment moyen)	0	
@@ -859,8 +859,8 @@ Eau minérale, gazeuse (aliment moyen)	0
 Boisson gazeuse aux fruits (teneur en jus non spécifiée), sucrée (aliment moyen)	46.6	
 Boisson concentrée à diluer, sans sucres ajoutés, avec édulcorants, type "sirop 0%"	21.7	
 Cola, non sucré, avec édulcorants	1.3	coca zéro|coca light|cola zéro
-Boisson au thé, aromatisée, teneur en sucre et édulcorant inconnue (aliment moyen)	27.3	
-Cola, teneur en sucre et édulcorant inconnue (aliment moyen)	30.7	
+Boisson au thé, aromatisée, teneur en sucre et édulcorant inconnue (aliment moyen)	27.3	ice tea|thé glacé|lipton
+Cola, teneur en sucre et édulcorant inconnue (aliment moyen)	30.7	pepsi
 Eau du robinet	0	eau du robinet
 Cola, sucré, sans caféine	43.8	
 Cola, non sucré, avec édulcorants, sans caféine	0.87	
@@ -869,7 +869,7 @@ Café décaféiné, non instantané, non sucré, prêt à boire	4.42
 Café expresso, non instantané, non sucré, prêt à boire	7.64	
 Café décaféiné, instantané, non sucré, prêt à boire	2.1	
 Café, instantané, non sucré, prêt à boire	1.64	café|café noir|expresso
-Boisson au thé, aromatisée, sucrée	27.3	
+Boisson au thé, aromatisée, sucrée	27.3	ice tea|thé glacé|lipton
 Thé, feuille	232	
 Cacao, non sucré, poudre soluble	387	
 Poudre cacaotée ou au chocolat pour boisson, sucrée	379	
@@ -934,9 +934,9 @@ Crème de lait, 15 à 20% MG, légère, semi-épaisse, UHT	194
 Crème de lait, 15 à 20% MG, légère, épaisse, rayon frais	166	crème légère|crème fraîche légère|crème allégée
 Spécialité à base de crème légère 8% MG, fluide ou épaisse	76.2	
 Fromage blanc nature ou aux fruits (aliment moyen)	87.7	
-Boisson lactée, lait fermenté ou yaourt à boire, aromatisé, sucré	73.7	
+Boisson lactée, lait fermenté ou yaourt à boire, aromatisé, sucré	73.7	yop|actimel|yaourt à boire
 Spécialité fromagère non affinée à tartiner environ 30-40 % MG aromatisée (ex: ail et fines herbes)	366	
-Boisson lactée, lait fermenté ou yaourt à boire, aux fruits, sucré	82.8	
+Boisson lactée, lait fermenté ou yaourt à boire, aux fruits, sucré	82.8	yop|actimel|yaourt à boire
 Lait fermenté ou spécialité laitière type yaourt, aromatisé, sucré, au bifidus	94.4	
 Lait fermenté ou spécialité laitière type yaourt, aux fruits, sucré, au bifidus	97.2	
 Lait fermenté ou spécialité laitière type yaourt, nature, au bifidus	64.5	
@@ -956,8 +956,8 @@ Yaourt, lait fermenté ou spécialité laitière, nature, 0% MG	39.4	yaourt 0%|y
 Yaourt, lait fermenté ou spécialité laitière, nature, à la crème	115	
 Yaourt, lait fermenté ou spécialité laitière, nature, sucré	84.3	yaourt sucré|yaourt nature sucré	125
 Yaourt ou spécialité laitière nature (aliment moyen)	56.8	
-Yaourt ou spécialité laitière nature ou aux fruits (aliment moyen)	69.4	
-Yaourt ou spécialité laitière aux fruits (aliment moyen)	93.1	yaourt aux fruits|yaourt à la fraise	125
+Yaourt ou spécialité laitière nature ou aux fruits (aliment moyen)	69.4	danone|activia|petit filou|petit filous
+Yaourt ou spécialité laitière aux fruits (aliment moyen)	93.1	yaourt aux fruits|yaourt à la fraise|danone|activia|petit filou|petit filous	125
 Faisselle, 6% MG environ	84.2	
 Fromage blanc nature, 0% MG	49.4	fromage blanc 0%
 Fromage blanc nature, 3% MG environ	76.9	fromage blanc|fromage blanc nature
@@ -1254,9 +1254,9 @@ Beignet rond moelleux, sans fourrage, saupoudré de sucre	404
 Beignet à la confiture	378	beignet
 Beignet fourré aux fruits, préemballé	362	
 Beignet fourré goût chocolat, préemballé	420	
-Cake aux fruits, préemballé	360	gâteau|quatre-quarts|cake|madeleine
-Biscuit aux céréales pour petit déjeuner, enrichis en vitamines et minéraux	445	biscuit|cookie|petit gâteau
-Biscuit sec fourré fruits à coque (non ou légèrement chocolaté)	511	biscuit|cookie|petit gâteau
+Cake aux fruits, préemballé	360	gâteau|quatre-quarts|cake|madeleine|napolitain|savane|kinder délice|brossard
+Biscuit aux céréales pour petit déjeuner, enrichis en vitamines et minéraux	445	biscuit|cookie|petit gâteau|oreo|prince|bn|granola|petit beurre|petit écolier|pépito|palmito|spéculoos|sablé|belvita|barquette
+Biscuit sec fourré fruits à coque (non ou légèrement chocolaté)	511	biscuit|cookie|petit gâteau|oreo|prince|bn|granola|petit beurre|petit écolier|pépito|palmito|spéculoos|sablé|belvita|barquette
 Florentin (biscuit sec sucré chocolaté aux amandes)	514	
 Gaufrette, fourrée vanille, préemballée	538	
 Biscuit sec ou tuile, aux amandes	471	
@@ -1382,8 +1382,8 @@ Crêpe ou Galette fourrée béchamel jambon, préemballée	136
 Crêpe ou Galette fourrée béchamel jambon fromage, préemballée	182	crêpe|galette|crêpe jambon fromage
 Crêpe ou Galette fourrée béchamel champignon, préemballée	150	
 Bouchée à la reine, à la viande/volaille/quenelle	292	
-Hamburger, provenant de fast food	246	hamburger|burger|mcdo|macdo|menu burger|burger king|fast food	200
-Cheeseburger, provenant de fast food	268	cheeseburger|burger|mcdo|macdo|menu burger|burger king|fast food	150
+Hamburger, provenant de fast food	246	hamburger|burger|mcdo|macdo|menu burger|burger king|fast food|big mac|whopper|mcchicken|royal cheese|double cheese|menu big mac	200
+Cheeseburger, provenant de fast food	268	cheeseburger|burger|mcdo|macdo|menu burger|burger king|fast food|big mac|whopper|mcchicken|royal cheese|double cheese|menu big mac	150
 Double cheeseburger, provenant de fast food	299	
 Burger au poisson, provenant de fast food	263	
 Tarte aux légumes, préemballée	216	
@@ -1911,34 +1911,34 @@ Mortadelle, porc et boeuf	297
 Mortadelle pistachée pur porc	320	
 Charcuterie (aliment moyen)	238	
 Confiture ou Marmelade, tout type de fruits, teneur en sucre inconnue (aliment moyen)	228	
-Barre chocolatée biscuitée	523	
-Barre chocolatée non biscuitée enrobée	496	
-Barre à la noix de coco, enrobée de chocolat	475	
+Barre chocolatée biscuitée	523	twix|kitkat|kit kat|lion|balisto|barre chocolatée
+Barre chocolatée non biscuitée enrobée	496	mars|snickers|milky way|nuts
+Barre à la noix de coco, enrobée de chocolat	475	bounty
 Chocolat au lait, tablette	537	chocolat au lait|nutella|pâte à tartiner
 Confiture ou Marmelade, tout type de fruits (aliment moyen)	249	confiture|marmelade
 Chewing-gum, sucré	372	
-Barres ou confiserie chocolatées au lait	551	
-Pâte de fruits	336	
+Barres ou confiserie chocolatées au lait	551	kinder|kinder bueno|bueno|kinder country|kinder maxi|kinder surprise|kinder pingui|pingui|schoko-bons|ferrero|ferrero rocher|rocher|mon chéri|raffaello|lindt|toblerone|milka|côte d'or|crunch|galak
+Pâte de fruits	336	bonbon|haribo|dragibus|tagada|fraise tagada|carambar|sucette
 Chocolat au lait sans sucres ajoutés, avec édulcorants, tablette	487	
 Marron glacé	324	
 Confiture de fraise (extra ou classique)	251	confiture de fraise
-Fruit confit	298	
+Fruit confit	298	bonbon|haribo|dragibus|tagada|fraise tagada|carambar|sucette
 Chocolat noir sans sucres ajoutés, avec édulcorants, en tablette	525	
 Barre glacée chocolatée	359	
 Confiture d'abricot (extra ou classique)	247	confiture d'abricot
 Marmelade d'orange	246	
-Confiserie au chocolat dragéifiée	505	
-Cacahuètes enrobées de chocolat dragéifiées	499	
+Confiserie au chocolat dragéifiée	505	m&m's|m&m|mms|smarties|maltesers
+Cacahuètes enrobées de chocolat dragéifiées	499	m&m's|m&m|mms|smarties|maltesers
 Gélifiant pour confitures	278	
 Chewing-gum, sans sucre	228	
 Confiture de myrtilles (extra ou classique)	246	
 Chocolat noir aux fruits secs (noisettes, amandes, raisins, praline), tablette	567	
-Barre chocolatée aux fruits secs	494	
+Barre chocolatée aux fruits secs	494	mars|snickers|milky way|nuts|bounty
 Chocolat noir à 70% cacao minimum, extra, dégustation, tablette	591	chocolat noir|chocolat noir 70%
 Édulcorant à base d'extrait de stévia	238	
 Calissons d'Aix en Provence	440	
 Gelée de groseille (extra ou classique)	246	
-Barre chocolat au lait avec nougat	532	
+Barre chocolat au lait avec nougat	532	kinder|kinder bueno|bueno|kinder country|kinder maxi|kinder surprise|kinder pingui|pingui|schoko-bons|ferrero|ferrero rocher|rocher|mon chéri|raffaello|lindt|toblerone|milka|côte d'or|crunch|galak|twix|kitkat|kit kat|lion|balisto|barre chocolatée
 Barre céréalière pour petit déjeuner au lait, chocolatée ou non, enrichie en vitamines et minéraux	382	
 Barre céréalière "équilibre" aux fruits, enrichie en vitamines et minéraux	379	
 Barre céréalière "équilibre" chocolatée, enrichie en vitamines et minéraux	418	
@@ -1947,14 +1947,14 @@ Barre céréalière chocolatée	451
 Pollen, partiellement séché	358	
 Confiture, tout type de fruits, allégée en sucres (extra ou classique)	162	
 Pollen,frais	285	
-Barre céréalière aux fruits	377	barre de céréales|barre céréalière
-Barre céréalière aux amandes ou noisettes	444	
+Barre céréalière aux fruits	377	barre de céréales|barre céréalière|grany|barre protéinée
+Barre céréalière aux amandes ou noisettes	444	grany|barre protéinée
 Chocolat, en tablette (aliment moyen)	557	chocolat|nutella|pâte à tartiner
 Chewing-gum, teneur en sucre inconnue (aliment moyen)	279	
 Grains de blé soufflés au miel ou caramel, enrichis en vitamines et minéraux	391	
 Céréales pour petit déjeuner chocolatées, non fourrées, enrichies en vitamines et minéraux	408	
 Céréales pour petit déjeuner riches en fibres, avec ou sans fruits, enrichies en vitamines et minéraux	360	
-Céréales pour petit déjeuner (aliment moyen)	398	céréales|céréales petit déjeuner
+Céréales pour petit déjeuner (aliment moyen)	398	céréales|céréales petit déjeuner|chocapic|trésor|coco pops|frosties|corn flakes|special k|miel pops|cheerios|lion céréales
 Muesli (aliment moyen)	418	muesli
 Pétales de maïs natures, enrichis en vitamines et minéraux	377	
 Riz soufflé nature, enrichi en vitamines et minéraux	391	
@@ -1975,7 +1975,7 @@ Céréales pour petit déjeuner "équilibre" au chocolat (non enrichies en vitam
 Céréales pour petit déjeuner "équilibre" aux fruits (non enrichies en vitamines et minéraux)	378	
 Céréales pour petit déjeuner "équilibre" nature (non enrichies en vitamines et minéraux)	379	
 Céréales pour petit déjeuner, enrichies en vitamines et minéraux (aliment moyen)	401	
-Céréales pour petit déjeuner, non enrichies en vitamines et minéraux (aliment moyen)	388	
+Céréales pour petit déjeuner, non enrichies en vitamines et minéraux (aliment moyen)	388	chocapic|trésor|coco pops|frosties|corn flakes|special k|miel pops|cheerios|lion céréales
 Pétales de maïs glacés au sucre (non enrichis en vitamines et minéraux)	379	
 Muesli croustillant aux fruits et/ou fruits secs, graines (non enrichi en vitamines et minéraux)	436	
 Muesli croustillant au chocolat (non enrichi en vitamines et minéraux)	442	
@@ -2077,16 +2077,16 @@ Base de pizza à la crème	261
 Pâte à pizza crue	240	
 Base de pizza tomatée	232	
 Chips de crevette	508	
-Chips de maïs ou tortilla chips	495	
+Chips de maïs ou tortilla chips	495	doritos|tortilla chips|nachos|monster munch
 Biscuit apéritif soufflé, à base de pomme de terre	484	
 Biscuit apéritif, mini bretzel ou sticks	379	
 Biscuit apéritif soufflé, à base de pomme de terre et de soja	409	
-Biscuit apéritif (aliment moyen)	486	gâteaux apéro|biscuits apéritifs|apéro
-Biscuit apéritif soufflé, à base de maïs, sans cacahuète	489	
-Biscuit apéritif, crackers, garni ou fourré, au fromage	537	
-Biscuit apéritif, crackers, nature	499	
+Biscuit apéritif (aliment moyen)	486	gâteaux apéro|biscuits apéritifs|apéro|curly
+Biscuit apéritif soufflé, à base de maïs, sans cacahuète	489	doritos|tortilla chips|nachos|monster munch
+Biscuit apéritif, crackers, garni ou fourré, au fromage	537	tuc|belin|crackers
+Biscuit apéritif, crackers, nature	499	tuc|belin|crackers
 Biscuit apéritif, crackers, nature, allégé en matière grasse	410	
-Biscuit apéritif soufflé, à base de maïs, à la cacahuète	487	
+Biscuit apéritif soufflé, à base de maïs, à la cacahuète	487	curly
 Biscuit apéritif à base de pomme de terre, type tuile salée	521	
 Cacahuètes (arachide) enrobées d'un biscuit, pour apéritif	518	
 Biscuit apéritif feuilleté	509	
@@ -2107,9 +2107,9 @@ Semoule au lait, rayon frais	121
 Liégeois aux fruits, préemballé	147	
 Mousse aux fruits, rayon frais	53.1	
 Crème dessert à la vanille, rayon frais	105	
-Crème dessert, rayon frais (aliment moyen)	133	crème dessert
+Crème dessert, rayon frais (aliment moyen)	133	crème dessert|danette|mont blanc|liégeois|viennois
 Gâteau de riz, appertisé	115	
-Gâteau au chocolat, coeur fondant, préemballé (rayon frais)	364	gâteau au chocolat|fondant au chocolat|moelleux au chocolat|gâteau|quatre-quarts|madeleine
+Gâteau au chocolat, coeur fondant, préemballé (rayon frais)	364	gâteau au chocolat|fondant au chocolat|moelleux au chocolat|gâteau|quatre-quarts|madeleine|napolitain|savane|kinder délice|brossard
 Mousse liégeoise (chocolat, café, caramel ou vanille), rayon frais	186	
 Pain perdu	218	
 Crème dessert au café, rayon frais	116	
@@ -2118,17 +2118,17 @@ Mousse au chocolat végétale, préemballée	262
 Lait de poule, sans alcool	87.8	
 Pêche melba	119	
 Dessert glacé type mystère ou vacherin	275	
-Glace ou crème glacée, bâtonnet, enrobé de chocolat	328	glace|crème glacée
+Glace ou crème glacée, bâtonnet, enrobé de chocolat	328	glace|crème glacée|magnum|cornetto|esquimau|mcflurry|sundae|cône glacé
 Crème dessert, appertisée (aliment moyen)	135	
 Crème dessert au chocolat, appertisée	138	
-Crème dessert, rayon frais ou appertisée (aliment moyen)	133	
+Crème dessert, rayon frais ou appertisée (aliment moyen)	133	danette|mont blanc|liégeois|viennois
 Dessert glacé, type sundae	230	
 Dessert glacé feuilleté, à partager	262	
 Omelette norvégienne	212	
 Poire belle Hélène	196	
 Nougat glacé	263	
 Citron givré ou Orange givrée (sorbet)	133	
-Coupe glacée type café ou chocolat liégeois	220	coupe glacée|glace
+Coupe glacée type café ou chocolat liégeois	220	coupe glacée|glace|magnum|cornetto|esquimau|mcflurry|sundae|cône glacé
 Bûche glacée	226	
 Coupe glacée parfum pêche Melba ou poire Belle-Hélène	163	
 Crème anglaise, préemballée	105	
