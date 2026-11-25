@@ -4,20 +4,21 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
-import android.graphics.DashPathEffect;
 import android.graphics.Paint;
-import android.graphics.Path;
 import android.graphics.PixelFormat;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.TextView;
 
 final class PaperStyle {
     static final int PAPER = 0xFFF3E6CF, SURFACE = 0xFFFFF8EA, FIELD = 0xFFFFFDF6;
-    static final int INK = 0xFF3B2A1E, MUTED = 0xFF5C4633, LINE = 0xFFD6BF98;
-    static final int ACCENT = 0xFF9A3412, BLUE_INK = 0xFF1F526D, BLUE_EDGE = 0xFF9CC3DC;
+    static final int INK = 0xFF3B2A1E, MUTED = 0xFF6B5440, LINE = 0xFFD6BF98;
+    static final int BRAND = 0xFFB8431F, ACCENT = 0xFF9A3412, BLUE_INK = 0xFF1F526D, BLUE_EDGE = 0xFF9CC3DC;
     private static Typeface title, body;
 
     static synchronized Typeface title(Context context) {
@@ -70,6 +71,14 @@ final class PaperStyle {
                     message.setTypeface(body(context));
                     message.setTextColor(MUTED);
                 }
+                ListView choices = dialog.getListView();
+                if (choices != null) {
+                    for (int i = 0; i < choices.getChildCount(); i++) choice(choices.getChildAt(i));
+                    choices.setOnHierarchyChangeListener(new ViewGroup.OnHierarchyChangeListener() {
+                        @Override public void onChildViewAdded(View parent, View child) { choice(child); }
+                        @Override public void onChildViewRemoved(View parent, View child) {}
+                    });
+                }
                 for (int id : new int[]{AlertDialog.BUTTON_POSITIVE, AlertDialog.BUTTON_NEGATIVE, AlertDialog.BUTTON_NEUTRAL}) {
                     TextView button = dialog.getButton(id);
                     if (button == null) continue;
@@ -79,6 +88,12 @@ final class PaperStyle {
                 }
             });
             return dialog;
+        }
+
+        private static void choice(View view) {
+            if (!(view instanceof TextView)) return;
+            ((TextView) view).setTypeface(body(view.getContext()));
+            ((TextView) view).setTextColor(INK);
         }
     }
 
@@ -117,54 +132,6 @@ final class PaperStyle {
         @Override public void setAlpha(int alpha) {}
         @Override public void setColorFilter(ColorFilter filter) {}
         @Override public int getOpacity() { return PixelFormat.OPAQUE; }
-    }
-
-    static final class Hills extends Drawable {
-        private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        private final Path hill = new Path();
-        private final float scale;
-        private final DashPathEffect stitch;
-
-        Hills(Context context) {
-            scale = context.getResources().getDisplayMetrics().density;
-            stitch = new DashPathEffect(new float[]{3 * scale, 4 * scale}, 0);
-        }
-
-        @Override public void draw(Canvas canvas) {
-            float width = getBounds().width(), bottom = getBounds().height();
-            hill.rewind();
-            hill.moveTo(0, bottom * .47f);
-            hill.cubicTo(width * .18f, -bottom * .62f, width * .40f, bottom * 1.08f, width * .64f, bottom * .47f);
-            hill.cubicTo(width * .79f, bottom * .07f, width * .91f, bottom * .01f, width, bottom * .25f);
-            fillHill(canvas, width, bottom, 0xFFA6CC8E);
-            hill.rewind();
-            hill.moveTo(0, bottom * .79f);
-            hill.cubicTo(width * .26f, bottom * .25f, width * .42f, bottom * .91f, width * .66f, bottom * .67f);
-            hill.cubicTo(width * .79f, bottom * .52f, width * .91f, bottom * .46f, width, bottom * .61f);
-            fillHill(canvas, width, bottom, 0xFFD5EBC6);
-        }
-
-        private void fillHill(Canvas canvas, float width, float bottom, int color) {
-            int crest = canvas.save();
-            hill.lineTo(width, bottom);
-            hill.lineTo(0, bottom);
-            hill.close();
-            paint.setColor(color);
-            canvas.drawPath(hill, paint);
-            canvas.clipPath(hill);
-            paint.setColor(0x80618447);
-            paint.setStyle(Paint.Style.STROKE);
-            paint.setStrokeWidth(1.6f * scale);
-            paint.setPathEffect(stitch);
-            canvas.drawPath(hill, paint);
-            paint.setPathEffect(null);
-            paint.setStyle(Paint.Style.FILL);
-            canvas.restoreToCount(crest);
-        }
-
-        @Override public void setAlpha(int alpha) {}
-        @Override public void setColorFilter(ColorFilter filter) {}
-        @Override public int getOpacity() { return PixelFormat.TRANSLUCENT; }
     }
 
     private PaperStyle() {}

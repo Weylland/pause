@@ -41,8 +41,6 @@ final class MealDescriptionDialog {
         this.provider = provider;
     }
 
-    void open() { showDescription(""); }
-
     void openDraft(Journal.MealDraft draft) {
         savedDraft = draft;
         String text = draft.description();
@@ -70,19 +68,12 @@ final class MealDescriptionDialog {
         int space = Math.round(14 * activity.getResources().getDisplayMetrics().density);
         check.setPadding(0, space, 0, space);
         AlertDialog dialog = new PaperStyle.DialogBuilder(activity).setTitle("Décrire un repas").setView(form)
-                .setNegativeButton("Annuler", null).setNeutralButton(provider.equals("claude") ? "Pour Claude" : "À la synchro", null)
-                .setPositiveButton("Ajouter", null).create();
+                .setNegativeButton("Annuler", null).setPositiveButton("Ajouter", null).create();
         dialog.getWindow().setSoftInputMode(android.view.WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE
                 | android.view.WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
         input.requestFocus();
         input.setSelection(input.length());
         dialog.show();
-        if (savedDraft != null) dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setVisibility(android.view.View.GONE);
-        dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener(v -> {
-            String description = input.getText().toString().trim();
-            if (description.isEmpty()) { input.setError("Décris ton repas."); return; }
-            defer(dialog, description);
-        });
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> read(dialog, input, false));
         check.setOnClickListener(v -> read(dialog, input, true));
     }

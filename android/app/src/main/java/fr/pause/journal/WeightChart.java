@@ -48,7 +48,7 @@ final class WeightChart extends View {
 
         paint.setShader(null);
         paint.setStrokeWidth(scale);
-        paint.setTextSize(11 * scale);
+        paint.setTextSize(12 * scale);
         DashPathEffect ruling = new DashPathEffect(new float[]{3 * scale, 4 * scale}, 0);
         for (int i = 0; i < 3; i++) {
             float y = top + (bottom - top) * i / 2;
@@ -57,7 +57,7 @@ final class WeightChart extends View {
             canvas.drawLine(left, y, right, y, paint);
             paint.setPathEffect(null);
             paint.setColor(PaperStyle.MUTED);
-            canvas.drawText(number.format(high - (high - low) * i / 2), 0, y + 3 * scale, paint);
+            canvas.drawText(number.format(high - (high - low) * i / 2), 0, y + 4 * scale, paint);
         }
         Path path = new Path();
         float[] xs = new float[values.size()];

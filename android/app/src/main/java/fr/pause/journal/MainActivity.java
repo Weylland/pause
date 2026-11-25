@@ -1,6 +1,7 @@
 package fr.pause.journal;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
@@ -16,6 +17,7 @@ import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.LayerDrawable;
 import android.graphics.drawable.RippleDrawable;
@@ -25,20 +27,28 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.MediaStore;
+import android.text.Editable;
 import android.text.InputFilter;
 import android.text.InputType;
+import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.view.Gravity;
 import android.view.View;
 import android.view.WindowInsets;
 import android.view.WindowManager;
-import android.widget.EditText;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.CheckBox;
+import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.window.OnBackInvokedCallback;
+import android.window.OnBackInvokedDispatcher;
 
 import androidx.core.content.FileProvider;
 
@@ -62,40 +72,38 @@ import java.nio.charset.StandardCharsets;
 import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.time.Instant;
+import java.time.YearMonth;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
+import java.util.function.IntConsumer;
+import java.util.stream.Collectors;
 
 public final class MainActivity extends Activity {
-    private static final int PAPER = 0xFFF3E6CF;
-    private static final int WHITE = 0xFFFFFFFF;
-    private static final int SURFACE = 0xFFFFF8EA;
-    private static final int INK = 0xFF3B2A1E;
-    private static final int MUTED = 0xFF5C4633;
-    private static final int LINE = 0xFFD6BF98;
-    private static final int BRAND = 0xFFB8431F;
-    private static final int ACCENT = 0xFF9A3412;
-    private static final int MINT = 0xFFE3F1D8;
-    private static final int GOLD = 0xFFFBE3A0;
-    private static final int GREEN = 0xFFD5EBC6;
-    private static final int GREEN_INK = 0xFF22401A;
-    private static final int PEACH = 0xFFF6D3C4;
-    private static final int PEACH_INK = 0xFF5A2412;
-    private static final int KRAFT = 0xFFE2C597;
-    private static final int BLUE = 0xFFCFE5F3;
-    private static final int VIOLET = 0xFFE3DDF5;
+    private static final int PAPER = PaperStyle.PAPER, SURFACE = PaperStyle.SURFACE, FIELD = PaperStyle.FIELD;
+    private static final int INK = PaperStyle.INK, MUTED = PaperStyle.MUTED, LINE = PaperStyle.LINE;
+    private static final int BRAND = PaperStyle.BRAND, ACCENT = PaperStyle.ACCENT;
+    private static final int SOFT_LINE = 0xFFE8D8B8, SIDE = 0xFFEBDABB;
+    private static final int GOLD = 0xFFFBE3A0, GOLD_EDGE = 0xFFDDBE6C;
+    private static final int GREEN = 0xFFD5EBC6, GREEN_MID = 0xFF6E9A55, GREEN_INK = 0xFF22401A;
+    private static final int PEACH = 0xFFF6D3C4, PEACH_INK = 0xFF5A2412;
+    private static final int VIOLET = 0xFFE3DDF5, VIOLET_INK = 0xFF453876;
     private static final int CAMERA = 10, GALLERY = 11, EXPORT = 12;
     private static final int NOTIFICATION_PERMISSION = 13;
     private static final int DRIVE_PERMISSION = 14;
-    private static final int PAUSE = 0, WEIGHT = 1, FOOD = 2, PC = 3, AI = 4;
+    private static final int TODAY = 0, TRACKS = 1, TRENDS = 2, SETTINGS = 3;
+    private static final int NONE = 0, DRIVE = 1, WIFI = 2, USB = 3;
+    private static final String[] WEEKDAYS = {"L", "M", "M", "J", "V", "S", "D"};
     private static final Locale FR = Locale.FRANCE;
     private static final DateTimeFormatter FULL_DATE = DateTimeFormatter.ofPattern("EEEE d MMMM", FR);
     private static final DateTimeFormatter SHORT_DATE = DateTimeFormatter.ofPattern("d MMM", FR);
     private static final DateTimeFormatter HISTORY_DATE = DateTimeFormatter.ofPattern("d MMM yyyy", FR);
+    private static final DateTimeFormatter TITLE_DATE = DateTimeFormatter.ofPattern("EEEE d MMM", FR);
     private static final DateTimeFormatter HEADER_DATE = DateTimeFormatter.ofPattern("d MMMM", FR);
 
     private Journal journal;
@@ -103,6 +111,10 @@ public final class MainActivity extends Activity {
     private LinearLayout root;
     private LinearLayout navigation;
     private ScrollView scroll;
+    private MealComposer composer;
+    private LinearLayout weightCard;
+    private EditText weightInput;
+    private Object backCallback;
     private final ExecutorService worker = Executors.newSingleThreadExecutor();
     private final ExecutorService chatgptWorker = Executors.newSingleThreadExecutor();
     private final ExecutorService driveWorker = Executors.newSingleThreadExecutor();
@@ -127,9 +139,12 @@ public final class MainActivity extends Activity {
     };
     private boolean chatgptAccountBusy;
     private final Runnable expireShare = () -> stopShare(true);
-    private int tab = PAUSE;
-    private boolean trackingPage;
-    private LocalDate currentDay, pauseDate, foodDate;
+    private int tab = TODAY, section = NONE;
+    private int chart, range = 30;
+    private boolean keyboard, refreshPending, revealWeight, pauseEditing, weightEditing;
+    private String weightDraft = "";
+    private YearMonth month;
+    private LocalDate currentDay, day;
     private LocalDate streakStart;
     private int streakTier;
     private String photoPath;
@@ -148,12 +163,15 @@ public final class MainActivity extends Activity {
         driveAuthorization = Identity.getAuthorizationClient(this);
         bridge = new Bridge(this, journal);
         desktop = getSharedPreferences("pause.desktop", MODE_PRIVATE);
-        currentDay = pauseDate = foodDate = today();
+        currentDay = day = today();
         if (state != null) {
-            tab = state.getInt("tab");
-            trackingPage = state.getBoolean("trackingPage");
-            pauseDate = LocalDate.parse(state.getString("pauseDate", today().toString()));
-            foodDate = LocalDate.parse(state.getString("foodDate", today().toString()));
+            tab = state.getInt("page");
+            section = state.getInt("section");
+            chart = state.getInt("chart");
+            range = state.getInt("range", 30);
+            weightEditing = state.getBoolean("weightEditing");
+            weightDraft = state.getString("weightDraft", "");
+            day = LocalDate.parse(state.getString("day", today().toString()));
             currentDay = LocalDate.parse(state.getString("currentDay", today().toString()));
             photoPath = state.getString("photoPath");
             photoBarcode = state.getBoolean("photoBarcode");
@@ -161,12 +179,7 @@ public final class MainActivity extends Activity {
             String date = state.getString("photoDate");
             if (date != null) photoDate = LocalDate.parse(date);
         }
-        if (JournalReminder.OPEN_TODAY.equals(getIntent().getAction())) {
-            tab = PAUSE;
-            trackingPage = false;
-            pauseDate = today();
-        }
-        else if (JournalReminder.OPEN_WEIGHT.equals(getIntent().getAction())) tab = WEIGHT;
+        else openReminder(getIntent());
         getWindow().setStatusBarColor(PAPER);
         getWindow().setNavigationBarColor(SURFACE);
         getWindow().getDecorView().setSystemUiVisibility(
@@ -177,21 +190,35 @@ public final class MainActivity extends Activity {
         scroll.setFillViewport(true);
         scroll.setClipToPadding(false);
         scroll.setVerticalScrollBarEnabled(false);
+        root.setFocusableInTouchMode(true);
+        root.setDefaultFocusHighlightEnabled(false);
         root.addView(scroll, new LinearLayout.LayoutParams(-1, 0, 1));
+        composer = new MealComposer(this, new MealComposer.Actions() {
+            @Override public void more() { moreWaysToAdd(); }
+            @Override public void scan() { choosePhoto(true, day); }
+            @Override public void send(String description) { addFromComposer(description, false); }
+        });
+        if (state != null) composer.setText(state.getString("composer", ""));
+        LinearLayout.LayoutParams bar = new LinearLayout.LayoutParams(-1, -2);
+        bar.setMargins(dp(14), dp(4), dp(14), dp(10));
+        root.addView(composer, bar);
         navigation = row();
-        View hills = new View(this);
-        hills.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
-        hills.setBackground(new PaperStyle.Hills(this));
-        root.addView(hills, new LinearLayout.LayoutParams(-1, dp(17)));
-        navigation.setBackgroundColor(SURFACE);
+        GradientDrawable shelf = shape(SURFACE, 0, 0);
+        LayerDrawable edge = new LayerDrawable(new Drawable[]{shape(SOFT_LINE, 0, 0), shelf});
+        edge.setLayerInset(1, 0, dp(1), 0, 0);
+        navigation.setBackground(edge);
         navigation.setPadding(dp(9), dp(6), dp(9), dp(6));
         root.addView(navigation, new LinearLayout.LayoutParams(-1, -2));
-        if (Build.VERSION.SDK_INT >= 35) {
+        if (Build.VERSION.SDK_INT >= 30) {
             root.setOnApplyWindowInsetsListener((view, insets) -> {
-                android.graphics.Insets bars = insets.getInsets(
-                        WindowInsets.Type.systemBars() | WindowInsets.Type.displayCutout());
-                view.setPadding(bars.left, bars.top, bars.right, 0);
-                navigation.setPadding(dp(9), dp(6), dp(9), dp(6) + bars.bottom);
+                keyboard = insets.isVisible(WindowInsets.Type.ime());
+                if (Build.VERSION.SDK_INT >= 35) {
+                    android.graphics.Insets bars = insets.getInsets(
+                            WindowInsets.Type.systemBars() | WindowInsets.Type.displayCutout());
+                    view.setPadding(bars.left, bars.top, bars.right, keyboard ? insets.getInsets(WindowInsets.Type.ime()).bottom : 0);
+                    navigation.setPadding(dp(9), dp(6), dp(9), dp(6) + bars.bottom);
+                }
+                showBars();
                 return insets;
             });
         }
@@ -201,10 +228,14 @@ public final class MainActivity extends Activity {
     @Override
     protected void onSaveInstanceState(Bundle state) {
         super.onSaveInstanceState(state);
-        state.putInt("tab", tab);
-        state.putBoolean("trackingPage", trackingPage);
-        state.putString("pauseDate", pauseDate.toString());
-        state.putString("foodDate", foodDate.toString());
+        state.putInt("page", tab);
+        state.putInt("section", section);
+        state.putInt("chart", chart);
+        state.putInt("range", range);
+        state.putBoolean("weightEditing", weightEditing);
+        state.putString("weightDraft", weightDraft);
+        state.putString("composer", composer.text());
+        state.putString("day", day.toString());
         state.putString("currentDay", currentDay.toString());
         state.putString("photoPath", photoPath);
         state.putBoolean("photoBarcode", photoBarcode);
@@ -218,8 +249,7 @@ public final class MainActivity extends Activity {
         visible = true;
         JournalReminder.ensureScheduled(this);
         LocalDate now = today();
-        if (foodDate.equals(currentDay)) foodDate = now;
-        if (pauseDate.equals(currentDay) && journal.inPause(now)) pauseDate = now;
+        if (day.equals(currentDay)) day = now;
         currentDay = now;
         render(true);
         getSharedPreferences("journal", MODE_PRIVATE).registerOnSharedPreferenceChangeListener(journalChanged);
@@ -230,17 +260,19 @@ public final class MainActivity extends Activity {
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
         setIntent(intent);
-        if (JournalReminder.OPEN_TODAY.equals(intent.getAction())) {
+        if (openReminder(intent)) {
             stopShare(false);
-            tab = PAUSE;
-            trackingPage = false;
-            pauseDate = today();
-            render(false);
-        } else if (JournalReminder.OPEN_WEIGHT.equals(intent.getAction())) {
-            stopShare(false);
-            tab = WEIGHT;
             render(false);
         }
+    }
+
+    private boolean openReminder(Intent intent) {
+        revealWeight = JournalReminder.OPEN_WEIGHT.equals(intent.getAction());
+        if (!revealWeight && !JournalReminder.OPEN_TODAY.equals(intent.getAction())) return false;
+        tab = TODAY;
+        section = NONE;
+        day = today();
+        return true;
     }
 
     @Override
@@ -266,26 +298,61 @@ public final class MainActivity extends Activity {
         return LocalDate.now();
     }
 
+    private void go(int tab, int section) {
+        if (section != USB) stopShare(false);
+        composer.hideKeyboard();
+        this.tab = tab;
+        this.section = section;
+        render(false);
+    }
+
+    private void openDay(LocalDate date) {
+        day = date;
+        pauseEditing = weightEditing = false;
+        weightDraft = "";
+        go(TODAY, NONE);
+    }
+
+    private void refresh() {
+        if (scroll.findFocus() instanceof EditText) refreshPending = true;
+        else render(true);
+    }
+
     private void render(boolean keepScroll) {
+        refreshPending = false;
         int position = keepScroll ? scroll.getScrollY() : 0;
         scroll.removeAllViews();
+        weightCard = null;
         LinearLayout page = column();
-        page.setPadding(dp(19), dp(8), dp(19), dp(18));
+        page.setPadding(dp(18), dp(10), dp(18), dp(18));
         scroll.addView(page, new ScrollView.LayoutParams(-1, -2));
         switch (tab) {
-            case PAUSE -> {
-                if (trackingPage) showTrackers(page);
-                else showPause(page);
+            case TODAY -> showToday(page);
+            case TRACKS -> showTracks(page);
+            case TRENDS -> showTrends(page);
+            default -> {
+                switch (section) {
+                    case DRIVE -> showDrive(page);
+                    case WIFI -> showWifi(page);
+                    case USB -> showUsb(page);
+                    default -> showSettings(page);
+                }
             }
-            case WEIGHT -> showWeight(page);
-            case FOOD -> showFood(page);
-            case PC -> showPc(page);
-            case AI -> showAi(page);
         }
-        scroll.post(() -> scroll.scrollTo(0, position));
+        scroll.post(() -> {
+            boolean weight = revealWeight && weightCard != null;
+            scroll.scrollTo(0, weight ? weightCard.getTop() : position);
+            revealWeight = false;
+        });
+        showNavigation();
+        showBars();
+        updateBack();
+    }
+
+    private void showNavigation() {
         navigation.removeAllViews();
-        String[] names = {"Pause", "Poids", "Calories", "Synchro", "Bilan IA"};
-        int[] tabColors = {GOLD, BLUE, PEACH, KRAFT, VIOLET};
+        String[] names = {"Aujourd’hui", "Suivis", "Évolution", "Réglages"};
+        JournalIcon.Kind[] icons = {JournalIcon.Kind.SUN, JournalIcon.Kind.CHECKS, JournalIcon.Kind.CHART, JournalIcon.Kind.SLIDERS};
         for (int i = 0; i < names.length; i++) {
             int destination = i;
             boolean selected = tab == i;
@@ -294,257 +361,758 @@ public final class MainActivity extends Activity {
             item.setSelected(selected);
             item.setFocusable(true);
             item.setContentDescription(names[i]);
-            item.setBackground(new RippleDrawable(ColorStateList.valueOf(0x209A3412), null, shape(WHITE, 10, 0)));
-            LinearLayout iconWrap = row();
-            iconWrap.setGravity(Gravity.CENTER);
-            iconWrap.setBackground(shape(selected ? tabColors[i] : SURFACE, 12, 0));
-            iconWrap.addView(new JournalIcon(this, destination, selected ? ACCENT : MUTED),
-                    new LinearLayout.LayoutParams(dp(20), dp(20)));
-            item.addView(iconWrap, new LinearLayout.LayoutParams(dp(43), dp(27)));
-            TextView label = text(names[i], 11, selected ? ACCENT : MUTED);
-            label.setTypeface(PaperStyle.title(this));
+            item.setBackground(new RippleDrawable(ColorStateList.valueOf(0x209A3412), null, shape(Color.WHITE, 14, 0)));
+            LinearLayout pill = row();
+            pill.setGravity(Gravity.CENTER);
+            pill.setBackground(shape(selected ? GOLD : Color.TRANSPARENT, 15, 0));
+            pill.addView(new JournalIcon(this, icons[i], selected ? ACCENT : MUTED), new LinearLayout.LayoutParams(dp(22), dp(22)));
+            item.addView(pill, new LinearLayout.LayoutParams(dp(58), dp(30)));
+            TextView label = heading(names[i], 12, selected ? ACCENT : MUTED);
             label.setSingleLine(true);
             label.setGravity(Gravity.CENTER);
             label.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
             item.addView(label);
             item.setOnClickListener(view -> {
-                if (tab == PAUSE && destination == PAUSE && trackingPage) {
-                    trackingPage = false;
-                    render(false);
-                    return;
-                }
-                if (tab == destination) return;
-                if (destination != AI) stopShare(false);
-                tab = destination;
-                render(false);
+                if (tab == destination && section == NONE) scroll.smoothScrollTo(0, 0);
+                else go(destination, NONE);
             });
-            navigation.addView(item, new LinearLayout.LayoutParams(0, dp(50), 1));
+            navigation.addView(item, new LinearLayout.LayoutParams(0, dp(58), 1));
         }
     }
 
-    private void title(LinearLayout page, String title, String subtitle) {
-        LinearLayout brand = row();
-        brand.setGravity(Gravity.CENTER_VERTICAL);
-        android.widget.ImageView mark = new android.widget.ImageView(this);
-        mark.setImageResource(fr.pause.journal.R.drawable.ic_pause);
-        mark.setBackground(shape(BRAND, 8, 0));
-        mark.setClipToOutline(true);
-        mark.setImportantForAccessibility(View.IMPORTANT_FOR_ACCESSIBILITY_NO);
-        brand.addView(mark, new LinearLayout.LayoutParams(dp(28), dp(28)));
-        TextView wordmark = heading(getString(R.string.app_name), 18, INK);
-        LinearLayout.LayoutParams wordmarkSize = new LinearLayout.LayoutParams(0, -2, 1);
-        wordmarkSize.setMarginStart(dp(7));
-        brand.addView(wordmark, wordmarkSize);
-        if (tab == PAUSE) {
-            JournalReminder.Settings settings = JournalReminder.settings(this);
-            String label = settings.enabled() && JournalReminder.canNotify(this)
-                    ? "Rappel · " + reminderTime(settings.hour(), settings.minute()) : "Rappel";
-            TextView reminder = button(label, MINT, ACCENT, this::editReminder);
-            reminder.setTextSize(13);
-            brand.addView(reminder);
+    private void showBars() {
+        navigation.setVisibility(keyboard ? View.GONE : View.VISIBLE);
+        composer.setVisibility(tab == TODAY && (!keyboard || composer.hasFocus()) ? View.VISIBLE : View.GONE);
+    }
+
+    private void updateBack() {
+        if (Build.VERSION.SDK_INT < 33) return;
+        boolean needed = tab != TODAY;
+        if (needed == (backCallback != null)) return;
+        if (needed) {
+            OnBackInvokedCallback callback = this::goBack;
+            getOnBackInvokedDispatcher().registerOnBackInvokedCallback(OnBackInvokedDispatcher.PRIORITY_DEFAULT, callback);
+            backCallback = callback;
         } else {
-            brand.addView(text(today().format(HEADER_DATE), 13, MUTED));
+            getOnBackInvokedDispatcher().unregisterOnBackInvokedCallback((OnBackInvokedCallback) backCallback);
+            backCallback = null;
         }
-        add(page, brand, 1);
-        TextView name = text(title, 37, INK);
-        name.setTypeface(PaperStyle.title(this));
-        name.setIncludeFontPadding(false);
-        add(page, name, 12);
-        if (!subtitle.isEmpty()) add(page, text(subtitle, 14, MUTED), 3);
+    }
+
+    private void goBack() {
+        if (section != NONE) go(SETTINGS, NONE);
+        else go(TODAY, NONE);
+    }
+
+    @SuppressLint("GestureBackNavigation")
+    @Override
+    public void onBackPressed() {
+        if (tab == TODAY) super.onBackPressed();
+        else goBack();
+    }
+
+    private LinearLayout pageHeader(LinearLayout page, String title) {
+        LinearLayout header = row();
+        header.setGravity(Gravity.CENTER_VERTICAL);
+        header.setMinimumHeight(dp(48));
+        TextView name = heading(title, 28, INK);
+        if (Build.VERSION.SDK_INT >= 28) name.setAccessibilityHeading(true);
+        header.addView(name, new LinearLayout.LayoutParams(0, -2, 1));
+        add(page, header, 0);
+        return header;
+    }
+
+    private void subpageHeader(LinearLayout page, String title) {
+        LinearLayout header = row();
+        header.setGravity(Gravity.CENTER_VERTICAL);
+        header.addView(iconButton(JournalIcon.Kind.LEFT, "Retour aux réglages", this::goBack), new LinearLayout.LayoutParams(dp(48), dp(48)));
+        TextView name = heading(title, 25, INK);
+        if (Build.VERSION.SDK_INT >= 28) name.setAccessibilityHeading(true);
+        header.addView(name, new LinearLayout.LayoutParams(0, -2, 1));
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(-1, -2);
+        params.setMarginStart(dp(-12));
+        page.addView(header, params);
+    }
+
+    private void showToday(LinearLayout page) {
+        LinearLayout header = row();
+        header.setGravity(Gravity.CENTER_VERTICAL);
+        LinearLayout date = row();
+        date.setGravity(Gravity.CENTER_VERTICAL);
+        date.setMinimumHeight(dp(48));
+        date.setContentDescription(displayDate(day) + ", choisir une date");
+        date.setOnClickListener(view -> pickDate(day, true, this::openDay));
+        TextView name = heading(capital(TITLE_DATE.format(day)), 24, INK);
+        name.setSingleLine(true);
+        name.setEllipsize(TextUtils.TruncateAt.END);
+        date.addView(name);
+        date.addView(new JournalIcon(this, JournalIcon.Kind.DOWN, MUTED), new LinearLayout.LayoutParams(dp(22), dp(22)));
+        header.addView(date, new LinearLayout.LayoutParams(0, -2, 1));
+        if (day.equals(today())) header.addView(syncState());
+        else header.addView(button("Aujourd’hui", FIELD, ACCENT, () -> openDay(today())));
+        add(page, header, 0);
+        showWeek(page);
+        showPauseAnswer(page);
+        showMeals(page);
+        showHabits(page);
+        showWeight(page);
+    }
+
+    private View syncState() {
+        boolean trouble = drive.connected() && (driveNeedsConsent || !drive.conflicts().isEmpty());
+        String label = !drive.connected() ? "Non relié" : driveBusy ? "Synchro…" : trouble ? "À vérifier" : "Drive";
+        LinearLayout state = row();
+        state.setGravity(Gravity.CENTER_VERTICAL);
+        state.setMinimumHeight(dp(48));
+        state.setContentDescription(drive.status());
+        state.setOnClickListener(view -> go(SETTINGS, DRIVE));
+        View dot = new View(this);
+        dot.setBackground(shape(trouble ? PEACH_INK : drive.connected() ? GREEN_MID : LINE, 4, 0));
+        state.addView(dot, new LinearLayout.LayoutParams(dp(8), dp(8)));
+        TextView text = text(label, 13, MUTED);
+        text.setPadding(dp(6), 0, 0, 0);
+        state.addView(text);
+        return state;
+    }
+
+    private void showWeek(LinearLayout page) {
+        LocalDate now = today(), monday = day.minusDays(day.getDayOfWeek().getValue() - 1L);
+        WeekStrip week = new WeekStrip(this, direction -> {
+            LocalDate target = day.plusWeeks(direction);
+            openDay(target.isAfter(now) ? now : target);
+        });
+        for (int i = 0; i < 7; i++) {
+            LocalDate date = monday.plusDays(i);
+            boolean future = date.isAfter(now), selected = date.equals(day);
+            String status = journal.status(date);
+            LinearLayout cell = column();
+            cell.setGravity(Gravity.CENTER_HORIZONTAL);
+            cell.setPadding(0, dp(6), 0, dp(8));
+            cell.setAlpha(future ? .45f : 1f);
+            cell.setSelected(selected);
+            cell.setBackground(new RippleDrawable(ColorStateList.valueOf(0x209A3412),
+                    selected ? shape(SURFACE, 16, BRAND) : null, shape(Color.WHITE, 16, 0)));
+            TextView letter = text(WEEKDAYS[i], 13, MUTED), number = heading(Integer.toString(date.getDayOfMonth()), 17, INK);
+            letter.setGravity(Gravity.CENTER);
+            number.setGravity(Gravity.CENTER);
+            cell.addView(letter);
+            cell.addView(number);
+            View dot = new View(this);
+            boolean waiting = status.isEmpty() && !future && journal.inPause(date);
+            dot.setBackground(shape(status.equals("tenu") ? GREEN_MID : status.isEmpty() ? Color.TRANSPARENT : PEACH_INK, 4, waiting ? BRAND : 0));
+            LinearLayout.LayoutParams mark = new LinearLayout.LayoutParams(dp(7), dp(7));
+            mark.topMargin = dp(3);
+            cell.addView(dot, mark);
+            cell.setContentDescription(displayDate(date) + (status.isEmpty() ? waiting ? ", sans réponse" : "" : ", " + statusLabel(status)));
+            if (!future) cell.setOnClickListener(view -> openDay(date));
+            week.addView(cell, new LinearLayout.LayoutParams(0, -2, 1));
+        }
+        add(page, week, 4);
+    }
+
+    private void showPauseAnswer(LinearLayout page) {
+        LocalDate start = journal.start(), now = today();
+        if (start == null) return;
+        LinearLayout card = goldCard(page, 12);
+        pauseHeader(card);
+        boolean inside = journal.inPause(day);
+        String status = journal.status(day);
+        boolean asking = inside && (status.isEmpty() || pauseEditing);
+        String moment = day.equals(now) ? "aujourd’hui" : "ce jour-là";
+        LinearLayout line = row();
+        line.setGravity(Gravity.CENTER_VERTICAL);
+        line.addView(text(day.isBefore(start) ? "Elle débute le " + HEADER_DATE.format(start) + "."
+                : day.isAfter(journal.end()) ? "Terminée le " + HEADER_DATE.format(journal.end()) + "."
+                : asking ? "Jour " + journal.elapsed(day) + " sur " + journal.duration() + ". Tu as tenu " + moment + " ?"
+                : capital(statusLabel(status)) + " " + moment, 15, INK), new LinearLayout.LayoutParams(0, -2, 1));
+        if (inside && !asking) line.addView(link("Modifier", () -> {
+            pauseEditing = true;
+            render(true);
+        }));
+        add(card, line, 2);
+        if (!asking) {
+            card.setPadding(dp(18), dp(18), dp(18), dp(10));
+            return;
+        }
+        LinearLayout actions = row();
+        boolean kept = status.equals("tenu"), notKept = status.equals(Journal.NOT_KEPT_STATUS);
+        TextView yes = button("Tenu", kept ? GREEN_INK : GREEN, kept ? Color.WHITE : GREEN_INK, () -> mark(day, "tenu"));
+        TextView no = button("Non tenu", notKept ? PEACH_INK : PEACH, notKept ? Color.WHITE : PEACH_INK, () -> mark(day, Journal.NOT_KEPT_STATUS));
+        yes.setSelected(kept);
+        no.setSelected(notKept);
+        weighted(actions, yes, 0);
+        weighted(actions, no, 10);
+        add(card, actions, 10);
+        if (!status.isEmpty()) add(card, link("Effacer la réponse", () -> mark(day, "")), 2);
+    }
+
+    private void pauseHeader(LinearLayout card) {
+        LocalDate now = today();
+        int streak = journal.streak(now), tier = StreakBadge.tier(streak);
+        boolean reached = journal.start().equals(streakStart) && tier > streakTier;
+        streakStart = journal.start();
+        streakTier = tier;
+        LinearLayout head = row();
+        head.setGravity(Gravity.CENTER_VERTICAL);
+        head.addView(heading("Ma pause", 18, INK), new LinearLayout.LayoutParams(0, -2, 1));
+        head.addView(new StreakBadge(this, streak, reached));
+        add(card, head, 0);
+    }
+
+    private void showMeals(LinearLayout page) {
+        LinearLayout card = card(page, 12);
+        List<Journal.Meal> meals = journal.meals(day);
+        List<Journal.MealDraft> drafts = journal.drafts(day);
+        Double target = journal.target(false);
+        double total = meals.stream().mapToDouble(Journal.Meal::kcal).sum();
+        LinearLayout head = row();
+        head.addView(heading("Repas", 18, INK), new LinearLayout.LayoutParams(0, -2, 1));
+        head.addView(heading(format(total, 0), 18, INK));
+        TextView unit = text(target == null ? "kcal" : "sur " + format(target, 0) + " kcal", 14, MUTED);
+        unit.setPadding(dp(5), dp(3), 0, 0);
+        head.addView(unit);
+        add(card, head, 0);
+        if (target != null) add(card, progress((float) Math.min(1, total / target), SIDE), 10);
+        if (processing) add(card, text("Lecture en cours…", 15, MUTED), 12);
+        if (meals.isEmpty() && drafts.isEmpty())
+            add(card, text("Rien de noté. Écris ce que tu as mangé juste en dessous, sans quantité ni calories si tu veux.", 15, MUTED), 10);
+        LinearLayout rows = column();
+        for (Journal.Meal meal : meals)
+            addRow(rows, entry(null, meal.name(), null, text(format(meal.kcal(), 0) + " kcal", 15, MUTED), () -> editMeal(day, meal, null)));
+        for (Journal.MealDraft draft : drafts) {
+            String label = draft.description().length() > 90 ? draft.description().substring(0, 87) + "…" : draft.description();
+            addRow(rows, entry(null, label, null, chip("à estimer"), () -> openDraft(draft)));
+        }
+        add(card, rows, 4);
+    }
+
+    private void openDraft(Journal.MealDraft draft) {
+        new PaperStyle.DialogBuilder(this).setTitle("Repas à estimer")
+                .setMessage(draft.description() + "\n\nAprès une synchro, le PC peut aussi proposer une estimation.")
+                .setPositiveButton("Estimer ici", (dialog, which) -> meal(draft.date()).openDraft(draft))
+                .setNegativeButton("Fermer", null)
+                .setNeutralButton("Supprimer", (dialog, which) -> confirmDeletion("Supprimer ce repas en attente ?", () -> {
+                    journal.deleteDraft(draft.id());
+                    render(true);
+                })).show();
+    }
+
+    private MealDescriptionDialog meal(LocalDate date) {
+        return new MealDescriptionDialog(this, journal, date, () -> render(true), chatgpt, chatgptWorker, mealProvider());
+    }
+
+    private void addFromComposer(String description, boolean check) {
+        LocalDate date = day;
+        if (description.isEmpty()) {
+            composer.showError("Écris ce que tu as mangé.");
+            return;
+        }
+        MealDescriptionDialog meal = new MealDescriptionDialog(this, journal, date, () -> {
+            composer.clear();
+            render(true);
+        }, chatgpt, chatgptWorker, mealProvider());
+        if (!meal.add(description, check)) composer.showError("Indique entre 1 et 20 aliments.");
+    }
+
+    private void moreWaysToAdd() {
+        String description = composer.text();
+        List<String> labels = new ArrayList<>(List.of("Photographier l’étiquette", "Saisir les calories"));
+        if (!description.isEmpty()) labels.addAll(List.of("Vérifier avant d’ajouter",
+                mealProvider().equals("claude") ? "Garder pour Claude" : "Garder pour la synchro"));
+        LocalDate date = day;
+        new PaperStyle.DialogBuilder(this).setTitle("Ajouter autrement")
+                .setItems(labels.toArray(new String[0]), (dialog, choice) -> {
+                    switch (choice) {
+                        case 0 -> choosePhoto(false, date);
+                        case 1 -> editMeal(date, null, null);
+                        case 2 -> addFromComposer(description, true);
+                        default -> {
+                            journal.addDraft(date, description);
+                            composer.clear();
+                            render(true);
+                            toast("Repas gardé pour la prochaine synchro.");
+                        }
+                    }
+                }).setNegativeButton("Annuler", null).show();
+    }
+
+    private void showHabits(LinearLayout page) {
+        List<Tracker> active = journal.trackers().stream().filter(tracker -> tracker.includes(day)).collect(Collectors.toList());
+        if (active.isEmpty()) return;
+        LinearLayout card = card(page, 12);
+        add(card, heading("Habitudes", 18, INK), 0);
+        LinearLayout rows = column();
+        for (Tracker tracker : active) {
+            Tracker.Day status = journal.trackerDay(tracker, day);
+            Tracker.Progress progress = journal.trackerProgress(tracker, today());
+            String detail = status == Tracker.Day.MISSED || status == Tracker.Day.REST ? trackerLabel(tracker, status)
+                    : tracker.duration() > 0 ? progress.done() + " sur " + (tracker.duration() - tracker.restDays())
+                    : progress.streak() > 0 ? days(progress.streak()) + " d’affilée" : days(progress.done());
+            FrameLayout tick = new FrameLayout(this);
+            int fill = status == null ? FIELD : status == Tracker.Day.DONE ? GREEN_MID : status == Tracker.Day.MISSED ? PEACH : SIDE;
+            GradientDrawable box = shape(fill, 13, 0);
+            box.setStroke(dp(2), status == null ? LINE : fill);
+            tick.setBackground(new RippleDrawable(ColorStateList.valueOf(0x229A3412), box, null));
+            if (status != null) tick.addView(new JournalIcon(this, status == Tracker.Day.DONE ? JournalIcon.Kind.CHECK
+                    : status == Tracker.Day.MISSED ? JournalIcon.Kind.CROSS : JournalIcon.Kind.MINUS,
+                    status == Tracker.Day.DONE ? Color.WHITE : INK), new FrameLayout.LayoutParams(dp(24), dp(24), Gravity.CENTER));
+            tick.setContentDescription(tracker.name() + " · " + (status == null ? trackerLabel(tracker, Tracker.Day.DONE)
+                    : "Effacer " + trackerLabel(tracker, status)));
+            tick.setOnClickListener(view -> markTracker(tracker, day, status == null ? Tracker.Day.DONE : null));
+            LinearLayout line = row();
+            line.setGravity(Gravity.CENTER_VERTICAL);
+            line.addView(entry(null, tracker.name(), detail, null, () -> editTrackerDay(tracker, day)), new LinearLayout.LayoutParams(0, -2, 1));
+            line.addView(tick, new LinearLayout.LayoutParams(dp(46), dp(46)));
+            line.setPadding(0, dp(4), 0, dp(4));
+            addRow(rows, line);
+        }
+        add(card, rows, 2);
+    }
+
+    private void showWeight(LinearLayout page) {
+        LinearLayout card = card(page, 12);
+        weightCard = card;
+        Double current = journal.weightAt(day);
+        LinearLayout head = row();
+        head.setGravity(Gravity.CENTER_VERTICAL);
+        head.addView(heading("Poids", 18, INK), new LinearLayout.LayoutParams(0, -2, 1));
+        Journal.Weight last = null;
+        for (Journal.Weight weight : journal.weights()) if (weight.date().isBefore(day)) last = weight;
+        if (last != null) head.addView(text(format(last.kg(), 1) + " kg le " + SHORT_DATE.format(last.date()), 14, MUTED));
+        add(card, head, 0);
+        LinearLayout line = row();
+        line.setGravity(Gravity.CENTER_VERTICAL);
+        if (current != null && !weightEditing) {
+            line.addView(heading(format(current, 1) + " kg", 27, INK), new LinearLayout.LayoutParams(0, -2, 1));
+            line.addView(link("Modifier", () -> {
+                weightEditing = true;
+                weightDraft = decimalInput(current);
+                render(true);
+                scroll.post(() -> {
+                    weightInput.requestFocus();
+                    weightInput.setSelection(weightInput.length());
+                    getSystemService(InputMethodManager.class).showSoftInput(weightInput, 0);
+                });
+            }));
+            add(card, line, 4);
+            return;
+        }
+        EditText input = new EditText(this);
+        input.setHint("kg");
+        input.setContentDescription("Poids en kilogrammes");
+        input.setSingleLine(true);
+        input.setFilters(new InputFilter[]{new InputFilter.LengthFilter(12)});
+        input.setKeyListener(android.text.method.DigitsKeyListener.getInstance("0123456789,."));
+        input.setRawInputType(decimalType());
+        input.setImeOptions(EditorInfo.IME_ACTION_DONE);
+        PaperStyle.field(input);
+        input.setText(weightDraft);
+        input.addTextChangedListener(new TextWatcher() {
+            @Override public void beforeTextChanged(CharSequence text, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence text, int start, int before, int count) { weightDraft = text.toString(); }
+            @Override public void afterTextChanged(Editable text) {}
+        });
+        input.setOnEditorActionListener((view, action, event) -> {
+            if (action != EditorInfo.IME_ACTION_DONE) return false;
+            saveWeight(input);
+            return true;
+        });
+        View.OnFocusChangeListener edge = input.getOnFocusChangeListener();
+        input.setOnFocusChangeListener((view, focus) -> {
+            edge.onFocusChange(view, focus);
+            if (!focus && refreshPending) handler.post(() -> { if (visible && refreshPending) refresh(); });
+        });
+        weighted(line, input, 0);
+        LinearLayout.LayoutParams size = new LinearLayout.LayoutParams(-2, -2);
+        size.setMarginStart(dp(10));
+        line.addView(button("Noter", FIELD, ACCENT, () -> saveWeight(input)), size);
+        add(card, line, 9);
+        weightInput = input;
+    }
+
+    private void saveWeight(EditText input) {
+        Double kg = null;
+        if (!input.getText().toString().trim().isEmpty() || !weightEditing) {
+            double value = number(input);
+            if (!Double.isFinite(value) || value <= 0 || value > 1000) {
+                input.setError("Indique un poids en kg.");
+                return;
+            }
+            kg = value;
+        }
+        journal.saveWeight(day, kg);
+        weightEditing = false;
+        weightDraft = "";
+        getSystemService(InputMethodManager.class).hideSoftInputFromWindow(input.getWindowToken(), 0);
+        render(true);
+    }
+
+    private void showTracks(LinearLayout page) {
+        LinearLayout header = pageHeader(page, "Suivis");
+        LinearLayout create = row();
+        create.setGravity(Gravity.CENTER);
+        create.setPadding(dp(12), 0, dp(16), 0);
+        create.setContentDescription("Nouveau suivi");
+        create.setBackground(new RippleDrawable(ColorStateList.valueOf(0x229A3412), shape(FIELD, 14, LINE), null));
+        create.addView(new JournalIcon(this, JournalIcon.Kind.PLUS, ACCENT), new LinearLayout.LayoutParams(dp(22), dp(22)));
+        TextView label = heading("Nouveau", 15, ACCENT);
+        label.setPadding(dp(5), 0, 0, 0);
+        create.addView(label);
+        create.setOnClickListener(view -> editTracker(null));
+        header.addView(create, new LinearLayout.LayoutParams(-2, dp(48)));
+        showPause(page);
+        List<Tracker> trackers = journal.trackers();
+        if (trackers.isEmpty()) add(card(page, 12), text("Ajoute un suivi pour une habitude ou une pause. Par exemple, pratiquer l’anglais ou faire du sport.", 15, MUTED), 0);
+        for (Tracker tracker : trackers) addTracker(page, tracker);
     }
 
     private void showPause(LinearLayout page) {
-        LocalDate now = today();
-        title(page, "Ma pause", "");
-        add(page, button("Mes suivis", MINT, ACCENT, () -> {
-            trackingPage = true;
-            render(false);
-        }), 9);
-        LocalDate start = journal.start();
-        LinearLayout hero = panel(page, GOLD, 17);
+        LocalDate now = today(), start = journal.start(), end = journal.end();
+        LinearLayout hero = goldCard(page, 8);
         if (start == null) {
-            streakStart = null;
-            streakTier = 0;
-            add(hero, heading("Préparer ma pause", 25, INK), 0);
-            add(hero, text("Choisis tes dates et note comment s’est passée chaque journée.", 15, MUTED), 7);
-            add(hero, button("Démarrer une pause", BRAND, WHITE, this::editGoal), 16);
+            add(hero, heading("Ma pause", 18, INK), 0);
+            add(hero, text("Choisis tes dates et note comment s’est passée chaque journée.", 15, MUTED), 4);
+            add(hero, button("Démarrer une pause", BRAND, Color.WHITE, this::editGoal), 12);
             return;
         }
-        LocalDate end = journal.end();
-        int elapsed = journal.elapsed(now);
+        pauseHeader(hero);
         int kept = journal.keptDays(now);
-        String heroLabel = elapsed == 0 ? "Pause à venir" : now.isAfter(end) ? "Pause terminée" : "Jour " + elapsed + " sur " + journal.duration();
-        LinearLayout heroHead = row();
-        heroHead.setGravity(Gravity.CENTER_VERTICAL);
-        heroHead.addView(text(heroLabel, 14, MUTED), new LinearLayout.LayoutParams(0, -2, 1));
-        int streak = journal.streak(now);
-        int tier = StreakBadge.tier(streak);
-        boolean reached = start.equals(streakStart) && tier > streakTier;
-        streakStart = start;
-        streakTier = tier;
-        heroHead.addView(new StreakBadge(this, streak, reached));
-        add(hero, heroHead, 0);
-        add(hero, heading(kept + (kept == 1 ? " jour tenu" : " jours tenus"), 32, INK), 4);
-        LinearLayout track = row();
-        track.setBackground(shape(0xFFDDBE6C, 12, 0));
-        track.setClipToOutline(true);
-        if (kept > 0) {
-            View fill = new View(this);
-            fill.setBackgroundColor(BRAND);
-            track.addView(fill, new LinearLayout.LayoutParams(0, -1, kept));
-        }
-        if (journal.duration() > kept) track.addView(new View(this), new LinearLayout.LayoutParams(0, -1, journal.duration() - kept));
-        LinearLayout.LayoutParams progress = new LinearLayout.LayoutParams(-1, dp(7));
-        progress.topMargin = dp(13);
-        hero.addView(track, progress);
+        add(hero, heading(kept + (kept == 1 ? " jour tenu" : " jours tenus"), 32, INK), 0);
+        add(hero, text(now.isBefore(start) ? "Pause à venir" : now.isAfter(end) ? "Pause terminée"
+                : "Jour " + journal.elapsed(now) + " sur " + journal.duration(), 14, MUTED), 0);
+        add(hero, progress((float) kept / journal.duration(), GOLD_EDGE), 10);
         LinearLayout dates = row();
         dates.setGravity(Gravity.CENTER_VERTICAL);
-        dates.addView(text("Du " + SHORT_DATE.format(start) + " au " + SHORT_DATE.format(end), 13, MUTED),
-                new LinearLayout.LayoutParams(0, -2, 1));
+        dates.addView(text("Du " + SHORT_DATE.format(start) + " au " + SHORT_DATE.format(end), 14, MUTED), new LinearLayout.LayoutParams(0, -2, 1));
         if (journal.duration() < Journal.MAX_PAUSE_DURATION) {
-            TextView extend = button("Prolonger", SURFACE, ACCENT, this::extendGoal);
+            TextView extend = link("Prolonger", this::extendGoal);
             extend.setContentDescription("Prolonger la pause");
             dates.addView(extend);
         }
-        add(hero, dates, 8);
-
-        if (!journal.inPause(pauseDate) && !now.isBefore(start)) pauseDate = now.isAfter(end) ? end : now;
-        if (journal.inPause(pauseDate) && !pauseDate.isAfter(now)) {
-            LocalDate day = pauseDate;
-            String current = journal.status(day);
-            LinearLayout check = panel(page, WHITE, 13);
-            LinearLayout checkHead = row();
-            checkHead.setGravity(Gravity.CENTER_VERTICAL);
-            checkHead.addView(heading(day.equals(now) ? "Aujourd’hui" : displayDate(day), 21, INK),
-                    new LinearLayout.LayoutParams(0, -2, 1));
-            if (!day.equals(now) && journal.inPause(now)) {
-                checkHead.addView(button("Aujourd’hui", MINT, ACCENT, () -> {
-                    pauseDate = now;
-                    render(false);
-                }));
-            }
-            add(check, checkHead, 0);
-            add(check, text("As-tu tenu ta pause ?", 14, MUTED), 3);
-            LinearLayout actions = row();
-            TextView yes = button("Tenu", current.equals("tenu") ? GREEN_INK : GREEN,
-                    current.equals("tenu") ? WHITE : GREEN_INK, () -> mark(day, "tenu"));
-            boolean notKept = current.equals(Journal.NOT_KEPT_STATUS);
-            TextView no = button("Non tenu", notKept ? PEACH_INK : PEACH,
-                    notKept ? WHITE : PEACH_INK, () -> mark(day, Journal.NOT_KEPT_STATUS));
-            yes.setSelected(current.equals("tenu"));
-            no.setSelected(notKept);
-            weighted(actions, yes, 0);
-            weighted(actions, no, 7);
-            add(check, actions, 12);
-            if (!current.isEmpty()) add(check, link("Effacer la réponse", () -> mark(day, "")), 3);
+        add(hero, dates, 2);
+        hero.setPadding(dp(18), dp(18), dp(18), dp(10));
+        if (now.isAfter(end)) {
+            add(hero, button("Démarrer une nouvelle pause", BRAND, Color.WHITE, this::editGoal), 8);
+            hero.setPadding(dp(18), dp(18), dp(18), dp(18));
         }
+        showMonth(page, start, end);
+    }
 
-        LinearLayout calendar = panel(page, WHITE, 13);
-        add(calendar, heading("Calendrier", 21, INK), 0);
-        LinearLayout legend = row();
-        calendarLegend(legend, "✓ Tenu", GREEN, GREEN_INK);
-        calendarLegend(legend, "× Non tenu", PEACH, PEACH_INK);
-        calendarLegend(legend, "· À renseigner", PAPER, MUTED);
-        add(calendar, legend, 8);
-        LocalDate week = start.minusDays(start.getDayOfWeek().getValue() - 1L);
-        LinearLayout weekdays = row();
-        for (String label : new String[]{"L", "M", "M", "J", "V", "S", "D"}) {
-            TextView cell = text(label, 12, MUTED);
-            cell.setGravity(Gravity.CENTER);
-            weekdays.addView(cell, new LinearLayout.LayoutParams(0, dp(26), 1));
-        }
-        add(calendar, weekdays, 8);
-        while (!week.isAfter(end)) {
+    private void showMonth(LinearLayout page, LocalDate start, LocalDate end) {
+        YearMonth first = YearMonth.from(start), last = YearMonth.from(end);
+        if (month == null) month = YearMonth.now();
+        if (month.isBefore(first)) month = first;
+        if (month.isAfter(last)) month = last;
+        LinearLayout card = card(page, 12);
+        LinearLayout head = row();
+        head.setGravity(Gravity.CENTER_VERTICAL);
+        head.addView(monthButton(JournalIcon.Kind.LEFT, "Mois précédent", -1, month.isAfter(first)), new LinearLayout.LayoutParams(dp(40), dp(48)));
+        TextView name = heading(capital(DateTimeFormatter.ofPattern(month.getYear() == today().getYear() ? "LLLL" : "LLLL yyyy", FR).format(month)), 18, INK);
+        name.setGravity(Gravity.CENTER);
+        name.setMinWidth(dp(96));
+        head.addView(name);
+        head.addView(monthButton(JournalIcon.Kind.RIGHT, "Mois suivant", 1, month.isBefore(last)), new LinearLayout.LayoutParams(dp(40), dp(48)));
+        TextView change = link("Changer les dates", this::editGoal);
+        change.setGravity(Gravity.END | Gravity.CENTER_VERTICAL);
+        head.addView(change, new LinearLayout.LayoutParams(0, -2, 1));
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(-1, -2);
+        params.setMargins(dp(-10), dp(-8), 0, 0);
+        card.addView(head, params);
+        addWeekdays(card);
+        LocalDate week = month.atDay(1);
+        week = week.minusDays(week.getDayOfWeek().getValue() - 1L);
+        while (!week.isAfter(month.atEndOfMonth())) {
             LinearLayout days = row();
             for (int i = 0; i < 7; i++) {
                 LocalDate date = week.plusDays(i);
-                addCalendarDay(days, date, now);
+                addCalendarDay(days, date, YearMonth.from(date).equals(month));
             }
-            add(calendar, days, 3);
+            add(card, days, 4);
             week = week.plusWeeks(1);
         }
-        add(page, link("Modifier les dates de la pause", this::editGoal), 8);
     }
 
-    private void showTrackers(LinearLayout page) {
-        title(page, "Mes suivis", "");
-        LinearLayout actions = row();
-        weighted(actions, link("Ma pause", () -> { trackingPage = false; render(false); }), 0);
-        weighted(actions, button("Nouveau suivi", BRAND, WHITE, () -> editTracker(null)), 7);
-        add(page, actions, 8);
-        List<Tracker> trackers = journal.trackers();
-        if (trackers.isEmpty()) {
-            LinearLayout empty = panel(page, WHITE, 13);
-            add(empty, text("Ajoute un suivi pour une habitude ou une pause. Par exemple, pratiquer l’anglais ou faire du sport.", 15, MUTED), 0);
+    private View monthButton(JournalIcon.Kind kind, String label, int offset, boolean enabled) {
+        View button = iconButton(kind, label, () -> {
+            month = month.plusMonths(offset);
+            render(true);
+        });
+        button.setEnabled(enabled);
+        button.setAlpha(enabled ? 1f : .35f);
+        return button;
+    }
+
+    private void addWeekdays(LinearLayout parent) {
+        LinearLayout weekdays = row();
+        for (String label : WEEKDAYS) {
+            TextView cell = text(label, 13, MUTED);
+            cell.setGravity(Gravity.CENTER);
+            weekdays.addView(cell, new LinearLayout.LayoutParams(0, -2, 1));
         }
-        for (Tracker tracker : trackers) addTracker(page, tracker);
+        add(parent, weekdays, 2);
+    }
+
+    private void addCalendarDay(LinearLayout days, LocalDate date, boolean shown) {
+        int height = Math.max(dp(42), Math.round(dp(37) * getResources().getConfiguration().fontScale));
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(0, height, 1);
+        params.setMarginStart(dp(2));
+        params.setMarginEnd(dp(2));
+        if (!shown) {
+            days.addView(new View(this), params);
+            return;
+        }
+        LocalDate now = today();
+        boolean inside = journal.inPause(date), future = date.isAfter(now);
+        String status = inside ? journal.status(date) : "";
+        boolean kept = status.equals("tenu"), notKept = status.equals(Journal.NOT_KEPT_STATUS);
+        TextView cell = heading(Integer.toString(date.getDayOfMonth()), 15, kept ? GREEN_INK : notKept ? PEACH_INK : inside ? MUTED : LINE);
+        cell.setGravity(Gravity.CENTER);
+        cell.setAlpha(inside && future ? .55f : 1f);
+        GradientDrawable fill = shape(kept ? GREEN : notKept ? PEACH : Color.TRANSPARENT, 12,
+                date.equals(now) ? BRAND : inside && !future && status.isEmpty() ? SOFT_LINE : 0);
+        if (date.equals(now)) fill.setStroke(dp(2), BRAND);
+        cell.setBackground(fill);
+        cell.setContentDescription(displayDate(date) + ", " + (!inside ? "hors pause" : future ? "à venir" : status.isEmpty() ? "sans réponse" : statusLabel(status)));
+        if (inside && !future) cell.setOnClickListener(view -> openDay(date));
+        days.addView(cell, params);
     }
 
     private void addTracker(LinearLayout page, Tracker tracker) {
         LocalDate now = today(), end = tracker.end();
-        LinearLayout card = panel(page, tracker.pause() ? GOLD : SURFACE, 13);
-        add(card, heading(tracker.name(), 23, INK), 0);
-        String dates = end == null ? "Depuis le " + SHORT_DATE.format(tracker.start())
-                : "Du " + SHORT_DATE.format(tracker.start()) + " au " + SHORT_DATE.format(end);
-        if (now.isBefore(tracker.start())) dates = "Débute le " + SHORT_DATE.format(tracker.start());
-        add(card, text((tracker.pause() ? "Pause" : "Habitude") + " · " + dates, 13, MUTED), 2);
-        Tracker.Progress progress = journal.trackerProgress(tracker, now);
-        String count = tracker.duration() == 0 ? Integer.toString(progress.done())
-                : progress.done() + "/" + (tracker.duration() - tracker.restDays());
-        String label = tracker.duration() == 0 && progress.done() == 1 ? " jour coché" : " jours cochés";
-        add(card, heading(count + label + " · Série " + progress.streak() + " j", 16, ACCENT), 8);
-        if (tracker.restDays() > 0 || progress.rests() > 0) {
-            int extra = progress.rests() - tracker.restDays();
-            add(card, text("Repos · " + progress.rests() + "/" + tracker.restDays()
-                    + (extra > 0 ? " · " + extra + " hors quota" : ""), 13, MUTED), 3);
-        }
-        if (tracker.includes(now)) {
-            Tracker.Day status = journal.trackerDay(tracker, now);
-            LinearLayout day = row();
-            TextView done = button(tracker.pause() ? "Tenue" : "Fait", status == Tracker.Day.DONE ? ACCENT : GREEN,
-                    status == Tracker.Day.DONE ? WHITE : GREEN_INK, () -> markTracker(tracker, now, Tracker.Day.DONE));
-            TextView missed = button(tracker.pause() ? "Non tenue" : "Non fait", status == Tracker.Day.MISSED ? PEACH_INK : PEACH,
-                    status == Tracker.Day.MISSED ? WHITE : PEACH_INK, () -> markTracker(tracker, now, Tracker.Day.MISSED));
-            done.setContentDescription(tracker.name() + " · " + done.getText() + " aujourd’hui");
-            missed.setContentDescription(tracker.name() + " · " + missed.getText() + " aujourd’hui");
-            done.setSelected(status == Tracker.Day.DONE);
-            missed.setSelected(status == Tracker.Day.MISSED);
-            weighted(day, done, 0);
-            if (tracker.restDays() > 0 || status == Tracker.Day.REST) {
-                TextView rest = button("Repos", status == Tracker.Day.REST ? ACCENT : MINT,
-                        status == Tracker.Day.REST ? WHITE : ACCENT, () -> markTracker(tracker, now, Tracker.Day.REST));
-                rest.setSelected(status == Tracker.Day.REST);
-                rest.setContentDescription(tracker.name() + " · Repos aujourd’hui");
-                weighted(day, rest, 7);
-            }
-            weighted(day, missed, 7);
-            add(card, day, 9);
-        }
-
+        LinearLayout card = card(page, 12);
+        LinearLayout head = row();
+        head.setGravity(Gravity.CENTER_VERTICAL);
+        head.addView(heading(tracker.name(), 18, INK), new LinearLayout.LayoutParams(0, -2, 1));
         LocalDate last = end != null && end.isBefore(now) ? end : now;
         if (!last.isBefore(tracker.start())) {
-            LinearLayout history = row();
-            for (int offset = 6; offset >= 0; offset--) {
-                LocalDate date = last.minusDays(offset);
-                if (date.isBefore(tracker.start())) continue;
-                Tracker.Day status = journal.trackerDay(tracker, date);
-                String symbol = status == Tracker.Day.DONE ? "✓" : status == Tracker.Day.MISSED ? "×" : status == Tracker.Day.REST ? "−" : "·";
-                TextView cell = button(date.getDayOfMonth() + "\n" + symbol,
-                        status == Tracker.Day.DONE ? GREEN : status == Tracker.Day.MISSED ? PEACH : PAPER,
-                        status == Tracker.Day.DONE ? GREEN_INK : status == Tracker.Day.MISSED ? PEACH_INK : MUTED, () -> editTrackerDay(tracker, date));
-                cell.setPadding(dp(2), dp(2), dp(2), dp(2));
-                cell.setContentDescription(tracker.name() + " · " + displayDate(date) + " · " +
-                        (status == Tracker.Day.DONE ? "Coché" : status == Tracker.Day.MISSED ? "Non coché"
-                                : status == Tracker.Day.REST ? "Repos" : "Sans réponse"));
-                weighted(history, cell, offset == 6 ? 0 : 4);
-            }
-            add(card, history, 8);
+            TextView other = link("Autre date", () -> pickDate(last, true, date -> editTrackerDay(tracker, date)));
+            other.setContentDescription(tracker.name() + ", choisir une autre date");
+            head.addView(other);
         }
-        LinearLayout settings = row();
-        weighted(settings, link("Modifier le suivi", () -> editTracker(tracker)), 0);
-        if (!last.isBefore(tracker.start())) weighted(settings, link("Autre date", () ->
-                pickDate(last, true, date -> editTrackerDay(tracker, date))), 5);
-        add(card, settings, 3);
+        TextView modify = link("Modifier", () -> editTracker(tracker));
+        modify.setContentDescription("Modifier " + tracker.name());
+        head.addView(modify);
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(-1, -2);
+        params.setMargins(0, dp(-8), 0, 0);
+        card.addView(head, params);
+        Tracker.Progress progress = journal.trackerProgress(tracker, now);
+        List<String> facts = new ArrayList<>();
+        if (tracker.pause()) facts.add("Pause");
+        facts.add(tracker.duration() == 0 ? days(progress.done()) : progress.done() + " jours sur " + (tracker.duration() - tracker.restDays()));
+        if (progress.streak() > 0) facts.add("série de " + progress.streak());
+        if (tracker.restDays() > 0 || progress.rests() > 0) {
+            int extra = progress.rests() - tracker.restDays();
+            facts.add("repos " + progress.rests() + " sur " + tracker.restDays() + (extra > 0 ? ", " + extra + " hors quota" : ""));
+        }
+        facts.add(now.isBefore(tracker.start()) ? "débute le " + SHORT_DATE.format(tracker.start())
+                : end != null ? "jusqu’au " + SHORT_DATE.format(end) : "depuis le " + SHORT_DATE.format(tracker.start()));
+        add(card, text(String.join(" · ", facts), 14, MUTED), 0);
+        if (last.isBefore(tracker.start())) return;
+        LinearLayout history = row();
+        for (int offset = 6; offset >= 0; offset--) addTrackerDay(history, tracker, last.minusDays(offset));
+        LinearLayout.LayoutParams size = new LinearLayout.LayoutParams(-1, -2);
+        size.setMargins(dp(-2), dp(10), dp(-2), 0);
+        card.addView(history, size);
+    }
+
+    private void addTrackerDay(LinearLayout history, Tracker tracker, LocalDate date) {
+        Tracker.Day status = journal.trackerDay(tracker, date);
+        String symbol = status == Tracker.Day.DONE ? "✓" : status == Tracker.Day.MISSED ? "×" : status == Tracker.Day.REST ? "−" : "";
+        TextView cell = heading(date.getDayOfMonth() + "\n" + symbol, 14,
+                status == Tracker.Day.DONE ? GREEN_INK : status == Tracker.Day.MISSED ? PEACH_INK : MUTED);
+        cell.setGravity(Gravity.CENTER);
+        cell.setMinHeight(dp(48));
+        GradientDrawable fill = shape(status == Tracker.Day.DONE ? GREEN : status == Tracker.Day.MISSED ? PEACH
+                : status == Tracker.Day.REST ? SIDE : Color.TRANSPARENT, 12, status == null ? SOFT_LINE : 0);
+        if (date.equals(today())) fill.setStroke(dp(2), BRAND);
+        cell.setBackground(new RippleDrawable(ColorStateList.valueOf(0x229A3412), fill, null));
+        cell.setContentDescription(tracker.name() + " · " + displayDate(date) + " · " + (status == null ? "Sans réponse" : trackerLabel(tracker, status)));
+        boolean included = tracker.includes(date);
+        cell.setAlpha(included ? 1f : .35f);
+        if (included) cell.setOnClickListener(view -> editTrackerDay(tracker, date));
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(0, -2, 1);
+        params.setMarginStart(dp(2));
+        params.setMarginEnd(dp(2));
+        history.addView(cell, params);
+    }
+
+    private static String trackerLabel(Tracker tracker, Tracker.Day status) {
+        return switch (status) {
+            case DONE -> tracker.pause() ? "Tenue" : "Fait";
+            case REST -> "Repos";
+            case MISSED -> tracker.pause() ? "Non tenue" : "Non fait";
+        };
+    }
+
+    private void showTrends(LinearLayout page) {
+        pageHeader(page, "Évolution");
+        add(page, segments(new String[]{"Poids", "Calories", "Pause"}, chart, 46, index -> {
+            chart = index;
+            render(true);
+        }), 4);
+        LocalDate now = today(), from = now.minusDays(range - 1L);
+        LinearLayout card = card(page, 12);
+        LinearLayout head = row();
+        LinearLayout summary = column();
+        head.addView(summary, new LinearLayout.LayoutParams(0, -2, 1));
+        int[] ranges = {7, 30, 90};
+        head.addView(segments(new String[]{"7 j", "30 j", "90 j"}, range == 7 ? 0 : range == 30 ? 1 : 2, 44, index -> {
+            range = ranges[index];
+            render(true);
+        }), new LinearLayout.LayoutParams(dp(156), -2));
+        add(card, head, 0);
+        switch (chart) {
+            case 0 -> showWeightTrend(card, summary, from);
+            case 1 -> showCaloriesTrend(card, summary, from);
+            default -> showPauseTrend(card, summary, from);
+        }
+        List<Journal.SavedReport> reports = journal.reports();
+        add(card(page, 12), entry(JournalIcon.Kind.DOC, "Bilans", reports.isEmpty() ? "Aucun bilan enregistré" : "Dernier : " + reports.get(0).title(),
+                chevron(), () -> {
+                    if (!reports.isEmpty()) showReports(reports);
+                    else new PaperStyle.DialogBuilder(this).setTitle("Bilans")
+                            .setMessage("Demande à ton IA d’enregistrer un bilan dans Fil des jours sur le PC, puis synchronise.")
+                            .setPositiveButton("Fermer", null).show();
+                }), 0);
+        showHistory(page, from, now);
+    }
+
+    private void summary(LinearLayout summary, String value, String detail) {
+        add(summary, heading(value, 27, INK), 0);
+        add(summary, text(detail, 14, MUTED), 0);
+    }
+
+    private void showWeightTrend(LinearLayout card, LinearLayout summary, LocalDate from) {
+        List<Journal.Weight> weights = journal.weights().stream().filter(weight -> !weight.date().isBefore(from)).collect(Collectors.toList());
+        Double target = journal.target(true);
+        String goal = target == null ? "" : "\nObjectif " + format(target, 1) + " kg";
+        if (weights.isEmpty()) {
+            summary(summary, "—", "Aucune pesée" + goal);
+            return;
+        }
+        Journal.Weight first = weights.get(0), last = weights.get(weights.size() - 1);
+        double change = last.kg() - first.kg();
+        summary(summary, format(last.kg(), 1) + " kg", (weights.size() == 1 ? "Le " + SHORT_DATE.format(last.date())
+                : Math.abs(change) < .05 ? "Stable" : format(Math.abs(change), 1) + " kg de " + (change < 0 ? "moins" : "plus")) + goal);
+        if (weights.size() < 2) {
+            add(card, text("Deux pesées suffisent pour afficher la courbe.", 14, MUTED), 12);
+            return;
+        }
+        LinearLayout.LayoutParams size = new LinearLayout.LayoutParams(-1, dp(190));
+        size.topMargin = dp(12);
+        card.addView(new WeightChart(this, weights), size);
+        LinearLayout dates = row();
+        TextView end = text(SHORT_DATE.format(last.date()), 13, MUTED);
+        dates.setPadding(dp(42), 0, 0, 0);
+        dates.addView(text(SHORT_DATE.format(first.date()), 13, MUTED), new LinearLayout.LayoutParams(0, -2, 1));
+        dates.addView(end);
+        add(card, dates, 2);
+    }
+
+    private void showCaloriesTrend(LinearLayout card, LinearLayout summary, LocalDate from) {
+        List<Double> totals = new ArrayList<>();
+        List<String> dates = new ArrayList<>();
+        for (int i = 0; i < range; i++) {
+            LocalDate date = from.plusDays(i);
+            List<Journal.Meal> meals = journal.meals(date);
+            totals.add(meals.isEmpty() ? null : meals.stream().mapToDouble(Journal.Meal::kcal).sum());
+            dates.add(range == 7 ? Integer.toString(date.getDayOfMonth()) : SHORT_DATE.format(date));
+        }
+        Double target = journal.target(false);
+        String goal = target == null ? "" : "\nObjectif " + format(target, 0);
+        double[] logged = totals.stream().filter(java.util.Objects::nonNull).mapToDouble(Double::doubleValue).toArray();
+        if (logged.length == 0) {
+            summary(summary, "—", "Aucune saisie" + goal);
+            return;
+        }
+        summary(summary, format(java.util.Arrays.stream(logged).average().orElse(0), 0) + " kcal", "Moyenne par jour noté" + goal);
+        LinearLayout.LayoutParams size = new LinearLayout.LayoutParams(-1, dp(200));
+        size.topMargin = dp(12);
+        card.addView(new DailyCaloriesChart(this, dates, totals, target), size);
+    }
+
+    private void showPauseTrend(LinearLayout card, LinearLayout summary, LocalDate from) {
+        LocalDate start = journal.start(), now = today();
+        if (start == null) {
+            summary(summary, "—", "Aucune pause en cours");
+            return;
+        }
+        summary(summary, journal.keptDays(now) + " sur " + journal.duration(), "Jours tenus");
+        LocalDate first = start.isAfter(from) ? start : from, last = journal.end().isBefore(now) ? journal.end() : now;
+        if (first.isAfter(last)) {
+            add(card, text("Aucun jour de pause sur cette période.", 14, MUTED), 12);
+            return;
+        }
+        LinearLayout grid = column();
+        addWeekdays(grid);
+        for (LocalDate week = first.minusDays(first.getDayOfWeek().getValue() - 1L); !week.isAfter(last); week = week.plusWeeks(1)) {
+            LinearLayout days = row();
+            for (int i = 0; i < 7; i++) {
+                LocalDate date = week.plusDays(i);
+                addCalendarDay(days, date, !date.isBefore(first) && !date.isAfter(last));
+            }
+            add(grid, days, 4);
+        }
+        add(card, grid, 10);
+    }
+
+    private void showHistory(LinearLayout page, LocalDate from, LocalDate now) {
+        LinearLayout rows = column();
+        for (LocalDate date = now; !date.isBefore(from); date = date.minusDays(1)) {
+            LocalDate entry = date;
+            List<Journal.Meal> meals = journal.meals(date);
+            Double kg = journal.weightAt(date);
+            List<String> details = new ArrayList<>();
+            if (!journal.status(date).isEmpty()) details.add(capital(statusLabel(journal.status(date))));
+            if (kg != null) details.add(format(kg, 1) + " kg");
+            if (details.isEmpty() && meals.isEmpty()) continue;
+            if (details.isEmpty()) details.add(meals.size() + " repas");
+            View kcal = meals.isEmpty() ? null : text(format(meals.stream().mapToDouble(Journal.Meal::kcal).sum(), 0) + " kcal", 15, MUTED);
+            addRow(rows, entry(null, capital(TITLE_DATE.format(date)), String.join(", ", details), kcal, () -> openDay(entry)));
+        }
+        if (rows.getChildCount() == 0) return;
+        LinearLayout card = card(page, 12);
+        add(card, heading("Journal", 18, INK), 0);
+        add(card, rows, 2);
+    }
+
+    private void showSettings(LinearLayout page) {
+        pageHeader(page, "Réglages");
+        long last = desktop.getLong("last", 0);
+        String wifi = desktopPairing() == null ? "Associer un PC avec un QR code" : last == 0 ? "PC associé" : "Dernier échange le " + moment(last);
+        LinearLayout sync = group(page, "Synchronisation");
+        addRow(sync, entry(JournalIcon.Kind.CLOUD, "Google Drive", drive.connected() ? drive.status() : "Non connecté", chevron(), () -> go(SETTINGS, DRIVE)));
+        addRow(sync, entry(JournalIcon.Kind.LAPTOP, "Wi-Fi local", wifi, chevron(), () -> go(SETTINGS, WIFI)));
+        LinearLayout goals = group(page, "Objectifs");
+        List<String> targets = new ArrayList<>();
+        if (journal.target(true) != null) targets.add(format(journal.target(true), 1) + " kg");
+        if (journal.target(false) != null) targets.add(format(journal.target(false), 0) + " kcal par jour");
+        addRow(goals, entry(JournalIcon.Kind.SCALE, "Poids et calories", targets.isEmpty() ? "Aucun objectif" : String.join(" · ", targets), chevron(), this::editTargets));
+        addRow(goals, entry(JournalIcon.Kind.FLAG, "Ma pause", journal.start() == null ? "Aucune pause"
+                : "Du " + HEADER_DATE.format(journal.start()) + " au " + HEADER_DATE.format(journal.end()), chevron(), this::editGoal));
+        LinearLayout daily = group(page, "Au quotidien");
+        JournalReminder.Settings reminder = JournalReminder.settings(this);
+        addRow(daily, entry(JournalIcon.Kind.BELL, "Rappels", !reminder.enabled() ? "Désactivés"
+                : !JournalReminder.canNotify(this) ? "Notifications à autoriser" : "Tous les jours à " + reminderTime(reminder.hour(), reminder.minute()),
+                chevron(), this::editReminder));
+        addRow(daily, entry(JournalIcon.Kind.SPARK, "Estimation des repas", chatgptAccountBusy ? "Connexion ChatGPT en cours…" : mealProviderLabel(),
+                chevron(), () -> { if (!chatgptAccountBusy) chooseMealProvider(); }));
+        LinearLayout data = group(page, "IA et données");
+        addRow(data, entry(JournalIcon.Kind.EXPORT, "Exporter un bilan", "Fichier JSON à joindre à une conversation", chevron(), this::export));
+        addRow(data, entry(JournalIcon.Kind.PLUG, "Partage USB", "Ouvert 10 minutes à la demande", chevron(), () -> go(SETTINGS, USB)));
+    }
+
+    private LinearLayout group(LinearLayout page, String title) {
+        TextView label = heading(title, 14, MUTED);
+        label.setPadding(dp(4), 0, 0, 0);
+        add(page, label, 14);
+        LinearLayout card = card(page, 6);
+        card.setPadding(dp(16), dp(4), dp(16), dp(4));
+        return card;
+    }
+
+    private static String moment(long time) {
+        return DateTimeFormatter.ofPattern("d MMM 'à' HH:mm", FR).format(Instant.ofEpochMilli(time).atZone(ZoneId.systemDefault()));
     }
 
     private void editTracker(Tracker previous) {
@@ -560,7 +1128,7 @@ public final class MainActivity extends Activity {
         add(form, kind, 6);
         LocalDate[] start = {previous == null ? today() : previous.start()};
         add(form, text("Début", 14, MUTED), 8);
-        TextView date = button(displayDate(start[0]), MINT, ACCENT, () -> {});
+        TextView date = button(displayDate(start[0]), FIELD, ACCENT, () -> {});
         date.setOnClickListener(view -> pickDate(start[0], false, chosen -> {
             start[0] = chosen;
             date.setText(displayDate(chosen));
@@ -615,45 +1183,9 @@ public final class MainActivity extends Activity {
         render(true);
     }
 
-    private void calendarLegend(LinearLayout row, String label, int background, int color) {
-        TextView tag = text(label, 12, color);
-        tag.setBackground(shape(background, 8, 0));
-        tag.setPadding(dp(7), dp(3), dp(7), dp(3));
-        LinearLayout.LayoutParams chip = new LinearLayout.LayoutParams(-2, -2);
-        chip.setMarginEnd(dp(5));
-        row.addView(tag, chip);
-    }
-
-    private void addCalendarDay(LinearLayout days, LocalDate date, LocalDate now) {
-        int height = Math.max(dp(42), Math.round(dp(37) * getResources().getConfiguration().fontScale));
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(0, height, 1);
-        params.setMarginStart(dp(2));
-        params.setMarginEnd(dp(2));
-        if (!journal.inPause(date)) {
-            days.addView(new View(this), params);
-            return;
-        }
-        String status = journal.status(date);
-        boolean future = date.isAfter(now);
-        boolean notKept = status.equals(Journal.NOT_KEPT_STATUS);
-        String symbol = status.equals("tenu") ? "✓" : notKept ? "×" : future ? "" : "·";
-        int fill = status.equals("tenu") ? GREEN : notKept ? PEACH : future ? SURFACE : PAPER;
-        int color = status.equals("tenu") ? GREEN_INK : notKept ? PEACH_INK : MUTED;
-        TextView cell = text(date.getDayOfMonth() + (symbol.isEmpty() ? "" : "\n" + symbol), 13, color);
-        cell.setGravity(Gravity.CENTER);
-        cell.setBackground(shape(fill, 10, date.equals(pauseDate) ? ACCENT : future ? LINE : 0));
-        cell.setContentDescription(displayDate(date) + ", " + (future ? "à venir"
-                : status.equals("tenu") ? "tenu" : notKept ? "non tenu" : "à renseigner"));
-        if (!future) cell.setOnClickListener(v -> {
-            pauseDate = date;
-            render(false);
-        });
-        cell.setSelected(date.equals(pauseDate));
-        days.addView(cell, params);
-    }
-
     private void mark(LocalDate date, String status) {
         if (journal.inPause(date) && !date.isAfter(today())) {
+            pauseEditing = false;
             journal.setStatus(date, status);
             render(true);
         }
@@ -662,7 +1194,7 @@ public final class MainActivity extends Activity {
     private void editGoal() {
         LinearLayout form = form();
         LocalDate[] start = {journal.start() == null ? today() : journal.start()};
-        TextView date = button(displayDate(start[0]), MINT, ACCENT, () -> {});
+        TextView date = button(displayDate(start[0]), FIELD, ACCENT, () -> {});
         date.setOnClickListener(view -> pickDate(start[0], false, chosen -> {
             start[0] = chosen;
             date.setText(displayDate(chosen));
@@ -713,10 +1245,8 @@ public final class MainActivity extends Activity {
 
     private void applyGoal(LocalDate start, int duration) {
         journal.setPause(start, duration);
-        LocalDate now = today();
-        LocalDate end = journal.end();
-        pauseDate = now.isBefore(start) ? start : now.isAfter(end) ? end : now;
-        render(false);
+        month = null;
+        render(true);
     }
 
     private static String reminderTime(int hour, int minute) {
@@ -726,16 +1256,12 @@ public final class MainActivity extends Activity {
     private void editReminder() {
         JournalReminder.Settings settings = JournalReminder.settings(this);
         LinearLayout form = form();
-        CheckBox enabled = new CheckBox(this);
-        enabled.setText("Activer le rappel quotidien");
-        enabled.setChecked(settings.enabled());
+        CheckBox enabled = checkBox("Activer le rappel quotidien", settings.enabled());
         add(form, enabled, 0);
-        CheckBox weight = new CheckBox(this);
-        weight.setText("Me rappeler aussi la pesée");
-        weight.setChecked(settings.weight());
+        CheckBox weight = checkBox("Me rappeler aussi la pesée", settings.weight());
         add(form, weight, 0);
         int[] time = {settings.hour(), settings.minute()};
-        TextView hour = button(reminderTime(time[0], time[1]), MINT, ACCENT, () -> {});
+        TextView hour = button(reminderTime(time[0], time[1]), FIELD, ACCENT, () -> {});
         hour.setContentDescription("Heure du rappel");
         hour.setOnClickListener(v -> new TimePickerDialog(this, (picker, hours, minutes) -> {
             time[0] = hours;
@@ -745,7 +1271,7 @@ public final class MainActivity extends Activity {
         add(form, hour, 7);
         add(form, text("Rappel si ta journée reste à renseigner. Android peut décaler la notification.", 13, MUTED), 8);
         if (settings.enabled() && !JournalReminder.canNotify(this))
-            add(form, text("Autorise les notifications de Pause dans les paramètres Android.", 13, PEACH_INK), 5);
+            add(form, text("Autorise les notifications de Fil des jours dans les paramètres Android.", 13, PEACH_INK), 5);
         new PaperStyle.DialogBuilder(this).setTitle("Rappel du journal").setView(form)
                 .setNegativeButton("Annuler", null).setPositiveButton("Enregistrer", (d, w) -> {
                     JournalReminder.configure(this, enabled.isChecked(), time[0], time[1], weight.isChecked());
@@ -754,7 +1280,7 @@ public final class MainActivity extends Activity {
                             && checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED)
                         requestPermissions(new String[]{Manifest.permission.POST_NOTIFICATIONS}, NOTIFICATION_PERMISSION);
                     else if (enabled.isChecked() && !JournalReminder.canNotify(this))
-                        toast("Autorise les notifications de Pause dans les paramètres Android.");
+                        toast("Autorise les notifications de Fil des jours dans les paramètres Android.");
                 }).show();
     }
 
@@ -768,218 +1294,32 @@ public final class MainActivity extends Activity {
         }
     }
 
-    private void editTarget(boolean weight) {
+    private void editTargets() {
         LinearLayout form = form();
-        EditText input = field(form, weight ? "Poids cible (kg)" : "Calories quotidiennes (kcal)",
-                decimalInput(journal.target(weight)), decimalType(), 12);
-        add(form, text("Laisse le champ vide pour retirer cet objectif.", 13, MUTED), 4);
-        AlertDialog dialog = new PaperStyle.DialogBuilder(this)
-                .setTitle(weight ? "Objectif de poids" : "Objectif calorique").setView(form)
+        EditText weight = field(form, "Poids cible (kg)", decimalInput(journal.target(true)), decimalType(), 12);
+        EditText calories = field(form, "Calories quotidiennes (kcal)", decimalInput(journal.target(false)), decimalType(), 12);
+        add(form, text("Laisse un champ vide pour retirer son objectif.", 13, MUTED), 4);
+        AlertDialog dialog = new PaperStyle.DialogBuilder(this).setTitle("Poids et calories").setView(form)
                 .setNegativeButton("Annuler", null).setPositiveButton("Enregistrer", null).create();
         dialog.show();
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
-            Double value = null;
-            if (!input.getText().toString().trim().isEmpty()) {
-                double number = number(input);
-                if (!Double.isFinite(number) || number <= 0 || number > (weight ? 1000 : 100000)) {
-                    input.setError("Indique une valeur valide.");
-                    return;
-                }
-                value = number;
-            }
-            journal.setTarget(weight, value);
+            if (!validTarget(weight, 1000) || !validTarget(calories, 100000)) return;
+            journal.setTarget(true, optional(weight));
+            journal.setTarget(false, optional(calories));
             dialog.dismiss();
             render(true);
         });
     }
 
-    private void showWeight(LinearLayout page) {
-        title(page, "Mon poids", "");
-        List<Journal.Weight> history = journal.weights();
-        LinearLayout summary = panel(page, BLUE, 17);
-        Double target = journal.target(true);
-        if (history.isEmpty()) {
-            add(summary, heading("Première pesée", 23, INK), 0);
-        } else {
-            Journal.Weight recent = history.get(history.size() - 1);
-            add(summary, text("Dernière mesure · " + HISTORY_DATE.format(recent.date()), 13, PaperStyle.BLUE_INK), 0);
-            add(summary, heading(format(recent.kg(), 1) + " kg", 34, INK), 3);
-        }
-        if (target != null) add(summary, text("Poids cible · " + format(target, 2) + " kg", 14, PaperStyle.BLUE_INK), 5);
-        add(summary, button("Ajouter une pesée", BRAND, WHITE, () -> editWeight(today())), 11);
-        add(summary, link(target == null ? "Définir un objectif de poids" : "Modifier l’objectif de poids", () -> editTarget(true)), 4);
-
-        if (history.size() >= 2) {
-            Journal.Weight first = history.get(0), last = history.get(history.size() - 1);
-            double difference = last.kg() - first.kg();
-            String delta = (difference > 0.0001 ? "+" : "") + format(difference, 1);
-            LinearLayout chart = panel(page, WHITE, 13);
-            add(chart, heading("Évolution du poids", 21, INK), 0);
-            add(chart, text(delta + " kg depuis le " + HISTORY_DATE.format(first.date()), 13, MUTED), 3);
-            LinearLayout.LayoutParams graph = new LinearLayout.LayoutParams(-1, dp(140));
-            graph.topMargin = dp(9);
-            chart.addView(new WeightChart(this, history), graph);
-            LinearLayout range = row();
-            TextView end = text(SHORT_DATE.format(last.date()), 12, MUTED);
-            end.setGravity(Gravity.END);
-            range.addView(text(SHORT_DATE.format(first.date()), 12, MUTED), new LinearLayout.LayoutParams(0, -2, 1));
-            range.addView(end, new LinearLayout.LayoutParams(0, -2, 1));
-            add(chart, range, 1);
-        }
-
-        if (!history.isEmpty()) {
-            LinearLayout rows = panel(page, WHITE, 17);
-            add(rows, heading("Historique", 20, INK), 0);
-            for (int i = history.size() - 1; i >= 0; i--) {
-                Journal.Weight entry = history.get(i);
-                add(rows, button(HISTORY_DATE.format(entry.date()) + "   ·   " + format(entry.kg(), 1) + " kg",
-                        PAPER, INK, () -> editWeight(entry.date())), 6);
-            }
-        }
+    private static boolean validTarget(EditText input, double maximum) {
+        Double value = optional(input);
+        boolean valid = value == null || Double.isFinite(value) && value > 0 && value <= maximum;
+        if (!valid) input.setError("Indique une valeur valide.");
+        return valid;
     }
 
-    private void editWeight(LocalDate initial) {
-        LocalDate[] selected = {initial};
-        LinearLayout form = form();
-        TextView date = button(displayDate(initial), MINT, ACCENT, () -> {});
-        add(form, date, 0);
-        EditText input = field(form, "Poids (kg)", decimalInput(journal.weightAt(initial)),
-                InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL, 7);
-        date.setOnClickListener(view -> pickDate(selected[0], true, chosen -> {
-            selected[0] = chosen;
-            date.setText(displayDate(chosen));
-            input.setText(decimalInput(journal.weightAt(chosen)));
-        }));
-        AlertDialog dialog = new PaperStyle.DialogBuilder(this).setTitle("Pesée").setView(form)
-                .setNegativeButton("Annuler", null).setNeutralButton("Supprimer", null)
-                .setPositiveButton("Enregistrer", null).create();
-        dialog.show();
-        dialog.getButton(AlertDialog.BUTTON_NEUTRAL).setOnClickListener(v -> {
-            if (journal.weightAt(selected[0]) == null) {
-                input.setError("Aucune mesure pour cette date.");
-                return;
-            }
-            confirmDeletion("Supprimer cette pesée ?", () -> {
-                journal.saveWeight(selected[0], null);
-                dialog.dismiss();
-                render(true);
-            });
-        });
-        dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
-            double kg = number(input);
-            if (!Double.isFinite(kg) || kg <= 0 || kg > 1000) {
-                input.setError("Indique un poids en kg.");
-                return;
-            }
-            journal.saveWeight(selected[0], kg);
-            dialog.dismiss();
-            render(true);
-        });
-    }
-
-    private void showFood(LinearLayout page) {
-        title(page, "Mes calories", "");
-        LinearLayout date = row();
-        TextView back = button("‹", WHITE, ACCENT, () -> changeFoodDate(foodDate.minusDays(1)));
-        back.setContentDescription("Jour précédent");
-        date.addView(back, new LinearLayout.LayoutParams(dp(46), dp(48)));
-        TextView current = button(foodDate.equals(today()) ? "Aujourd’hui" : displayDate(foodDate), WHITE, INK,
-                () -> pickDate(foodDate, true, this::changeFoodDate));
-        weighted(date, current, 6);
-        TextView next = button("›", WHITE, ACCENT, () -> changeFoodDate(foodDate.plusDays(1)));
-        next.setContentDescription("Jour suivant");
-        next.setEnabled(foodDate.isBefore(today()));
-        next.setAlpha(next.isEnabled() ? 1f : .45f);
-        LinearLayout.LayoutParams nextSize = new LinearLayout.LayoutParams(dp(46), dp(48));
-        nextSize.setMarginStart(dp(6));
-        date.addView(next, nextSize);
-        add(page, date, 16);
-
-        List<Journal.Meal> meals = journal.meals(foodDate);
-        LinearLayout total = panel(page, PEACH, 10);
-        add(total, text("Total enregistré", 14, PEACH_INK), 0);
-        if (meals.isEmpty()) {
-            add(total, heading("Aucune saisie", 24, INK), 6);
-        } else {
-            double kcal = 0;
-            for (Journal.Meal meal : meals) kcal += meal.kcal();
-            add(total, heading(format(kcal, 1) + " kcal", 33, INK), 4);
-            add(total, text(meals.size() + (meals.size() == 1 ? " aliment noté" : " aliments notés"), 13, PEACH_INK), 5);
-        }
-        Double target = journal.target(false);
-        if (target != null) add(total, text("Objectif quotidien · " + format(target, 1) + " kcal", 13, PEACH_INK), 6);
-        add(total, link(target == null ? "Définir un objectif calorique" : "Modifier l’objectif calorique", () -> editTarget(false)), 3);
-
-        LocalDate day = foodDate;
-        LinearLayout addFood = panel(page, WHITE, 13);
-        add(addFood, heading("Ajouter un aliment", 21, INK), 0);
-        if (processing) {
-            add(addFood, text("Lecture en cours…", 14, MUTED), 10);
-        } else {
-            add(addFood, button("Décrire un repas", BRAND, WHITE,
-                    () -> new MealDescriptionDialog(this, journal, day, () -> render(true), chatgpt, chatgptWorker, mealProvider()).open()), 10);
-            LinearLayout scan = row();
-            weighted(scan, button("Scanner un code-barres", PEACH, PEACH_INK, () -> choosePhoto(true, day)), 0);
-            weighted(scan, button("Photographier l’étiquette", PAPER, INK, () -> choosePhoto(false, day)), 6);
-            add(addFood, scan, 7);
-            add(addFood, link("Saisir manuellement", () -> editMeal(day, null, null)), 3);
-        }
-        if (chatgptAccountBusy) add(addFood, text("Connexion ChatGPT en cours…", 13, MUTED), 6);
-        else add(addFood, link("Estimation · " + mealProviderLabel(), this::chooseMealProvider), 3);
-        List<Journal.MealDraft> drafts = journal.drafts(day);
-        if (!drafts.isEmpty()) {
-            LinearLayout pending = panel(page, WHITE, 13);
-            add(pending, heading("Repas à estimer", 21, INK), 0);
-            add(pending, text("Si tu synchronises avec un PC, retrouve ses propositions dans Repas à estimer sur Windows.", 13, MUTED), 5);
-            WindowsSync.Pairing pairing = desktopPairing();
-            if (pairing != null) add(pending, button("Synchroniser", MINT, ACCENT, () -> syncPc(pairing)), 7);
-            for (Journal.MealDraft draft : drafts) {
-                String label = draft.description().length() > 90 ? draft.description().substring(0, 87) + "…" : draft.description();
-                add(pending, button(label, PAPER, INK, () -> new PaperStyle.DialogBuilder(this)
-                        .setTitle("Repas à estimer").setMessage(draft.description())
-                        .setPositiveButton("Estimer ici", (dialog, which) -> new MealDescriptionDialog(this, journal, day,
-                                () -> render(true), chatgpt, chatgptWorker, mealProvider()).openDraft(draft))
-                        .setNegativeButton("Fermer", null)
-                        .setNeutralButton("Supprimer", (dialog, which) -> confirmDeletion("Supprimer ce repas en attente ?", () -> {
-                            journal.deleteDraft(draft.id());
-                            render(true);
-                        })).show()), 7);
-            }
-        }
-        if (!meals.isEmpty()) {
-            LinearLayout entries = panel(page, WHITE, 13);
-            add(entries, heading("Aliments du jour", 21, INK), 0);
-            for (Journal.Meal meal : meals) {
-                TextView item = button(meal.name() + "  ·  " + format(meal.kcal(), 1) + " kcal", PAPER, INK,
-                        () -> editMeal(day, meal, null));
-                item.setGravity(Gravity.CENTER_VERTICAL | Gravity.START);
-                add(entries, item, 7);
-            }
-        }
-        List<Double> history = new java.util.ArrayList<>();
-        List<String> dates = new java.util.ArrayList<>();
-        for (int i = 6; i >= 0; i--) {
-            LocalDate dateInHistory = day.minusDays(i);
-            List<Journal.Meal> entries = journal.meals(dateInHistory);
-            history.add(entries.isEmpty() ? null : entries.stream().mapToDouble(Journal.Meal::kcal).sum());
-            dates.add(Integer.toString(dateInHistory.getDayOfMonth()));
-        }
-        if (history.stream().anyMatch(java.util.Objects::nonNull)) {
-            LinearLayout chart = panel(page, WHITE, 13);
-            add(chart, heading("Calories sur 7 jours", 21, INK), 0);
-            DailyCaloriesChart view = new DailyCaloriesChart(this, dates, history, target);
-            LinearLayout.LayoutParams size = new LinearLayout.LayoutParams(-1, dp(145));
-            size.topMargin = dp(9);
-            chart.addView(view, size);
-            if (target != null) add(chart, text("Ligne pointillée · objectif quotidien", 12, MUTED), 4);
-        }
-    }
-
-    private void changeFoodDate(LocalDate date) {
-        if (!date.isAfter(today())) {
-            foodDate = date;
-            render(false);
-        }
+    private static Double optional(EditText input) {
+        return input.getText().toString().trim().isEmpty() ? null : Double.valueOf(number(input));
     }
 
     private void chatgptAccount() {
@@ -1003,15 +1343,15 @@ public final class MainActivity extends Activity {
 
     private String mealProviderLabel() {
         return switch (mealProvider()) {
-            case "chatgpt" -> chatgpt.connected() ? "ChatGPT" : "ChatGPT à connecter";
-            case "claude" -> "Claude sur PC";
-            default -> "Ciqual";
+            case "chatgpt" -> chatgpt.connected() ? "Ciqual, puis ChatGPT" : "ChatGPT à connecter";
+            case "claude" -> "Claude sur le PC";
+            default -> "Ciqual sur le téléphone";
         };
     }
 
     private void chooseMealProvider() {
         String[] providers = {"ciqual", "chatgpt", "claude"};
-        String[] labels = {"Ciqual sur le téléphone", chatgpt.connected() ? "ChatGPT · compte connecté" : "ChatGPT · connecter mon abonnement", "Claude via MCP sur le PC"};
+        String[] labels = {"Ciqual sur le téléphone", chatgpt.connected() ? "ChatGPT · compte connecté" : "ChatGPT · à connecter", "Claude via MCP sur le PC"};
         int selected = java.util.Arrays.asList(providers).indexOf(mealProvider());
         new PaperStyle.DialogBuilder(this).setTitle("Source des estimations").setNegativeButton("Fermer", null)
                 .setSingleChoiceItems(labels, selected, (dialog, choice) -> {
@@ -1020,7 +1360,7 @@ public final class MainActivity extends Activity {
                     render(true);
                     if (choice == 1) chatgptAccount();
                     if (choice == 2) new PaperStyle.DialogBuilder(this).setTitle("Claude via MCP")
-                            .setMessage("Garde le repas avec « Pour Claude », puis synchronise avec le PC. Tu pourras demander à Claude une proposition à relire dans Fil des jours.")
+                            .setMessage("Garde le repas pour Claude avec le bouton +, puis synchronise avec le PC. Tu pourras demander à Claude une proposition à relire dans Fil des jours.")
                             .setPositiveButton("Compris", null).show();
                 }).show();
     }
@@ -1035,7 +1375,7 @@ public final class MainActivity extends Activity {
                     chatgpt.signIn(uri -> runOnUiThread(() -> openBrowser(uri)));
                     message = "ChatGPT connecté.";
                 } else message = chatgpt.signOut() ? "ChatGPT déconnecté."
-                        : "Déconnexion locale effectuée. Vérifie l’accès de Pause dans les réglages ChatGPT.";
+                        : "Déconnexion locale effectuée. Vérifie l’accès de Fil des jours dans les réglages ChatGPT.";
             } catch (Exception error) {
                 message = error instanceof IOException && error.getMessage() != null ? error.getMessage() : "Connexion ChatGPT indisponible.";
             }
@@ -1054,61 +1394,62 @@ public final class MainActivity extends Activity {
         catch (ActivityNotFoundException error) { toast("Aucun navigateur disponible."); }
     }
 
-    private void showPc(LinearLayout page) {
-        title(page, "Synchronisation", "");
-        LinearLayout cloud = panel(page, BLUE, 14);
-        add(cloud, heading("Google Drive", 24, INK), 0);
-        add(cloud, text(driveBusy ? "Connexion ou synchronisation en cours…" : drive.status(), 14, PaperStyle.BLUE_INK), 6);
+    private void showDrive(LinearLayout page) {
+        subpageHeader(page, "Google Drive");
+        LinearLayout card = card(page, 8);
+        add(card, text(driveBusy ? "Connexion ou synchronisation en cours…" : drive.status(), 15, INK), 0);
         if (!drive.connected()) {
-            add(cloud, text("Relie tes appareils au même compte Google pour retrouver ton journal automatiquement quand tu ouvres l’app.", 14, PaperStyle.BLUE_INK), 6);
-            TextView connect = button("Connecter Google Drive", BRAND, WHITE, () -> new PaperStyle.DialogBuilder(this)
+            add(card, text("Relie tes appareils au même compte Google pour retrouver ton journal automatiquement quand tu ouvres l’app.", 14, MUTED), 6);
+            TextView connect = button("Connecter Google Drive", BRAND, Color.WHITE, () -> new PaperStyle.DialogBuilder(this)
                     .setTitle("Connecter Google Drive")
                     .setMessage("Tes saisies seront synchronisées dans l’espace privé de Fil des jours sur ton compte Google. Tes données restent aussi sur cet appareil.")
                     .setNegativeButton("Annuler", null).setPositiveButton("Continuer", (dialog, which) -> startDrive(true, null)).show());
             connect.setEnabled(!driveBusy);
-            add(cloud, connect, 11);
-        } else {
-            for (DriveJournal.Conflict conflict : drive.conflicts())
-                add(cloud, link("Vérifier · " + driveEntryLabel(conflict.key()), () -> reviewDriveConflict(conflict)), 3);
-            add(cloud, button(driveNeedsConsent ? "Reconnecter Google Drive" : "Synchroniser maintenant", BRAND, WHITE,
-                    () -> startDrive(driveNeedsConsent, null)), 9);
-            add(cloud, link("Remplacer le contenu de Drive", () -> new PaperStyle.DialogBuilder(this)
-                    .setTitle("Remplacer le contenu de Drive")
-                    .setMessage("Drive repartira du journal de ce téléphone. Tes autres appareils garderont le leur : les différences y seront à vérifier.")
-                    .setNegativeButton("Annuler", null).setPositiveButton("Remplacer", (dialog, which) -> startDrive(false, true, null)).show()), 4);
-            add(cloud, link("Déconnecter Google Drive", () -> {
-                if (driveBusy) return;
-                drive.disconnect();
-                render(true);
-            }), 4);
-        }
-        WindowsSync.Pairing pairing = desktopPairing();
-        LinearLayout connection = panel(page, WHITE, 13);
-        add(connection, text("Synchro Wi-Fi avec le PC", 13, MUTED), 0);
-        if (pairing == null) {
-            add(connection, heading("Associer ton PC", 22, INK), 4);
-            add(connection, text("Connecte les deux appareils au même réseau. Sur le PC, ouvre Fil des jours puis « Associer Android ».",
-                    14, MUTED), 7);
-            add(connection, button("Scanner le QR code", MINT, INK, this::pickPairingPhoto), 13);
-            add(connection, button("Coller le code", SURFACE, INK, this::enterPairing), 7);
+            add(card, connect, 14);
             return;
         }
-        add(connection, heading("PC associé", 22, INK), 4);
-        add(connection, text(pairing.address(), 14, MUTED), 4);
-        long last = desktop.getLong("last", 0);
-        if (last > 0) {
-            String date = DateTimeFormatter.ofPattern("d MMMM 'à' HH:mm", FR)
-                    .format(Instant.ofEpochMilli(last).atZone(ZoneId.systemDefault()));
-            add(connection, text("Dernière synchro : " + date, 14, MUTED), 4);
+        LinearLayout conflicts = column();
+        for (DriveJournal.Conflict conflict : drive.conflicts())
+            addRow(conflicts, entry(null, driveEntryLabel(conflict.key()), "Deux versions à départager", chevron(), () -> reviewDriveConflict(conflict)));
+        if (conflicts.getChildCount() > 0) add(card, conflicts, 6);
+        add(card, button(driveNeedsConsent ? "Reconnecter Google Drive" : "Synchroniser maintenant", BRAND, Color.WHITE,
+                () -> startDrive(driveNeedsConsent, null)), 14);
+        LinearLayout actions = card(page, 12);
+        actions.setPadding(dp(16), dp(4), dp(16), dp(4));
+        addRow(actions, entry(null, "Remplacer le contenu de Drive", "Repartir du journal de ce téléphone", null, () -> new PaperStyle.DialogBuilder(this)
+                .setTitle("Remplacer le contenu de Drive")
+                .setMessage("Drive repartira du journal de ce téléphone. Tes autres appareils garderont le leur : les différences y seront à vérifier.")
+                .setNegativeButton("Annuler", null).setPositiveButton("Remplacer", (dialog, which) -> startDrive(false, true, null)).show()));
+        addRow(actions, entry(null, "Déconnecter Google Drive", "Ton journal reste sur ce téléphone", null, () -> {
+            if (driveBusy) return;
+            drive.disconnect();
+            render(true);
+        }));
+    }
+
+    private void showWifi(LinearLayout page) {
+        subpageHeader(page, "Wi-Fi local");
+        WindowsSync.Pairing pairing = desktopPairing();
+        LinearLayout card = card(page, 8);
+        if (pairing == null) {
+            add(card, heading("Associer ton PC", 18, INK), 0);
+            add(card, text("Connecte les deux appareils au même réseau. Sur le PC, ouvre Fil des jours, puis Réglages et Wi-Fi local.", 14, MUTED), 4);
+            add(card, button("Scanner le QR code", BRAND, Color.WHITE, this::pickPairingPhoto), 14);
+            add(card, button("Coller le code", FIELD, ACCENT, this::enterPairing), 8);
+            return;
         }
-        add(connection, button("Synchroniser en Wi-Fi", MINT, INK, () -> syncPc(pairing)), 13);
-        LinearLayout settings = panel(page, WHITE, 13);
-        add(settings, text("Garde Pause ouvert sur le PC pendant l’échange. Tu peux modifier ton journal hors ligne sur les deux appareils.",
-                14, MUTED), 0);
-        add(settings, link("Modifier l’adresse du PC", () -> changePcAddress(pairing)), 7);
-        add(settings, link("Scanner un nouveau QR code", this::pickPairingPhoto), 0);
-        add(settings, link("Coller un nouveau code", this::enterPairing), 0);
-        add(settings, link("Dissocier ce PC", this::forgetPc), 0);
+        add(card, heading("PC associé", 18, INK), 0);
+        add(card, text(pairing.address(), 14, MUTED), 2);
+        long last = desktop.getLong("last", 0);
+        if (last > 0) add(card, text("Dernier échange le " + moment(last), 14, MUTED), 2);
+        add(card, text("Garde Fil des jours ouvert sur le PC pendant l’échange.", 14, MUTED), 2);
+        add(card, button("Synchroniser en Wi-Fi", BRAND, Color.WHITE, () -> syncPc(pairing)), 14);
+        LinearLayout actions = card(page, 12);
+        actions.setPadding(dp(16), dp(4), dp(16), dp(4));
+        addRow(actions, entry(null, "Modifier l’adresse du PC", null, chevron(), () -> changePcAddress(pairing)));
+        addRow(actions, entry(null, "Scanner un nouveau QR code", null, chevron(), this::pickPairingPhoto));
+        addRow(actions, entry(null, "Coller un nouveau code", null, chevron(), this::enterPairing));
+        addRow(actions, entry(null, "Dissocier ce PC", null, chevron(), this::forgetPc));
     }
 
     private void startDrive(boolean interactive, DriveJournal.Resolution resolution) { startDrive(interactive, false, resolution); }
@@ -1116,14 +1457,14 @@ public final class MainActivity extends Activity {
     private void startDrive(boolean interactive, boolean replace, DriveJournal.Resolution resolution) {
         if (driveBusy || (!interactive && !drive.connected())) return;
         driveBusy = true;
-        if (tab == PC) render(true);
+        if (section == DRIVE) render(true);
         AuthorizationRequest request = AuthorizationRequest.builder().setRequestedScopes(List.of(new Scope(DriveFiles.SCOPE))).build();
         driveAuthorization.authorize(request).addOnSuccessListener(result -> {
             if (isFinishing() || isDestroyed()) return;
             if (result.hasResolution()) {
                 driveNeedsConsent = true;
                 if (!interactive || !visible || result.getPendingIntent() == null) {
-                    finishDrive("Google demande une nouvelle autorisation. Reconnecte ton compte depuis Synchro.");
+                    finishDrive("Google demande une nouvelle autorisation. Reconnecte ton compte depuis Réglages.");
                     return;
                 }
                 try { startIntentSenderForResult(result.getPendingIntent().getIntentSender(), DRIVE_PERMISSION, null, 0, 0, 0); }
@@ -1151,7 +1492,7 @@ public final class MainActivity extends Activity {
     private void finishDrive(String error) {
         driveBusy = false;
         if (error != null) drive.setStatus(error);
-        if (!isFinishing() && !isDestroyed() && visible) render(true);
+        if (!isFinishing() && !isDestroyed() && visible) refresh();
     }
 
     private static String driveEntryLabel(String key) {
@@ -1169,7 +1510,7 @@ public final class MainActivity extends Activity {
     }
 
     private void reviewDriveConflict(DriveJournal.Conflict conflict) {
-        List<Object> options = new java.util.ArrayList<>();
+        List<Object> options = new ArrayList<>();
         options.add(conflict.local());
         options.add(conflict.cloud());
         options.addAll(conflict.alternatives());
@@ -1206,7 +1547,7 @@ public final class MainActivity extends Activity {
     }
 
     private void pickPairingPhoto() {
-        new PaperStyle.DialogBuilder(this).setTitle("QR code de Pause Windows")
+        new PaperStyle.DialogBuilder(this).setTitle("QR code affiché sur le PC")
                 .setItems(new String[]{"Prendre une photo", "Choisir une image"}, (dialog, selected) -> {
                     photoPairing = true;
                     if (selected == 0) capture();
@@ -1218,7 +1559,7 @@ public final class MainActivity extends Activity {
         LinearLayout form = form();
         EditText code = field(form, "Code copié sur le PC", "", InputType.TYPE_CLASS_TEXT
                 | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS, 150);
-        AlertDialog dialog = new PaperStyle.DialogBuilder(this).setTitle("Associer Pause Windows").setView(form)
+        AlertDialog dialog = new PaperStyle.DialogBuilder(this).setTitle("Associer ton PC").setView(form)
                 .setNegativeButton("Annuler", null).setPositiveButton("Associer", null).create();
         dialog.show();
         dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
@@ -1259,8 +1600,7 @@ public final class MainActivity extends Activity {
         SharedPreferences.Editor change = desktop.edit().putString("code", pairing.code());
         if (previous != null && !previous.pin().equals(pairing.pin())) change.remove("last");
         change.apply();
-        tab = PC;
-        render(false);
+        go(SETTINGS, WIFI);
         syncPc(pairing);
     }
 
@@ -1422,39 +1762,20 @@ public final class MainActivity extends Activity {
                 .setPositiveButton("Fermer", null).show();
     }
 
-    private void showAi(LinearLayout page) {
-        title(page, "Bilan IA", "Historique et partage");
-        LinearLayout history = panel(page, WHITE, 17);
-        add(history, heading("Bilans enregistrés", 22, INK), 0);
-        List<Journal.SavedReport> all = journal.reports();
-        if (all.isEmpty()) {
-            add(history, text("Demande à ton IA d’enregistrer un bilan dans Pause sur le PC, puis synchronise.", 14, MUTED), 6);
-        } else {
-            add(history, text(all.size() + (all.size() == 1 ? " bilan" : " bilans"), 14, MUTED), 5);
-            add(history, button("Ouvrir les bilans", MINT, ACCENT, () -> showReports(all)), 10);
-        }
-        LinearLayout live = panel(page, VIOLET, 17);
-        add(live, heading("Partager par USB", 24, INK), 0);
-        add(live, text("Branche le téléphone à ton ordinateur, puis ouvre l’accès le temps de demander ton bilan à ton IA.",
-                14, MUTED), 7);
+    private void showUsb(LinearLayout page) {
+        subpageHeader(page, "Partage USB");
+        LinearLayout live = card(page, 8);
+        add(live, text("Branche le téléphone à ton ordinateur, puis ouvre l’accès le temps de demander ton bilan à ton IA. "
+                + "Il contient les jours de pause, les pesées et les calories par jour.", 14, MUTED), 0);
         if (bridge.active()) {
-            add(live, button("Fermer l’accès", SURFACE, INK, () -> stopShare(true)), 13);
-            add(live, text("Accès ouvert pour 10 minutes maximum. Garde cet écran ouvert.", 13, MUTED), 7);
+            add(live, text("Accès ouvert pour 10 minutes maximum. Garde cet écran ouvert.", 15, INK), 10);
+            add(live, button("Fermer l’accès", FIELD, ACCENT, () -> stopShare(true)), 12);
         } else {
-            add(live, button("Ouvrir l’accès pour 10 min", BRAND, WHITE, this::startShare), 13);
+            add(live, button("Ouvrir l’accès pour 10 min", BRAND, Color.WHITE, this::startShare), 14);
         }
-
-        LinearLayout manual = panel(page, WHITE, 13);
-        add(manual, heading("Première connexion", 20, INK), 0);
-        add(manual, text("Associe le connecteur sur ton ordinateur avec le code de ce téléphone.", 14, MUTED), 5);
-        add(manual, button("Afficher le code", MINT, ACCENT, this::showPairing), 10);
-
-        LinearLayout export = panel(page, WHITE, 13);
-        add(export, heading("Export JSON", 20, INK), 0);
-        add(export, text("Enregistre un fichier de bilan à joindre à une conversation ou à lire avec le connecteur.", 14, MUTED), 5);
-        add(export, button("Exporter le bilan", PAPER, INK, this::export), 10);
-        add(page, text("Le bilan contient les jours de pause, les pesées et les totaux de calories saisis par jour.",
-                13, MUTED), 13);
+        LinearLayout first = card(page, 12);
+        first.setPadding(dp(16), dp(4), dp(16), dp(4));
+        addRow(first, entry(null, "Afficher le code du téléphone", "Pour associer le connecteur sur ton ordinateur", chevron(), this::showPairing));
     }
 
     private void showReports(List<Journal.SavedReport> reports) {
@@ -1491,7 +1812,7 @@ public final class MainActivity extends Activity {
         bridge.stop();
         handler.removeCallbacks(expireShare);
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        if (update && tab == AI && visible) render(true);
+        if (update && section == USB && visible) render(true);
     }
 
     private void showPairing() {
@@ -1511,7 +1832,7 @@ public final class MainActivity extends Activity {
                 })
                 .setPositiveButton("Copier", (dialog, which) -> {
                     ClipboardManager clipboard = getSystemService(ClipboardManager.class);
-                    ClipData content = ClipData.newPlainText("Code du connecteur Pause", token);
+                    ClipData content = ClipData.newPlainText("Code du connecteur Fil des jours", token);
                     if (Build.VERSION.SDK_INT >= 33) {
                         android.os.PersistableBundle extras = new android.os.PersistableBundle();
                         extras.putBoolean(ClipDescription.EXTRA_IS_SENSITIVE, true);
@@ -1590,13 +1911,13 @@ public final class MainActivity extends Activity {
             if (result == RESULT_OK) {
                 Uri uri = Uri.fromFile(new File(path));
                 if (photoPairing) analyzePairing(uri, path);
-                else analyze(uri, path, photoBarcode, photoDate == null ? foodDate : photoDate);
+                else analyze(uri, path, photoBarcode, photoDate == null ? day : photoDate);
             } else {
                 removePhoto(path);
             }
         } else if (request == GALLERY && result == RESULT_OK && data != null && data.getData() != null) {
             if (photoPairing) analyzePairing(data.getData(), null);
-            else analyze(data.getData(), null, photoBarcode, photoDate == null ? foodDate : photoDate);
+            else analyze(data.getData(), null, photoBarcode, photoDate == null ? day : photoDate);
         } else if (request == EXPORT && result == RESULT_OK && data != null && data.getData() != null) {
             Uri uri = data.getData();
             worker.execute(() -> {
@@ -1695,7 +2016,7 @@ public final class MainActivity extends Activity {
 
     private void setProcessing(boolean processing) {
         this.processing = processing;
-        if (tab == FOOD) render(true);
+        if (tab == TODAY) render(true);
     }
 
     private void completeRecognition(LocalDate day, FoodRecognition.Product product, boolean retryCode, String message) {
@@ -1760,10 +2081,9 @@ public final class MainActivity extends Activity {
             }
             boolean usePortion = method.getCheckedRadioButtonId() == portion.getId();
             if (previous == null && (usePortion ? per100 : kcal).getText().toString().trim().isEmpty()
-                    && new MealDescriptionDialog(this, journal, day, () -> render(true), chatgpt, chatgptWorker, mealProvider()).add(title, false)) {
-                foodDate = day;
-                tab = FOOD;
+                    && meal(day).add(title, false)) {
                 dialog.dismiss();
+                openDay(day);
                 return;
             }
             if (usePortion && previous == null && amount.getText().toString().trim().isEmpty()) {
@@ -1793,12 +2113,18 @@ public final class MainActivity extends Activity {
             }
             String source = previous != null ? previous.source() : product == null ? "Manuel" : product.source();
             journal.saveMeal(day, previous, title, total, consumed, basis, source);
-            foodDate = day;
-            if (tab == AI) stopShare(false);
-            tab = FOOD;
             dialog.dismiss();
-            render(true);
+            openDay(day);
         });
+    }
+
+    private CheckBox checkBox(String label, boolean checked) {
+        CheckBox box = new CheckBox(this);
+        box.setText(label);
+        box.setTextColor(INK);
+        box.setTypeface(PaperStyle.body(this));
+        box.setChecked(checked);
+        return box;
     }
 
     private RadioButton radio(String label) {
@@ -1806,6 +2132,7 @@ public final class MainActivity extends Activity {
         button.setId(View.generateViewId());
         button.setText(label);
         button.setTextColor(INK);
+        button.setTypeface(PaperStyle.body(this));
         return button;
     }
 
@@ -1827,8 +2154,19 @@ public final class MainActivity extends Activity {
     }
 
     private String displayDate(LocalDate date) {
-        String result = FULL_DATE.format(date);
-        return result.substring(0, 1).toUpperCase(FR) + result.substring(1);
+        return capital(FULL_DATE.format(date));
+    }
+
+    private static String capital(String label) {
+        return label.substring(0, 1).toUpperCase(FR) + label.substring(1);
+    }
+
+    private static String days(int count) {
+        return count + (count > 1 ? " jours" : " jour");
+    }
+
+    private static String statusLabel(String status) {
+        return status.equals("tenu") ? "tenu" : "non tenu";
     }
 
     private static String format(double value, int decimals) {
@@ -1881,37 +2219,106 @@ public final class MainActivity extends Activity {
         return form;
     }
 
-    private LinearLayout panel(LinearLayout parent, int color, int margin) {
-        LinearLayout panel = column();
-        int shadow = switch (color) {
-            case GOLD -> 0xFFDDBE6C;
-            case PEACH -> 0xFFD9A28C;
-            case BLUE -> 0xFF9CC3DC;
-            case VIOLET -> 0xFFB9ADE0;
-            default -> LINE;
-        };
-        float[] corners = {dp(22), dp(22), dp(18), dp(18), dp(24), dp(24), dp(16), dp(16)};
-        GradientDrawable edge = shape(shadow, 20, 0), front = shape(color == WHITE ? SURFACE : color, 20, 0);
-        edge.setCornerRadii(corners);
-        front.setCornerRadii(corners);
-        LayerDrawable sheets = new LayerDrawable(new android.graphics.drawable.Drawable[]{edge, front});
-        sheets.setLayerInset(1, 0, 0, 0, dp(4));
-        if (color == GOLD) {
-            GradientDrawable seam = shape(Color.TRANSPARENT, 15, 0);
-            seam.setStroke(dp(1), 0x59745726, dp(4), dp(4));
-            sheets.addLayer(seam);
-            sheets.setLayerInset(2, dp(7), dp(7), dp(7), dp(11));
-            GradientDrawable tape = shape(0xDDFFF0B7, 2, 0);
-            tape.setStroke(dp(1), 0x33A77526);
-            sheets.addLayer(tape);
-            sheets.setLayerSize(3, dp(42), dp(9));
-            sheets.setLayerGravity(3, Gravity.TOP | Gravity.RIGHT);
-            sheets.setLayerInset(3, 0, dp(1), dp(25), 0);
+    private LinearLayout card(LinearLayout parent, int margin) {
+        LinearLayout card = column();
+        card.setBackground(shape(SURFACE, 20, SOFT_LINE));
+        card.setPadding(dp(16), dp(16), dp(16), dp(16));
+        add(parent, card, margin);
+        return card;
+    }
+
+    private LinearLayout goldCard(LinearLayout parent, int margin) {
+        LinearLayout card = card(parent, margin);
+        GradientDrawable seam = shape(Color.TRANSPARENT, 15, 0);
+        seam.setStroke(dp(1), 0x59745726, dp(4), dp(4));
+        LayerDrawable sheets = new LayerDrawable(new Drawable[]{shape(GOLD, 20, GOLD_EDGE), seam});
+        sheets.setLayerInset(1, dp(6), dp(6), dp(6), dp(6));
+        card.setBackground(sheets);
+        card.setPadding(dp(18), dp(18), dp(18), dp(18));
+        return card;
+    }
+
+    private View progress(float ratio, int color) {
+        LinearLayout track = row();
+        track.setBackground(shape(color, 4, 0));
+        track.setClipToOutline(true);
+        View fill = new View(this);
+        fill.setBackground(shape(BRAND, 4, 0));
+        track.addView(fill, new LinearLayout.LayoutParams(0, dp(8), ratio));
+        track.addView(new View(this), new LinearLayout.LayoutParams(0, dp(8), 1 - ratio));
+        return track;
+    }
+
+    private void addRow(LinearLayout rows, View row) {
+        if (rows.getChildCount() > 0) {
+            View separator = new View(this);
+            separator.setBackgroundColor(SOFT_LINE);
+            rows.addView(separator, new LinearLayout.LayoutParams(-1, dp(1)));
         }
-        panel.setBackground(sheets);
-        panel.setPadding(dp(16), dp(16), dp(16), dp(20));
-        add(parent, panel, margin);
-        return panel;
+        rows.addView(row, new LinearLayout.LayoutParams(-1, -2));
+    }
+
+    private View entry(JournalIcon.Kind icon, String title, String detail, View end, Runnable action) {
+        LinearLayout line = row();
+        line.setGravity(Gravity.CENTER_VERTICAL);
+        line.setMinimumHeight(dp(52));
+        line.setPadding(0, dp(6), 0, dp(6));
+        line.setBackground(new RippleDrawable(ColorStateList.valueOf(0x189A3412), null, shape(Color.WHITE, 12, 0)));
+        if (icon != null) {
+            LinearLayout.LayoutParams size = new LinearLayout.LayoutParams(dp(24), dp(24));
+            size.setMarginEnd(dp(13));
+            line.addView(new JournalIcon(this, icon, ACCENT), size);
+        }
+        LinearLayout labels = column();
+        labels.addView(detail == null ? text(title, 16, INK) : heading(title, 16, INK));
+        if (detail != null) labels.addView(text(detail, 14, MUTED));
+        line.addView(labels, new LinearLayout.LayoutParams(0, -2, 1));
+        if (end != null) {
+            LinearLayout.LayoutParams size = end instanceof JournalIcon
+                    ? new LinearLayout.LayoutParams(dp(22), dp(22)) : new LinearLayout.LayoutParams(-2, -2);
+            size.setMarginStart(dp(10));
+            line.addView(end, size);
+        }
+        line.setOnClickListener(view -> action.run());
+        return line;
+    }
+
+    private View chevron() {
+        return new JournalIcon(this, JournalIcon.Kind.RIGHT, MUTED);
+    }
+
+    private TextView chip(String label) {
+        TextView chip = heading(label, 13, VIOLET_INK);
+        chip.setBackground(shape(VIOLET, 12, 0));
+        chip.setPadding(dp(10), dp(3), dp(10), dp(4));
+        return chip;
+    }
+
+    private View iconButton(JournalIcon.Kind kind, String label, Runnable action) {
+        FrameLayout button = new FrameLayout(this);
+        button.setContentDescription(label);
+        button.setBackground(new RippleDrawable(ColorStateList.valueOf(0x229A3412), null, shape(Color.WHITE, 14, 0)));
+        button.addView(new JournalIcon(this, kind, ACCENT), new FrameLayout.LayoutParams(dp(24), dp(24), Gravity.CENTER));
+        button.setOnClickListener(view -> action.run());
+        return button;
+    }
+
+    private View segments(String[] labels, int selected, int height, IntConsumer choose) {
+        LinearLayout track = row();
+        track.setBackground(shape(SIDE, 15, 0));
+        track.setPadding(dp(4), dp(4), dp(4), dp(4));
+        for (int i = 0; i < labels.length; i++) {
+            int index = i;
+            TextView part = heading(labels[i], 15, i == selected ? ACCENT : MUTED);
+            part.setGravity(Gravity.CENTER);
+            part.setSingleLine(true);
+            part.setSelected(i == selected);
+            part.setBackground(new RippleDrawable(ColorStateList.valueOf(0x189A3412),
+                    i == selected ? shape(SURFACE, 12, 0) : null, shape(Color.WHITE, 12, 0)));
+            part.setOnClickListener(view -> choose.accept(index));
+            track.addView(part, new LinearLayout.LayoutParams(0, dp(height), 1));
+        }
+        return track;
     }
 
     private void add(LinearLayout parent, View child, int margin) {
@@ -1958,7 +2365,7 @@ public final class MainActivity extends Activity {
     private TextView button(String label, int fill, int color, Runnable action) {
         android.widget.Button button = new android.widget.Button(this);
         button.setText(label);
-        button.setTextSize(14);
+        button.setTextSize(15);
         button.setTextColor(color);
         button.setAllCaps(false);
         button.setTypeface(PaperStyle.title(this));
@@ -1968,10 +2375,10 @@ public final class MainActivity extends Activity {
         button.setMinimumWidth(0);
         button.setPadding(dp(9), dp(7), dp(9), dp(7));
         button.setStateListAnimator(null);
-        GradientDrawable front = shape(fill, 14, 0);
-        android.graphics.drawable.Drawable felt = front;
+        GradientDrawable front = shape(fill, 14, fill == FIELD ? LINE : 0);
+        Drawable felt = front;
         if (fill == BRAND) {
-            LayerDrawable raised = new LayerDrawable(new android.graphics.drawable.Drawable[]{shape(0xFF9E3519, 14, 0), front});
+            LayerDrawable raised = new LayerDrawable(new Drawable[]{shape(0xFF8F3216, 14, 0), front});
             raised.setLayerInset(1, 0, 0, 0, dp(3));
             felt = raised;
         }
@@ -1981,7 +2388,11 @@ public final class MainActivity extends Activity {
     }
 
     private TextView link(String label, Runnable action) {
-        return button(label, Color.TRANSPARENT, ACCENT, action);
+        TextView link = button(label, Color.TRANSPARENT, ACCENT, action);
+        link.setGravity(Gravity.END | Gravity.CENTER_VERTICAL);
+        link.setMinWidth(dp(48));
+        link.setPadding(dp(12), dp(7), 0, dp(7));
+        return link;
     }
 
     private GradientDrawable shape(int color, int radius, int stroke) {
