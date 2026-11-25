@@ -1135,10 +1135,10 @@ Légume cuit (aliment moyen)	43.5	légumes|ratatouille|wok de légumes|poêlée 
 Fève, bouillie/cuite à l'eau	82.9	
 Haricot blanc, bouilli/cuit à l'eau	112	haricots blancs
 Haricot rouge, bouilli/cuit à l'eau	116	haricots rouges
-Pois chiche, bouilli/cuit à l'eau	147	pois chiches cuits
+Pois chiche, bouilli/cuit à l'eau	147	pois chiches cuits|pois chiches
 Haricot flageolet, bouilli/cuit à l'eau	112	
 Tomate grappe, crue	20.1	
-Lentille verte, bouillie/cuite à l'eau	127	lentilles cuites
+Lentille verte, bouillie/cuite à l'eau	127	lentilles cuites|lentilles|lentilles vertes
 Crosne, cuit	50.8	
 Protéine de soja texturée, réhydratée	150	
 Farine de soja	460	
@@ -1244,8 +1244,8 @@ Pâte sablée pur beurre, cuite	469
 Chouquette	381	
 Profiterole avec glace vanille et sauce chocolat	286	éclair|éclair au chocolat|pâtisserie|chou à la crème
 Profiteroles (crème pâtissière et sauce chocolat), préemballées	273	éclair|éclair au chocolat|pâtisserie|chou à la crème
-Chausson aux pommes	338		100
-Tarte normande aux pommes (garniture farine, oeufs, crème, sucre, calvados)	313	tarte aux pommes|tarte aux fruits
+Chausson aux pommes	338	chausson aux pommes|tarte|tarte au citron|tarte aux fraises|crumble	100
+Tarte normande aux pommes (garniture farine, oeufs, crème, sucre, calvados)	313	tarte aux pommes|tarte aux fruits|tarte|tarte au citron|tarte aux fraises|crumble
 Gâteau de semoule aux raisins et caramel, rayon frais	146	
 Gâteau de semoule, appertisé	150	
 Gâteau de riz au caramel, rayon frais	143	
@@ -1382,8 +1382,8 @@ Crêpe ou Galette fourrée béchamel jambon, préemballée	136
 Crêpe ou Galette fourrée béchamel jambon fromage, préemballée	182	crêpe|galette|crêpe jambon fromage
 Crêpe ou Galette fourrée béchamel champignon, préemballée	150	
 Bouchée à la reine, à la viande/volaille/quenelle	292	
-Hamburger, provenant de fast food	246	hamburger|burger	200
-Cheeseburger, provenant de fast food	268	cheeseburger	150
+Hamburger, provenant de fast food	246	hamburger|burger|mcdo|macdo|menu burger|burger king|fast food	200
+Cheeseburger, provenant de fast food	268	cheeseburger|burger|mcdo|macdo|menu burger|burger king|fast food	150
 Double cheeseburger, provenant de fast food	299	
 Burger au poisson, provenant de fast food	263	
 Tarte aux légumes, préemballée	216	
@@ -1914,7 +1914,7 @@ Confiture ou Marmelade, tout type de fruits, teneur en sucre inconnue (aliment m
 Barre chocolatée biscuitée	523	
 Barre chocolatée non biscuitée enrobée	496	
 Barre à la noix de coco, enrobée de chocolat	475	
-Chocolat au lait, tablette	537	chocolat au lait
+Chocolat au lait, tablette	537	chocolat au lait|nutella|pâte à tartiner
 Confiture ou Marmelade, tout type de fruits (aliment moyen)	249	confiture|marmelade
 Chewing-gum, sucré	372	
 Barres ou confiserie chocolatées au lait	551	
@@ -1949,7 +1949,7 @@ Confiture, tout type de fruits, allégée en sucres (extra ou classique)	162
 Pollen,frais	285	
 Barre céréalière aux fruits	377	barre de céréales|barre céréalière
 Barre céréalière aux amandes ou noisettes	444	
-Chocolat, en tablette (aliment moyen)	557	chocolat
+Chocolat, en tablette (aliment moyen)	557	chocolat|nutella|pâte à tartiner
 Chewing-gum, teneur en sucre inconnue (aliment moyen)	279	
 Grains de blé soufflés au miel ou caramel, enrichis en vitamines et minéraux	391	
 Céréales pour petit déjeuner chocolatées, non fourrées, enrichies en vitamines et minéraux	408	

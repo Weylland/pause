@@ -40,12 +40,12 @@ pain\nfromage : 30 g	pain|60*|=Pain (aliment moyen)	fromage|30|=Fromage (aliment
 80 g de saumon fumé avec 100 g de riz blanc cuit	saumon fumé|80|=Saumon fumé	riz blanc cuit|100|=Riz blanc, cuit, non salé
 12 kg de pommes	pommes|?|=Pomme Golden, pulpe et peau, crue
 40 g de zorglub	zorglub|40|-
-4 quarts au citron	quarts au citron|100*|-
+4 quarts au citron	quarts au citron|400*|~Citron, pulpe, cru
 un quatre-quarts	quatre-quarts|80*|~Cake aux fruits, préemballé
 jambon-beurre	jambon-beurre|200*|=Sandwich baguette, jambon, beurre
 un bol de soupe	soupe|300*|=Soupe (aliment moyen)
 soupe	soupe|300*|=Soupe (aliment moyen)
-un petit bol de soupe maison	soupe maison|210*|=Soupe (aliment moyen)
+un petit bol de soupe maison	soupe|210*|=Soupe (aliment moyen)
 un grand verre de lait	lait|260*|=Lait demi-écrémé, UHT
 beaucoup de frites	frites|225*|~Frites de pommes de terre, surgelées, rôties/cuites au four
 2 bols de céréales	céréales|100*|=Céréales pour petit déjeuner (aliment moyen)
@@ -59,7 +59,26 @@ salade de tomates	salade|60*|=Salade sucrine, crue	tomates|110*|=Tomate, crue
 des frites	frites|150*|~Frites de pommes de terre, surgelées, rôties/cuites au four
 une louche de soupe	soupe|125*|=Soupe (aliment moyen)
 poulet curry	poulet curry|300*|=Poulet au curry et au lait de coco
-un mcdo	mcdo|100*|-
+un mcdo	mcdo|400*|~Hamburger, provenant de fast food
 un bol de zorglub	zorglub|300*|-
 couscous	couscous|350*|~Couscous royal (avec plusieurs viandes), préemballé
 gâteau	gâteau|80*|~Cake aux fruits, préemballé
+un bol de soup	soupe|300*|=Soupe (aliment moyen)
+deux tartine beure confitur	tartine|80*|=Pain (aliment moyen)	beurre|10*|=Beurre à 82% MG, doux	confiture|20*|=Confiture ou Marmelade, tout type de fruits (aliment moyen)
+pouler riz	poulet|130*|~Poulet, cuisse, viande et peau, rôtie/cuite au four	riz|180*|~Riz blanc, cuit, non salé
+gratin dauphinois 200 g	gratin dauphinois|200|~Gratin de pâtes
+poulet machin riz	poulet|130*|~Poulet, cuisse, viande et peau, rôtie/cuite au four	riz|180*|~Riz blanc, cuit, non salé
+soupe sans sel	soupe sans sel|300*|~Soupe (aliment moyen)
+une crêpe au nutella	crêpe|70*|~Crêpe ou Galette fourrée béchamel jambon fromage, préemballée	nutella|20*|~Chocolat au lait, tablette
+repas au resto	repas au resto|400*|-
+un steack frite	steak|130*|~Boeuf, entrecôte, partie maigre, grillée/poêlée	frite|150*|~Frites de pommes de terre, surgelées, rôties/cuites au four
+c. à café d’huile	huile|4*|=Huile combinée, mélange d'huile d'olive et de graines
+avocat toast	avocat toast|150*|~Avocat, pulpe, cru
+j’ai mangé une pizza	pizza|350*|=Pizza (aliment moyen)
+ce midi j'ai pris un kebab et bu un coca	kebab|350*|~Sandwich grec ou Kebab, pita, crudités	coca|330*|=Cola, sucré
+une soupe maison	soupe|300*|=Soupe (aliment moyen)
+lentilles saucisse	lentilles|180*|=Lentille verte, bouillie/cuite à l'eau	saucisse|100*|=Saucisse (aliment moyen)
+truc	truc|100*|-
+ce soir, soupe et pain	soupe|300*|=Soupe (aliment moyen)	pain|60*|=Pain (aliment moyen)
+midi : poulet riz	poulet|130*|~Poulet, cuisse, viande et peau, rôtie/cuite au four	riz|180*|~Riz blanc, cuit, non salé
+au goûter une pomme	pomme|150*|=Pomme Golden, pulpe et peau, crue

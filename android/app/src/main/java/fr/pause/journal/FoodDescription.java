@@ -27,6 +27,7 @@ final class FoodDescription {
     private static final Pattern COUNT = Pattern.compile("^(?:(" + DIGITS + ")(?:\\s*([x×])(?=[\\s0-9])\\s*|\\s+)|(" + WORDS + "))(.+)$", FLAGS);
     private static final Pattern CORRECTION = Pattern.compile("^.+?\\s*:\\s*(?:" + DIGITS + ")\\s*" + UNIT + "$", FLAGS);
     private static final Pattern SEPARATOR = Pattern.compile("\\s+(?:et|avec|puis)\\s+|[;+&•]|(?<![0-9]),|,(?![0-9])", FLAGS);
+    private static final Pattern TOLD = Pattern.compile("^(?:(?:hier|aujourd['’]hui|(?:[àa]\\s+|(?:hier|ce|le)\\s+)?(?:matin|midi|soir)|au\\s+(?:petit[\\s-]+d[ée]jeuner|d[ée]jeuner|d[îi]ner|go[ûu]ter))(?:[\\s,:]+|$))?(?:(?:j['’\\s]?\\s*ai\\s+)?(?:mang[ée]+|bu|pris|grignot[ée]+)\\s+)?", FLAGS);
     private static final Pattern LITTLE = Pattern.compile("^((?:un\\s+)?(?:petit\\s+)?peu|beaucoup)\\s+(?:de\\s+|d['’]\\s*)", FLAGS);
     private static final Pattern ARTICLE = Pattern.compile("^(?:(?:des|du|de|une|un|la|les|le|quelques)\\s+|[dl]['’]\\s*)+", FLAGS);
     private static final String SIZES = "(petite?s?|grande?s?|gros(?:se)?s?|bonne?s?|bons?)";
@@ -35,7 +36,7 @@ final class FoodDescription {
     private static final Pattern CONTAINER = Pattern.compile("^(?:" + SIZES + "\\s+)?"
             + "(verres?|tasses?|bols?|parts?|tranches?|portions?|assiettes?|morceaux?|poign[ée]es?|pots?|canettes?|bouteilles?|carr[ée]s?"
             + "|rondelles?|pinc[ée]es?|sachets?|paquets?|barquettes?|briques?|louches?|gousses?"
-            + "|cuill(?:[èe]res?|[ée]r[ée]es?)(?:\\s+[àa]\\s+(?:soupe|caf[ée]))?|c\\.?\\s*[àa]\\.?\\s*[sc]\\.?)\\s+(?:de\\s+|du\\s+|des\\s+|d['’]\\s*)", FLAGS);
+            + "|cuill(?:[èe]res?|[ée]r[ée]es?)(?:\\s+[àa]\\s+(?:soupe|caf[ée]))?|c\\.?\\s*[àa]\\.?\\s*(?:soupe|caf[ée]|[sc]\\.?))\\s+(?:de\\s+|du\\s+|des\\s+|d['’]\\s*)", FLAGS);
     private static final List<String> NUMBERS = Arrays.asList("un", "deux", "trois", "quatre", "cinq", "six", "sept", "huit", "neuf", "dix", "onze", "douze");
     private static final List<String> IGNORED = Arrays.asList("a", "au", "aux", "d", "de", "des", "du", "en", "et", "l", "la", "le", "les", "ou");
     private static final List<String> EXTRAS = Arrays.asList("bio", "chaud", "chaude", "fait", "faite", "frais", "fraiche", "froid", "froide", "maison");
@@ -44,6 +45,8 @@ final class FoodDescription {
     record Serving(String container, List<String> foods, double grams) {}
     record Table(List<Reference> references, List<Serving> servings) {}
     record Portion(String name, Double grams, boolean usual, Reference reference, Reference guess, List<Reference> options) {}
+
+    static final Reference AVERAGE = new Reference("Valeur moyenne", 150, new ArrayList<>(), new ArrayList<>(), null);
 
     private FoodDescription() {}
 
@@ -58,7 +61,7 @@ final class FoodDescription {
                         ? new Portion(item.name(), correction.grams(), false, item.reference(), item.guess(), item.options()) : item);
                 continue;
             }
-            for (String piece : SEPARATOR.split(line)) for (String part : parts(clean(piece), table)) {
+            for (String piece : SEPARATOR.split(line)) for (String part : parts(TOLD.matcher(clean(piece)).replaceFirst(""), table)) {
                 Portion portion = portion(part, table);
                 if (portion != null) portions.add(portion);
             }
@@ -76,34 +79,77 @@ final class FoodDescription {
 
     private static List<String> parts(String piece, Table table) {
         Portion portion = portion(piece, table);
-        if (portion == null || !portion.usual() || !piece.endsWith(portion.name())) return Arrays.asList(piece);
-        List<String> names = split(table.references(), portion.name());
-        if (names.size() < 2) return Arrays.asList(piece);
-        names.set(0, piece.substring(0, piece.length() - portion.name().length()) + names.get(0));
+        int at = portion == null ? -1 : piece.lastIndexOf(portion.name());
+        if (at < 0) return Arrays.asList(piece);
+        List<String> names = identify(table.references(), portion.name());
+        if (names.size() > 1 && !portion.usual()) return Arrays.asList(piece);
+        names.set(0, piece.substring(0, at) + names.get(0) + piece.substring(at + portion.name().length()));
         return names;
+    }
+
+    private static List<String> identify(List<Reference> table, String said) {
+        List<String> names = split(table, said);
+        if (!names.isEmpty()) return names;
+        if (!options(table, plain(normalize(said))).isEmpty()) return new ArrayList<>(Arrays.asList(said));
+        String name = Arrays.stream(said.split(" ")).map(word -> spell(table, word)).collect(Collectors.joining(" "));
+        names = split(table, name);
+        if (names.isEmpty() && options(table, normalize(name)).isEmpty()) names = segments(table, Arrays.asList(name.split(" ")), true);
+        return names.size() < 2 ? new ArrayList<>(Arrays.asList(name)) : names;
+    }
+
+    private static String plain(String query) {
+        return Arrays.stream(query.split(" ")).filter(word -> !EXTRAS.contains(word)).collect(Collectors.joining(" "));
+    }
+
+    private static String spell(List<Reference> table, String text) {
+        String word = stem(normalize(text)), best = text;
+        if (word.length() < 4 || word.contains(" ") || EXTRAS.contains(word) || table.stream().anyMatch(item ->
+                item.stems().stream().anyMatch(key -> Arrays.asList(key.split(" ")).contains(word)))) return text;
+        int limit = word.length() < 8 ? 1 : 2;
+        for (Reference item : table) for (String key : item.stems().subList(1, item.stems().size())) for (String other : key.split(" ")) {
+            if (other.length() < 4 || other.charAt(0) != word.charAt(0) || Math.abs(other.length() - word.length()) > limit) continue;
+            int distance = distance(word, other);
+            if (distance > limit) continue;
+            best = other;
+            limit = distance - 1;
+        }
+        return best;
+    }
+
+    private static int distance(String first, String second) {
+        int[][] costs = new int[first.length() + 1][second.length() + 1];
+        for (int i = 0; i <= first.length(); i++) for (int j = 0; j <= second.length(); j++) {
+            if (i == 0 || j == 0) { costs[i][j] = i + j; continue; }
+            int cost = Math.min(Math.min(costs[i - 1][j], costs[i][j - 1]) + 1,
+                    costs[i - 1][j - 1] + (first.charAt(i - 1) == second.charAt(j - 1) ? 0 : 1));
+            if (i > 1 && j > 1 && first.charAt(i - 1) == second.charAt(j - 2) && first.charAt(i - 2) == second.charAt(j - 1))
+                cost = Math.min(cost, costs[i - 2][j - 2] + 1);
+            costs[i][j] = cost;
+        }
+        return costs[first.length()][second.length()];
     }
 
     private static List<String> split(List<Reference> table, String name) {
         String query = normalize(name), first = stem(query).split(" ")[0] + " ";
         List<String> names = exact(table, query).isEmpty() && options(table, query).stream().noneMatch(item ->
-                item.stems().stream().anyMatch(key -> (key + " ").startsWith(first))) ? segments(table, Arrays.asList(name.split(" "))) : null;
+                item.stems().stream().anyMatch(key -> (key + " ").startsWith(first))) ? segments(table, Arrays.asList(name.split(" ")), false) : null;
         return names == null ? new ArrayList<>() : names;
     }
 
-    private static List<String> segments(List<Reference> table, List<String> words) {
+    private static List<String> segments(List<Reference> table, List<String> words, boolean tolerant) {
         int start = 0;
         while (start < words.size() && (IGNORED.contains(normalize(words.get(start))) || EXTRAS.contains(normalize(words.get(start))))) start++;
         List<String> names = new ArrayList<>();
-        if (start == words.size()) return names;
+        if (start == words.size() || tolerant && normalize(words.get(start)).equals("sans")) return names;
         for (int end = words.size(); end > start; end--) {
             String head = String.join(" ", words.subList(start, end));
-            List<String> rest = exact(table, normalize(head)).isEmpty() ? null : segments(table, words.subList(end, words.size()));
+            List<String> rest = exact(table, normalize(head)).isEmpty() ? null : segments(table, words.subList(end, words.size()), tolerant);
             if (rest == null) continue;
             names.add(head);
             names.addAll(rest);
             return names;
         }
-        return null;
+        return tolerant ? segments(table, words.subList(start + 1, words.size()), true) : null;
     }
 
     private static Portion portion(String piece, Table table) {
@@ -155,17 +201,19 @@ final class FoodDescription {
         name = (name.length() > 90 ? name.substring(0, 90) : name).trim();
         String said = normalize(name);
         if (said.length() < 2) return null;
-        String query = options(table.references(), said).isEmpty() ? Arrays.stream(said.split(" "))
-                .filter(word -> !EXTRAS.contains(word)).collect(Collectors.joining(" ")) : said;
+        String known = options(table.references(), said).isEmpty() ? plain(said) : said;
+        boolean near = options(table.references(), known).isEmpty();
+        List<String> close = near ? segments(table.references(), Arrays.asList(known.split(" ")), true) : new ArrayList<>();
+        String query = close.isEmpty() ? known : close.get(0);
         List<Reference> exact = exact(table.references(), query), options = options(table.references(), query);
-        Reference reference = exact.size() == 1 ? exact.get(0) : null;
-        Reference guess = reference != null ? reference : options.stream()
+        Reference reference = exact.size() == 1 && !near ? exact.get(0) : null;
+        Reference guess = exact.size() == 1 ? exact.get(0) : options.stream()
                 .filter(item -> !raw(item.keys().get(0)) || raw(query)).findFirst().orElse(options.isEmpty() ? null : options.get(0));
         if (measured) return new Portion(name, grams, false, reference, guess, options);
         List<Double> weights = exact.stream().map(Reference::unit).filter(Objects::nonNull).distinct().collect(Collectors.toList());
         Double unit = weights.size() == 1 ? weights.get(0) : exact.isEmpty() && guess != null ? guess.unit() : null;
         double weight = container == null && count != null && unit != null ? count * unit
-                : serving(table.servings(), container, query, guess) * (count != null && (container != null || count <= 3) ? count : 1);
+                : serving(table.servings(), container, said, guess) * (count != null && (container != null || count <= 3) ? count : 1);
         return new Portion(name, grams(Math.floor(weight * factor * 10 + .5) / 10, "g"), true, reference, guess, options);
     }
 

@@ -47,10 +47,12 @@ internal static class FoodReference
         string query = Normalize(name);
         if (query.Length < 2) return new(null, null, [], null);
         if (Options(query).Length == 0) query = string.Join(' ', query.Split(' ').Where(word => !Extras.Contains(word)));
+        bool near = Options(query).Length == 0;
+        if (near) query = Segments(query.Split(' '), true)!.FirstOrDefault() ?? query;
         Item[] exact = Exact(query);
         Item[] options = Options(query);
-        Item? reference = exact.Length == 1 ? exact[0] : null;
-        Item? guess = reference ?? options.FirstOrDefault(item => !Raw(item.Keys[0]) || Raw(query)) ?? options.FirstOrDefault();
+        Item? reference = exact.Length == 1 && !near ? exact[0] : null;
+        Item? guess = reference ?? (exact.Length == 1 ? exact[0] : null) ?? options.FirstOrDefault(item => !Raw(item.Keys[0]) || Raw(query)) ?? options.FirstOrDefault();
         double[] weights = exact.Where(item => item.Unit.HasValue).Select(item => item.Unit!.Value).Distinct().ToArray();
         return new(reference, guess, options, weights.Length == 1 ? weights[0] : exact.Length == 0 ? guess?.Unit : null);
     }
@@ -65,16 +67,57 @@ internal static class FoodReference
             ? [] : Segments(name.Split(' ')) ?? [];
     }
 
-    private static string[]? Segments(string[] words)
+    internal static string[] Identify(string name)
+    {
+        string[] names = Split(name);
+        if (names.Length > 0) return names;
+        if (Options(string.Join(' ', Normalize(name).Split(' ').Where(word => !Extras.Contains(word)))).Length > 0) return [name];
+        name = string.Join(' ', name.Split(' ').Select(Spell));
+        names = Split(name);
+        if (names.Length == 0 && Options(Normalize(name)).Length == 0) names = Segments(name.Split(' '), true)!;
+        return names.Length < 2 ? [name] : names;
+    }
+
+    private static string Spell(string text)
+    {
+        string word = Stem(Normalize(text)), best = text;
+        if (word.Length < 4 || word.Contains(' ') || Extras.Contains(word) || Catalog.Value.Any(item => item.Stems.Any(key => key.Split(' ').Contains(word)))) return text;
+        int limit = word.Length < 8 ? 1 : 2;
+        foreach (string other in Catalog.Value.SelectMany(item => item.Stems.Skip(1)).SelectMany(key => key.Split(' ')))
+        {
+            if (other.Length < 4 || other[0] != word[0] || Math.Abs(other.Length - word.Length) > limit) continue;
+            int distance = Distance(word, other);
+            if (distance > limit) continue;
+            best = other;
+            limit = distance - 1;
+        }
+        return best;
+    }
+
+    private static int Distance(string first, string second)
+    {
+        var costs = new int[first.Length + 1, second.Length + 1];
+        for (int i = 0; i <= first.Length; i++)
+            for (int j = 0; j <= second.Length; j++)
+            {
+                if (i == 0 || j == 0) { costs[i, j] = i + j; continue; }
+                int cost = Math.Min(Math.Min(costs[i - 1, j], costs[i, j - 1]) + 1, costs[i - 1, j - 1] + (first[i - 1] == second[j - 1] ? 0 : 1));
+                if (i > 1 && j > 1 && first[i - 1] == second[j - 2] && first[i - 2] == second[j - 1]) cost = Math.Min(cost, costs[i - 2, j - 2] + 1);
+                costs[i, j] = cost;
+            }
+        return costs[first.Length, second.Length];
+    }
+
+    private static string[]? Segments(string[] words, bool tolerant = false)
     {
         words = words.SkipWhile(word => Ignored.Contains(Normalize(word)) || Extras.Contains(Normalize(word))).ToArray();
-        if (words.Length == 0) return [];
+        if (words.Length == 0 || tolerant && Normalize(words[0]) == "sans") return [];
         for (int kept = words.Length; kept > 0; kept--)
         {
             string head = string.Join(' ', words[..kept]);
-            if (Exact(Normalize(head)).Length > 0 && Segments(words[kept..]) is string[] rest) return [head, .. rest];
+            if (Exact(Normalize(head)).Length > 0 && Segments(words[kept..], tolerant) is string[] rest) return [head, .. rest];
         }
-        return null;
+        return tolerant ? Segments(words[1..], true) : null;
     }
 
     internal static double Portion(string? container, string name, Item? reference)

@@ -1733,7 +1733,7 @@ public final class MainActivity extends Activity {
         LinearLayout totalForm = column(), portionForm = column();
         add(form, totalForm, 0);
         add(form, portionForm, 0);
-        EditText kcal = field(totalForm, "Calories de la portion (kcal)",
+        EditText kcal = field(totalForm, previous == null ? "Calories de la portion (kcal), vide pour une estimation" : "Calories de la portion (kcal)",
                 previous == null ? "" : decimalInput(previous.kcal()), decimalType(), 10);
         EditText per100 = field(portionForm, "Calories pour 100 g ou 100 ml", decimalInput(energy), decimalType(), 10);
         EditText amount = field(portionForm, "Quantité consommée (g ou ml)",
@@ -1759,6 +1759,17 @@ public final class MainActivity extends Activity {
                 return;
             }
             boolean usePortion = method.getCheckedRadioButtonId() == portion.getId();
+            if (previous == null && (usePortion ? per100 : kcal).getText().toString().trim().isEmpty()
+                    && new MealDescriptionDialog(this, journal, day, () -> render(true), chatgpt, chatgptWorker, mealProvider()).add(title, false)) {
+                foodDate = day;
+                tab = FOOD;
+                dialog.dismiss();
+                return;
+            }
+            if (usePortion && previous == null && amount.getText().toString().trim().isEmpty()) {
+                List<FoodDescription.Portion> parts = MealDescriptionDialog.parse(this, title);
+                amount.setText(decimalInput(parts.isEmpty() || parts.get(0).grams() == null ? Double.valueOf(100) : parts.get(0).grams()));
+            }
             Double basis = null, consumed = null;
             double total;
             if (usePortion) {

@@ -72,6 +72,11 @@ cuillere a soupe		15
 cuillere a cafe	huile	4
 cuillere a cafe	sucre	4
 cuillere a cafe		5
+*	mcdo|macdo|menu|fast food|burger king	400
+*	repas|resto|restaurant|dejeuner|diner|plat|reste	400
+*	nutella|pate a tartiner	20
+*	bonbon	20
+*	houmous	50
 *	tartine	40
 *	sushi|maki	150
 *	nem	100
@@ -84,6 +89,7 @@ cuillere a cafe		5
 *	crepe|gaufre|beignet	70
 *	eclair|patisserie|chou a la creme	90
 *	boeuf bourguignon|blanquette|poulet curry|poulet au curry|curry de poulet	300
+*	curry de|curry d agneau|curry vert|curry rouge	300
 *	curry|paprika|poivre|cannelle|epice	2
 *	barre de cereales|barre cerealiere	25
 *	biscuit aperitif|apero	30
@@ -101,7 +107,7 @@ cuillere a cafe		5
 *	whisky|rhum|vodka|pastis	40
 *	huile|beurre|margarine	10
 *	sauce|vinaigrette|mayonnaise|ketchup|moutarde|pesto	15
-*	confiture|miel|marmelade|pate a tartiner	20
+*	confiture|miel|marmelade	20
 *	sucre	5
 *	creme caramel|creme brulee|creme dessert	120
 *	creme	30
@@ -143,7 +149,7 @@ cuillere a cafe		5
 *	lasagnes|hachis|tartiflette|chili	300
 *	gratin	250
 *	couscous|paella|cassoulet|tajine|choucroute	350
-*	tarte	120
+*	tarte|crumble	120
 *	gateau|cake	80
 *	mousse|compote|glace|sorbet	100
 *	biscuit|cookie	30

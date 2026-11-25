@@ -16,6 +16,7 @@ internal sealed record MealEstimate(string Source, EstimatedFood[] Foods)
     {
         Timeout = TimeSpan.FromSeconds(25), MaxResponseContentBufferSize = 262144
     };
+    internal const double UnknownPer100 = 150;
     private const RegexOptions Flags = RegexOptions.IgnoreCase | RegexOptions.CultureInvariant;
     private const string Digits = @"[0-9]+\s*/\s*[0-9]+|[0-9]+(?:[.,][0-9]+)?|[½¼¾]";
     private const string Words = @"(?:une?\s+)?demie?[\s-]+|(?:une?|deux|trois|quatre|cinq|six|sept|huit|neuf|dix|onze|douze)\s+";
@@ -25,6 +26,7 @@ internal sealed record MealEstimate(string Source, EstimatedFood[] Foods)
     private static readonly Regex Count = new("^(?:(" + Digits + @")(?:\s*([x×])(?=[\s0-9])\s*|\s+)|(" + Words + "))(.+)$", Flags);
     private static readonly Regex Correction = new(@"^.+?\s*:\s*(?:" + Digits + @")\s*" + Unit + "$", Flags);
     private static readonly Regex Separator = new(@"\s+(?:et|avec|puis)\s+|[;+&•]|(?<![0-9]),|,(?![0-9])", Flags);
+    private static readonly Regex Told = new(@"^(?:(?:hier|aujourd['’]hui|(?:[àa]\s+|(?:hier|ce|le)\s+)?(?:matin|midi|soir)|au\s+(?:petit[\s-]+d[ée]jeuner|d[ée]jeuner|d[îi]ner|go[ûu]ter))(?:[\s,:]+|$))?(?:(?:j['’\s]?\s*ai\s+)?(?:mang[ée]+|bu|pris|grignot[ée]+)\s+)?", Flags);
     private static readonly Regex Little = new(@"^((?:un\s+)?(?:petit\s+)?peu|beaucoup)\s+(?:de\s+|d['’]\s*)", Flags);
     private static readonly Regex Article = new(@"^(?:(?:des|du|de|une|un|la|les|le|quelques)\s+|[dl]['’]\s*)+", Flags);
     private const string Sizes = "(petite?s?|grande?s?|gros(?:se)?s?|bonne?s?|bons?)";
@@ -32,11 +34,11 @@ internal sealed record MealEstimate(string Source, EstimatedFood[] Foods)
     private static readonly Regex Container = new("^(?:" + Sizes + @"\s+)?"
         + "(verres?|tasses?|bols?|parts?|tranches?|portions?|assiettes?|morceaux?|poign[ée]es?|pots?|canettes?|bouteilles?|carr[ée]s?"
         + "|rondelles?|pinc[ée]es?|sachets?|paquets?|barquettes?|briques?|louches?|gousses?"
-        + @"|cuill(?:[èe]res?|[ée]r[ée]es?)(?:\s+[àa]\s+(?:soupe|caf[ée]))?|c\.?\s*[àa]\.?\s*[sc]\.?)\s+(?:de\s+|du\s+|des\s+|d['’]\s*)", Flags);
+        + @"|cuill(?:[èe]res?|[ée]r[ée]es?)(?:\s+[àa]\s+(?:soupe|caf[ée]))?|c\.?\s*[àa]\.?\s*(?:soupe|caf[ée]|[sc]\.?))\s+(?:de\s+|du\s+|des\s+|d['’]\s*)", Flags);
     private static readonly string[] Numbers = ["un", "deux", "trois", "quatre", "cinq", "six", "sept", "huit", "neuf", "dix", "onze", "douze"];
     private static readonly Regex Barcode = new(@"^Code-barres (\d{8}|\d{12,14})(?:\r?\n(.+))?$", RegexOptions.IgnoreCase);
     private static string CacheFile(MealDraft draft) => Path.Combine(JournalStore.DirectoryPath, "estimates", draft.Id + ".json");
-    private static string Fingerprint(MealDraft draft) => Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes("ciqual-v4\n" + draft.Description)));
+    private static string Fingerprint(MealDraft draft) => Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes("ciqual-v5\n" + draft.Description)));
     private sealed record Cached(string Fingerprint, MealEstimate Estimate);
 
     internal static MealEstimate? Read(MealDraft draft)
@@ -77,7 +79,8 @@ internal sealed record MealEstimate(string Source, EstimatedFood[] Foods)
             EstimatedFood? product = null;
             try { product = await LookupBarcodeAsync(scan.Groups[1].Value, scan.Groups[2].Value, cancellation); }
             catch (Exception error) when (!cancellation.IsCancellationRequested && error is HttpRequestException or JsonException or OperationCanceledException) { }
-            if (product is not null) return new("Open Food Facts", [product]);
+            if (product is not null)
+                return new("Open Food Facts", [product with { Grams = FoodReference.Portion(null, product.Name, FoodReference.Match(product.Name).Guess), Usual = true }]);
             description = scan.Groups[2].Value.Trim();
             if (description.Length == 0) return null;
         }
@@ -107,7 +110,7 @@ internal sealed record MealEstimate(string Source, EstimatedFood[] Foods)
                     ? (item.Name, correction.Grams, false) : item).ToList();
                 continue;
             }
-            foreach (string piece in Separator.Split(line).SelectMany(piece => Parts(Clean(piece))))
+            foreach (string piece in Separator.Split(line).SelectMany(piece => Parts(Told.Replace(Clean(piece), "", 1))))
                 if (ParsePortion(piece) is { } portion) portions.Add(portion);
         }
         if (portions.Count > 20) return [];
@@ -121,9 +124,12 @@ internal sealed record MealEstimate(string Source, EstimatedFood[] Foods)
 
     private static string[] Parts(string piece)
     {
-        if (ParsePortion(piece) is not { Usual: true } portion || !piece.EndsWith(portion.Name, StringComparison.Ordinal)) return [piece];
-        string[] names = FoodReference.Split(portion.Name);
-        return names.Length < 2 ? [piece] : [piece[..^portion.Name.Length] + names[0], .. names[1..]];
+        if (ParsePortion(piece) is not { } portion) return [piece];
+        int at = piece.LastIndexOf(portion.Name, StringComparison.Ordinal);
+        if (at < 0) return [piece];
+        string[] names = FoodReference.Identify(portion.Name);
+        if (names.Length > 1 && !portion.Usual) return [piece];
+        return [piece[..at] + names[0] + piece[(at + portion.Name.Length)..], .. names[1..]];
     }
 
     private static (string Name, double? Grams, bool Usual)? ParsePortion(string piece)

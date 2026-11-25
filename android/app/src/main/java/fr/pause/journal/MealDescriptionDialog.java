@@ -93,18 +93,23 @@ final class MealDescriptionDialog {
             input.setError("Décris ton repas.");
             return;
         }
-        List<FoodDescription.Portion> parts;
-        try {
-            parts = FoodDescription.parse(description, FoodDescription.load(activity.getAssets().open("ciqual.tsv"), activity.getAssets().open("portions.tsv")));
-        } catch (Exception error) {
-            parts = FoodDescription.parse(description, new FoodDescription.Table(java.util.Collections.emptyList(), java.util.Collections.emptyList()));
-        }
-        if (parts.isEmpty() || parts.size() > 20) {
-            input.setError("Indique entre 1 et 20 aliments.");
-            return;
-        }
-        dialog.dismiss();
+        if (add(description, check)) dialog.dismiss();
+        else input.setError("Indique entre 1 et 20 aliments.");
+    }
+
+    boolean add(String description, boolean check) {
+        List<FoodDescription.Portion> parts = parse(activity, description);
+        if (parts.isEmpty() || parts.size() > 20) return false;
         estimate(description, parts, check);
+        return true;
+    }
+
+    static List<FoodDescription.Portion> parse(Activity activity, String description) {
+        try {
+            return FoodDescription.parse(description, FoodDescription.load(activity.getAssets().open("ciqual.tsv"), activity.getAssets().open("portions.tsv")));
+        } catch (java.io.IOException error) {
+            return FoodDescription.parse(description, new FoodDescription.Table(java.util.Collections.emptyList(), java.util.Collections.emptyList()));
+        }
     }
 
     private void estimate(String description, List<FoodDescription.Portion> portions, boolean check) {
@@ -122,7 +127,6 @@ final class MealDescriptionDialog {
             activity.runOnUiThread(() -> {
                 if (activity.isFinishing() || activity.isDestroyed() || !loading.isShowing()) return;
                 loading.dismiss();
-                if (result.isEmpty()) Toast.makeText(activity, "ChatGPT n’a pas proposé de valeur. Tu peux compléter le repas.", Toast.LENGTH_LONG).show();
                 propose(description, portions, result, check);
             });
         });
@@ -132,21 +136,25 @@ final class MealDescriptionDialog {
         List<Journal.Meal> meals = new ArrayList<>();
         for (int i = 0; i < portions.size(); i++) {
             FoodDescription.Portion part = portions.get(i);
-            Double energy = part.guess() != null ? Double.valueOf(part.guess().per100()) : estimates.get(i);
-            if (check || part.grams() == null || energy == null) {
+            if (check || part.grams() == null) {
                 review(description, portions, estimates);
                 return;
             }
-            meals.add(meal(part, part.guess(), estimates.get(i), part.grams(), energy));
+            FoodDescription.Reference reference = reference(part, estimates.get(i));
+            meals.add(meal(part, reference, estimates.get(i), part.grams(), reference == null ? estimates.get(i) : reference.per100()));
         }
         save(meals);
     }
 
+    private static FoodDescription.Reference reference(FoodDescription.Portion part, Double estimate) {
+        return part.guess() != null ? part.guess() : estimate == null ? FoodDescription.AVERAGE : null;
+    }
+
     private static Journal.Meal meal(FoodDescription.Portion part, FoodDescription.Reference reference, Double estimate, double grams, double energy) {
-        boolean ciqual = reference != null && Math.abs(energy - reference.per100()) < .0001;
-        String name = reference == null || reference == part.guess() && part.reference() == null ? part.name() : reference.name();
+        boolean referenced = reference != null && Math.abs(energy - reference.per100()) < .0001;
+        String name = reference == null || reference == FoodDescription.AVERAGE || reference == part.guess() && part.reference() == null ? part.name() : reference.name();
         if (name.length() > 90) name = name.substring(0, 90);
-        String source = ciqual ? "Ciqual" : estimate != null && Math.abs(energy - estimate) < .0001 ? "ChatGPT" : "Saisie";
+        String source = referenced ? reference == FoodDescription.AVERAGE ? "Moyenne" : "Ciqual" : estimate != null && Math.abs(energy - estimate) < .0001 ? "ChatGPT" : "Saisie";
         return new Journal.Meal(UUID.randomUUID().toString(), name, grams * energy / 100, grams, energy, source);
     }
 
@@ -158,7 +166,10 @@ final class MealDescriptionDialog {
             return;
         }
         double kcal = meals.stream().mapToDouble(Journal.Meal::kcal).sum();
-        Toast.makeText(activity, String.format(Locale.FRANCE, "Ajouté · %.0f kcal. Touche un aliment pour le corriger.", kcal), Toast.LENGTH_LONG).show();
+        String unknown = meals.stream().filter(meal -> meal.source().equals("Moyenne")).map(Journal.Meal::name)
+                .collect(java.util.stream.Collectors.joining(", "));
+        Toast.makeText(activity, String.format(Locale.FRANCE, "Ajouté · %.0f kcal. ", kcal) + (unknown.isEmpty()
+                ? "Touche un aliment pour le corriger." : "Valeur moyenne pour : " + unknown + "."), Toast.LENGTH_LONG).show();
         refresh.run();
     }
 
@@ -238,11 +249,11 @@ final class MealDescriptionDialog {
         Row(LinearLayout form, FoodDescription.Portion part, Double estimate) {
             this.part = part;
             this.estimate = estimate;
-            reference = part.guess();
+            reference = MealDescriptionDialog.reference(part, estimate);
             TextView heading = text(form, "\n" + part.name());
             heading.setTextSize(17);
             heading.setTypeface(PaperStyle.title(activity));
-            note = text(form, reference == null ? estimate == null ? "Référence à choisir ou à renseigner." : "Estimation ChatGPT"
+            note = text(form, reference == null ? "Estimation ChatGPT" : reference == FoodDescription.AVERAGE ? "Aliment inconnu · valeur moyenne"
                     : "Ciqual · " + reference.name());
             grams = decimal(form, part.usual() ? "Quantité estimée (g)" : "Quantité (g)", part.grams());
             energy = decimal(form, "Calories pour 100 g", reference == null ? estimate : Double.valueOf(reference.per100()));
@@ -251,7 +262,7 @@ final class MealDescriptionDialog {
                 choose.setAllCaps(false);
                 choose.setTypeface(PaperStyle.title(activity));
                 choose.setTextColor(PaperStyle.ACCENT);
-                choose.setText(reference == null ? "Choisir une référence" : "Changer de référence");
+                choose.setText("Changer de référence");
                 choose.setOnClickListener(v -> {
                     String[] choices = part.options().stream().map(FoodDescription.Reference::name).toArray(String[]::new);
                     new PaperStyle.DialogBuilder(activity).setTitle(part.name()).setItems(choices, (dialog, index) -> {

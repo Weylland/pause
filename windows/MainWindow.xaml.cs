@@ -917,9 +917,11 @@ public partial class MainWindow : Window
                     if (food.Length == 0) { name.Focus(); return "Indique le nom de l’aliment."; }
                     if (!TryNumber(grams.Text, out double amount) || amount is not (>= .0001 and <= 10000))
                     { grams.Focus(); return $"Indique la quantité pour {food}."; }
-                    if (!TryNumber(energy.Text, out double per100) || per100 is not (>= 0 and <= 1000))
-                    { energy.Focus(); return $"Indique les calories pour 100 g de {food} ou choisis ChatGPT ou Claude."; }
-                    completed.Add(new(food, amount, per100, SourceOf(per100, choice, proposed)));
+                    bool unknown = string.IsNullOrWhiteSpace(energy.Text);
+                    double per100 = MealEstimate.UnknownPer100;
+                    if (!unknown && (!TryNumber(energy.Text, out per100) || per100 is not (>= 0 and <= 1000)))
+                    { energy.Focus(); return $"Vérifie les calories pour 100 g de {food}."; }
+                    completed.Add(new(food, amount, per100, unknown ? "Moyenne" : SourceOf(per100, choice, proposed)));
                 }
                 try { store.SaveEstimate(shown, completed, proposal.Source); }
                 catch (Exception error) when (JournalStore.IsFailure(error) || error is InvalidOperationException) { return error.Message; }
@@ -986,12 +988,11 @@ public partial class MainWindow : Window
             {
                 EstimatedFood[] foods = MealEstimate.ParseLocal(name.Text);
                 if (foods.Length == 0) return "Indique entre 1 et 20 aliments.";
-                if (foods.FirstOrDefault(food => food.Grams is null || food.Per100 is null) is EstimatedFood missing)
-                    return $"« {missing.Name} » n’a pas d’estimation. Indique ses calories.";
+                if (foods.FirstOrDefault(food => food.Grams is null) is EstimatedFood missing) return $"Vérifie la quantité pour {missing.Name}.";
                 return SaveEdits(before, foods.Select(food => ($"meal/{JournalState.Iso(selected)}/{Guid.NewGuid():D}", (JsonNode?)new JsonObject
                 {
-                    ["name"] = food.Name, ["kcal"] = food.Grams!.Value * food.Per100!.Value / 100,
-                    ["kcalPer100"] = food.Per100, ["amount"] = food.Grams, ["source"] = "Ciqual"
+                    ["name"] = food.Name, ["kcal"] = food.Grams!.Value * (food.Per100 ?? MealEstimate.UnknownPer100) / 100,
+                    ["kcalPer100"] = food.Per100 ?? MealEstimate.UnknownPer100, ["amount"] = food.Grams, ["source"] = food.Source ?? "Moyenne"
                 })).ToArray());
             }
             if (name.Text.Trim().Length > 90) return "Raccourcis le nom de l’aliment.";
