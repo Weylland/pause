@@ -108,7 +108,7 @@ final class DriveJournal {
 
     static Batch parse(JSONObject batch) throws JSONException {
         String id = batch.getString("id");
-        if (batch.getInt("v") != 1 || !id.matches("[0-9a-f]{32}")) throw new JSONException("Historique Drive illisible.");
+        if (batch.getInt("v") != 1 || !id.matches("[0-9a-f]{32}|[0-9a-f]{64}")) throw new JSONException("Historique Drive illisible.");
         JSONArray rows = batch.getJSONArray("edits");
         List<Edit> edits = new ArrayList<>(rows.length());
         Set<String> keys = new HashSet<>();

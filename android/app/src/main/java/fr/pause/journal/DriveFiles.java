@@ -30,7 +30,7 @@ final class DriveFiles {
     private static final int MAX_BYTES = 8_388_608;
     private static final String FILES = "https://www.googleapis.com/drive/v3/files";
     private static final String UPLOAD = "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id";
-    private static final Pattern BATCH = Pattern.compile("fil-des-jours-changes-v1-([0-9a-f]{32})\\.json");
+    private static final Pattern BATCH = Pattern.compile("fil-des-jours-changes-v1-([0-9a-f]{32}|[0-9a-f]{64})\\.json");
     private static final Pattern SNAPSHOT = Pattern.compile("fil-des-jours-snapshot-v1-([0-9]{1,12})-[0-9a-f]{32}\\.json");
     private final String access;
 
@@ -128,7 +128,7 @@ final class DriveFiles {
                 String name = item.getString("name");
                 Matcher batch = BATCH.matcher(name), snapshot = SNAPSHOT.matcher(name);
                 boolean change = batch.matches();
-                if (!change && !snapshot.matches()) throw new IOException("La synchro Drive vient d’une version plus récente. Mets à jour Fil des jours.");
+                if (!change && !snapshot.matches()) throw new IOException("Fichier Drive inconnu (" + name + "). Mets à jour Fil des jours.");
                 files.add(new File(item.getString("id"), change ? batch.group(1) : null, change ? 0 : Long.parseLong(snapshot.group(1)),
                         Instant.parse(item.getString("createdTime"))));
             }

@@ -106,7 +106,7 @@ internal sealed class DriveJournal(DriveSnapshot start)
     internal static (string Id, DriveEdit[] Edits) Parse(JsonObject batch)
     {
         if (batch["v"]?.GetValue<int>() != 1 || batch["id"]?.GetValue<string>() is not string id
-            || id.Length != 32 || !id.All(Uri.IsHexDigit) || batch["edits"] is not JsonArray edits)
+            || id.Length is not (32 or 64) || !id.All(Uri.IsHexDigit) || batch["edits"] is not JsonArray edits)
             throw new InvalidDataException("Historique Drive illisible.");
         var normalized = new List<DriveEdit>(edits.Count);
         var keys = new HashSet<string>(StringComparer.Ordinal);

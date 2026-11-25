@@ -135,6 +135,7 @@ final class DriveSync {
     private static Baseline read(AtomicFile base) throws IOException, JSONException {
         if (!base.getBaseFile().isFile()) return EMPTY;
         JSONObject saved = new JSONObject(new String(base.readFully(), StandardCharsets.UTF_8));
+        if (saved.has("revision")) return new Baseline(0, List.of(), saved.getJSONObject("entries"));
         JSONArray rows = saved.getJSONArray("batches");
         List<String> batches = new ArrayList<>(rows.length());
         for (int i = 0; i < rows.length(); i++) batches.add(rows.getString(i));

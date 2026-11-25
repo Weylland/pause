@@ -17,7 +17,7 @@ internal sealed class DriveFiles(string access)
     private const int MaxBytes = 8_388_608;
     private const string Files = "https://www.googleapis.com/drive/v3/files";
     private const string Upload = "https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id";
-    private static readonly Regex BatchName = new("^fil-des-jours-changes-v1-([0-9a-f]{32})\\.json$", RegexOptions.CultureInvariant);
+    private static readonly Regex BatchName = new("^fil-des-jours-changes-v1-([0-9a-f]{32}|[0-9a-f]{64})\\.json$", RegexOptions.CultureInvariant);
     private static readonly Regex SnapshotName = new("^fil-des-jours-snapshot-v1-([0-9]{1,12})-[0-9a-f]{32}\\.json$", RegexOptions.CultureInvariant);
     private static readonly JsonSerializerOptions Json = new() { PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
 
@@ -111,7 +111,7 @@ internal sealed class DriveFiles(string access)
                     throw new InvalidDataException("Fichier d’historique Drive illisible.");
                 Match batch = BatchName.Match(name), snapshot = SnapshotName.Match(name);
                 if (!batch.Success && !snapshot.Success)
-                    throw new InvalidDataException("La synchro Drive vient d’une version plus récente. Mets à jour Fil des jours.");
+                    throw new InvalidDataException($"Fichier Drive inconnu ({name}). Mets à jour Fil des jours.");
                 files.Add(new(id, batch.Success ? batch.Groups[1].Value : null, snapshot.Success ? long.Parse(snapshot.Groups[1].Value) : 0, created));
             }
             if (files.Count > 10_000) throw new InvalidDataException("Historique Drive trop volumineux.");
