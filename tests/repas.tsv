@@ -6,7 +6,7 @@ deux oeufs durs	oeufs durs|100*|=Oeuf, dur
 2 yaourts de 125 g	yaourts|250|=Yaourt, lait fermenté ou spécialité laitière, nature
 2 x 125 g de yaourt	yaourt|250|=Yaourt, lait fermenté ou spécialité laitière, nature
 un yaourt nature	yaourt nature|125*|=Yaourt, lait fermenté ou spécialité laitière, nature
-des yaourts	yaourts|?|=Yaourt, lait fermenté ou spécialité laitière, nature
+des yaourts	yaourts|125*|=Yaourt, lait fermenté ou spécialité laitière, nature
 une pomme, 2 bananes	pomme|150*|=Pomme Golden, pulpe et peau, crue	bananes|240*|=Banane, pulpe, crue
 100 g de pommes	pommes|100|=Pomme Golden, pulpe et peau, crue
 une demi-baguette	baguette|125*|=Pain, baguette, courante
@@ -18,28 +18,48 @@ un demi-litre de jus d’orange	jus d’orange|500|=Jus d'orange, pur jus
 33cl de coca	coca|330|=Cola, sucré
 200ml de soupe	soupe|200|=Soupe (aliment moyen)
 un kilo de fraises	fraises|1000|=Fraise, crue
-100 gr. de poulet	poulet|100|?Poulet, cuisse, viande et peau, rôtie/cuite au four
-150 g de pâtes	pâtes|150|?Pâtes sèches standard, crues
+100 gr. de poulet	poulet|100|~Poulet, cuisse, viande et peau, rôtie/cuite au four
+150 g de pâtes	pâtes|150|~Pâtes sèches standard, cuites, non salées
 50 g de pâté	pâté|50|=Pâté (aliment moyen)
 150 g de riz basmati	riz basmati|150|=Riz basmati, cuit, non salé
-un verre de vin rouge	vin rouge|?|=Vin rouge
-2 tranches de jambon	jambon|?|=Jambon cuit, supérieur
-une cuillère à soupe d'huile d'olive	huile d'olive|?|=Huile d'olive vierge extra
-un peu de beurre	beurre|?|=Beurre à 82% MG, doux
-une part de pizza	pizza|?|=Pizza (aliment moyen)
-une pizza	pizza|?|=Pizza (aliment moyen)
-un café et un croissant	café|?|=Café, instantané, non sucré, prêt à boire	croissant|50*|=Croissant, sans précision
-poulet (200 g), haricots verts 150 g.	poulet|200|?Poulet, cuisse, viande et peau, rôtie/cuite au four	haricots verts|150|=Haricot vert, cuit
+un verre de vin rouge	vin rouge|125*|=Vin rouge
+2 tranches de jambon	jambon|80*|=Jambon cuit, supérieur
+une cuillère à soupe d'huile d'olive	huile d'olive|10*|=Huile d'olive vierge extra
+un peu de beurre	beurre|5*|=Beurre à 82% MG, doux
+une part de pizza	pizza|130*|=Pizza (aliment moyen)
+une pizza	pizza|350*|=Pizza (aliment moyen)
+un café et un croissant	café|100*|=Café, instantané, non sucré, prêt à boire	croissant|50*|=Croissant, sans précision
+poulet (200 g), haricots verts 150 g.	poulet|200|~Poulet, cuisse, viande et peau, rôtie/cuite au four	haricots verts|150|=Haricot vert, cuit
 30 g de fromage + 60 g de pain	fromage|30|=Fromage (aliment moyen)	pain|60|=Pain (aliment moyen)
-2 steaks hachés 5%	steaks hachés 5%|200*|?Boeuf, steak haché 5% MG, cru
-100 g de steak haché	steak haché|100|?Boeuf, steak haché 5% MG, cru
+2 steaks hachés 5%	steaks hachés 5%|200*|~Boeuf, steak haché 5% MG, cuit
+100 g de steak haché	steak haché|100|~Boeuf, steak haché 5% MG, cuit
 - 2 clémentines\n- 1 kiwi	clémentines|120*|=Clémentine ou Mandarine, pulpe, crue	kiwi|75*|=Kiwi, pulpe et graines, cru
 pain et beurre\npain : 50 g\nBeurre : 12,5 g	pain|50|=Pain (aliment moyen)	beurre|12.5|=Beurre à 82% MG, doux
 2 œufs\nœufs : 120 g	œufs|120|=Oeuf, cru
-pain\nfromage : 30 g	pain|?|=Pain (aliment moyen)	fromage|30|=Fromage (aliment moyen)
+pain\nfromage : 30 g	pain|60*|=Pain (aliment moyen)	fromage|30|=Fromage (aliment moyen)
 80 g de saumon fumé avec 100 g de riz blanc cuit	saumon fumé|80|=Saumon fumé	riz blanc cuit|100|=Riz blanc, cuit, non salé
 12 kg de pommes	pommes|?|=Pomme Golden, pulpe et peau, crue
 40 g de zorglub	zorglub|40|-
-4 quarts au citron	quarts au citron|?|-
-un quatre-quarts	quatre-quarts|?|-
-jambon-beurre	jambon-beurre|?|=Sandwich baguette, jambon, beurre
+4 quarts au citron	quarts au citron|100*|-
+un quatre-quarts	quatre-quarts|80*|~Cake aux fruits, préemballé
+jambon-beurre	jambon-beurre|200*|=Sandwich baguette, jambon, beurre
+un bol de soupe	soupe|300*|=Soupe (aliment moyen)
+soupe	soupe|300*|=Soupe (aliment moyen)
+un petit bol de soupe maison	soupe maison|210*|=Soupe (aliment moyen)
+un grand verre de lait	lait|260*|=Lait demi-écrémé, UHT
+beaucoup de frites	frites|225*|~Frites de pommes de terre, surgelées, rôties/cuites au four
+2 bols de céréales	céréales|100*|=Céréales pour petit déjeuner (aliment moyen)
+poulet riz salade	poulet|130*|~Poulet, cuisse, viande et peau, rôtie/cuite au four	riz|180*|~Riz blanc, cuit, non salé	salade|60*|=Salade sucrine, crue
+des pâtes au saumon	pâtes|200*|~Pâtes sèches standard, cuites, non salées	saumon|130*|~Saumon, cuit, sans précision (aliment moyen)
+deux tartines beurre confiture	tartines|80*|=Pain (aliment moyen)	beurre|10*|=Beurre à 82% MG, doux	confiture|20*|=Confiture ou Marmelade, tout type de fruits (aliment moyen)
+steak frites	steak|130*|~Boeuf, entrecôte, partie maigre, grillée/poêlée	frites|150*|~Frites de pommes de terre, surgelées, rôties/cuites au four
+soupe de légumes	soupe de légumes|300*|=Soupe aux légumes variés, préemballée à réchauffer
+salade de tomates	salade|60*|=Salade sucrine, crue	tomates|110*|=Tomate, crue
+6 sushis	sushis|150*|=Sushi ou Maki aux produits de la mer
+des frites	frites|150*|~Frites de pommes de terre, surgelées, rôties/cuites au four
+une louche de soupe	soupe|125*|=Soupe (aliment moyen)
+poulet curry	poulet curry|300*|=Poulet au curry et au lait de coco
+un mcdo	mcdo|100*|-
+un bol de zorglub	zorglub|300*|-
+couscous	couscous|350*|~Couscous royal (avec plusieurs viandes), préemballé
+gâteau	gâteau|80*|~Cake aux fruits, préemballé

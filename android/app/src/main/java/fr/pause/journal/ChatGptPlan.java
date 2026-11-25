@@ -217,7 +217,7 @@ final class ChatGptPlan {
 
     synchronized Map<Integer, Double> estimate(List<FoodDescription.Portion> portions) throws Exception {
         JSONArray items = new JSONArray();
-        for (int i = 0; i < portions.size(); i++) if (portions.get(i).reference() == null)
+        for (int i = 0; i < portions.size(); i++) if (portions.get(i).guess() == null)
             items.put(new JSONObject().put("index", i).put("name", portions.get(i).name()));
         if (items.length() == 0) return java.util.Collections.emptyMap();
         String access = access();
@@ -267,7 +267,7 @@ final class ChatGptPlan {
             JSONObject entry = values.getJSONObject(i);
             int index = entry.getInt("index");
             double kcal = entry.optDouble("kcal", Double.NaN);
-            if (index >= 0 && index < portions.size() && portions.get(index).reference() == null && kcal >= 0 && kcal <= 1000)
+            if (index >= 0 && index < portions.size() && portions.get(index).guess() == null && kcal >= 0 && kcal <= 1000)
                 estimates.putIfAbsent(index, kcal);
         }
         return estimates;

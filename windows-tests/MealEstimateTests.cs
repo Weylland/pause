@@ -35,8 +35,8 @@ public class MealEstimateTests
     private static string Describe(EstimatedFood food)
     {
         string grams = food.Grams is double value ? value.ToString("0.####", CultureInfo.InvariantCulture) + (food.Usual ? "*" : "") : "?";
-        if (food.Per100.HasValue) return $"{food.Name}|{grams}|=";
-        FoodReference.Item[] options = FoodReference.Match(food.Name).Options;
-        return $"{food.Name}|{grams}|{(options.Length == 0 ? "-" : "?" + options[0].Name)}";
+        FoodReference.Item? guess = FoodReference.Match(food.Name).Guess;
+        Assert.Equal(guess?.Per100, food.Per100);
+        return $"{food.Name}|{grams}|{(guess is null ? "-" : guess.Name == food.Name ? "=" : "~" + guess.Name)}";
     }
 }

@@ -30,9 +30,9 @@ Jus de pamplemousse (pomelo), pur jus	42.5
 Jus de tomate, pur jus, salé à 6g/L	20.1	
 Jus multifruit, pur jus, standard	48.9	
 Jus de tomate, pur jus (aliment moyen)	21.7	
-Nectar multifruit, standard	49.7	
+Nectar multifruit, standard	49.7	smoothie
 Jus d'orange, pur jus	45.4	jus d'orange
-Jus de fruits, pur jus (aliment moyen)	46.9	
+Jus de fruits, pur jus (aliment moyen)	46.9	smoothie
 Jus d'ananas, pur jus	52.9	jus d'ananas
 Jus de pomme, pur jus	48.9	jus de pomme
 Jus de légumes, pur jus (aliment moyen)	21.7	
@@ -42,7 +42,7 @@ Lait 2e âge, poudre soluble (préparation de suite)	484
 Tapioca ou Perles du Japon, cru	354	
 Pomme de terre, sans peau, rôtie/cuite au four	91.9	
 Pomme de terre, bouillie/cuite à l'eau	80.5	
-Chips de pommes de terre nature ou aromatisées, standard	545	chips
+Chips de pommes de terre nature ou aromatisées, standard	545	chips	2
 Pomme de terre, sans peau, crue	80.5	
 Pomme de terre, appertisée, égouttée	59.9	
 Pomme de terre noisette, surgelée, crue	181	
@@ -61,8 +61,8 @@ Pomme de terre, rôtie/cuite au four	89.4
 Pomme de terre sautée/rissolée, pré-frite, surgelée, cuite	156	
 Pomme de terre de conservation, sans peau, bouillie/cuite à l'eau	76.1	
 Pomme de terre primeur, sans peau, bouillie/cuite à l'eau	71.6	
-Frites de pommes de terre, surgelées, rôties/cuites au four	213	frites|frites au four
-Frites de pommes de terre, surgelées, cuites en friteuse	285	frites
+Frites de pommes de terre, surgelées, rôties/cuites au four	213	frites|frites au four	5
+Frites de pommes de terre, surgelées, cuites en friteuse	285	frites	5
 Pomme de terre duchesse, surgelée, cuite	218	
 Pomme de terre noisette, surgelée, cuite	191	
 Pomme de terre sautée/poêlée à la graisse de canard	213	
@@ -76,7 +76,7 @@ Frites de pommes de terre, surgelées, préfrites, pour cuisson rôtie/ au four	
 Frites de pommes de terre, surgelées, préfrites, pour cuisson micro-ondes	254	
 Frites de pommes de terre, surgelées, préfrites, pour cuisson en friteuse	244	
 Pomme de terre, purée (aliment moyen)	91.8	purée|purée de pommes de terre
-Pomme de terre, cuite (aliment moyen)	93.2	pomme de terre|pommes de terre cuites
+Pomme de terre, cuite (aliment moyen)	93.2	pomme de terre|pommes de terre cuites	120
 Fécule de pomme de terre	348	
 Patate douce, crue	86.3	
 Patate douce, cuite	62.8	
@@ -181,8 +181,8 @@ Cheval, faux-filet, grillé/poêlé	163
 Cheval, entrecôte, grillée/poêlée	169	
 Cheval, faux-filet, rôti/cuit au four	173	
 Cheval, tende de tranche, rôtie/cuite au four	144	
-Viande cuite (aliment moyen)	182	
-Pain (aliment moyen)	276	pain
+Viande cuite (aliment moyen)	182	viande
+Pain (aliment moyen)	276	pain|tartine
 Pain, baguette, courante	287	baguette|baguette courante|pain baguette|baguette de pain	250
 Pain, baguette ou boule, au levain	261	
 Pain grillé, domestique	317	pain grillé
@@ -200,7 +200,7 @@ Pain de seigle, et froment	260
 Pain, sans gluten	261	
 Pain, baguette, sans sel	279	
 Pain panini	272	
-Pain pita	259	pita
+Pain pita	259	pita	70
 Pain de mie, courant	278	pain de mie
 Pain de mie, sans croûte, préemballé	271	
 Pain de mie brioché, préemballé	309	
@@ -234,7 +234,7 @@ Croûton à tartiner	374
 Croûtons nature, préemballés	495	
 Chapelure	374	
 Gressin	433	
-Viennoiserie (aliment moyen)	380	
+Viennoiserie (aliment moyen)	380	viennoiserie
 Croissant, sans précision	375	croissant	50
 Croissant ordinaire, artisanal	412	
 Croissant au beurre, artisanal	420	croissant au beurre	50
@@ -339,7 +339,7 @@ Blé dur précuit, grains entiers, cuit, non salé	149
 Blé dur précuit cuisiné, en sachet micro-ondable	188	
 Blé dur précuit, grains entiers, cuisiné, à poêler	344	
 Nouilles asiatiques cuites, aromatisées	147	
-Pâtes ou nouilles asiatiques au blé, cuites, nature, non salées	165	
+Pâtes ou nouilles asiatiques au blé, cuites, nature, non salées	165	nouilles|nouilles chinoises
 Riz blanc, cru	352	riz|riz blanc|riz cru
 Riz blanc étuvé, cru	356	
 Riz complet, cru	350	riz complet
@@ -428,13 +428,13 @@ Coquille Saint-Jacques, noix et corail, crue	83
 Coquille Saint-Jacques, noix et corail, cuite	110	
 Crabe, miettes et ou pattes décortiquées, appertisé, égoutté	111	
 Crevette grise, cuite	89.9	
-Crevette, cuite	93.8	crevettes
+Crevette, cuite	93.8	crevettes	10
 Escargot, cru	77.9	
 Homard, bouilli/cuit à l'eau	90.9	
 Homard, cru	85.5	
 Huître, sans précision, crue	67.2	
 Langoustine, panée, frite	282	
-Moule, bouillie/cuite à l'eau	108	moules
+Moule, bouillie/cuite à l'eau	108	moules	5
 Moule commune, crue	71.8	
 Langouste, crue	86.9	
 Seiche, crue	76.3	
@@ -475,7 +475,7 @@ Ail, cru	111
 Bouillon de boeuf, déshydraté	240	
 Cerfeuil, frais	39.9	
 Ciboule ou Ciboulette, fraîche	29.7	
-Cornichon, au vinaigre	19.4	cornichon
+Cornichon, au vinaigre	19.4	cornichon	8
 Curry, poudre	301	
 Gingembre, poudre	335	
 Gélatine, sèche	348	
@@ -679,32 +679,32 @@ Abricot, dénoyauté, sec	239
 Ananas, pulpe, cru	54.4	ananas
 Avocat, pulpe, cru	205	avocat	150
 Banane, pulpe, crue	90.5	banane|banane crue	120
-Cerise, dénoyautée, crue	55.7	cerise
-Citron, pulpe, cru	27.6	citron
+Cerise, dénoyautée, crue	55.7	cerise	6
+Citron, pulpe, cru	27.6	citron	100
 Figue, crue	69.4	
-Fraise, crue	38.6	fraise
-Framboise, crue	49.2	framboise
+Fraise, crue	38.6	fraise	12
+Framboise, crue	49.2	framboise	4
 Fruit de la passion ou maracudja, pulpe et pépins, cru	101	
 Grenade, pulpe et pépins, crue	80.6	
 Groseille, crue	68.5	
 Kiwi, pulpe et graines, cru	60.5	kiwi	75
 Litchi, pulpe, cru	81	
 Clémentine ou Mandarine, pulpe, crue	47.3	clémentine|mandarine	60
-Mangue, pulpe, crue	73.9	mangue
+Mangue, pulpe, crue	73.9	mangue	250
 Melon cantaloup (par ex.: Charentais, de Cavaillon) pulpe, cru	62.7	melon
 Mirabelle, crue	76.9	
-Myrtille, crue	57.7	myrtille
+Myrtille, crue	57.7	myrtille	1
 Mûre (de ronce), crue	47.3	
-Olive verte, en saumure, égouttée	155	olives vertes
+Olive verte, en saumure, égouttée	155	olives vertes	4
 Orange, pulpe, crue	45.5	orange	150
 Papaye, pulpe, crue	42.2	
 Pastèque, pulpe, crue	38.9	pastèque
 Compote de pomme	102	compote de pommes
-Pomelo (dit Pamplemousse), pulpe, cru	39.8	pamplemousse|pomelo
-Prune Reine-Claude, crue	71.3	prune
+Pomelo (dit Pamplemousse), pulpe, cru	39.8	pamplemousse|pomelo	250
+Prune Reine-Claude, crue	71.3	prune	40
 Pruneau, sec	229	
 Raisin blanc, à gros grain (type Italia ou Dattier), cru	73.4	raisin|raisin blanc
-Raisin, sec	321	raisins secs
+Raisin, sec	321	raisins secs	1
 Mélange apéritif de fruits exotiques, sec	389	
 Kaki, pulpe, cru	68.6	
 Citron vert ou Lime, pulpe, cru	40.2	
@@ -714,7 +714,7 @@ Compote, tout type de fruits	102	compote
 Compote, tout type de fruits, allégée en sucres	66	
 Pomme Granny Smith, pulpe, crue	53.9	
 Pomme Granny Smith, pulpe et peau, crue	51.5	
-Olive noire, à l'huile (à la grecque)	332	olives noires
+Olive noire, à l'huile (à la grecque)	332	olives noires	4
 Nectarine ou brugnon, jaune, pulpe et peau, crue	51.3	nectarine|brugnon	130
 Nectarine ou brugnon, blanche, pulpe et peau, crue	51.8	
 Compote de pomme, allégée en sucres	65.1	
@@ -733,7 +733,7 @@ Boisson infantile lactées aux fruits pour le goûter dès 4/6 mois (sans céré
 Boisson infantile céréales lactées pour le petit déjeuner	85.5	
 Canneberge ou cranberry, séchée, sucrée	333	
 Boisson infantile céréales lactées (aliment moyen)	86.3	
-Olive (aliment moyen)	162	olive
+Olive (aliment moyen)	162	olive	4
 Compote ou assimilé, tout type de fruits, teneur en sucre (allégée en sucres ou non, sans sucres ajoutés...) inconnue (aliment moyen)	80.1	
 Purée de pommes, type "compote sans sucres ajoutés"	56.4	compote de pommes sans sucres ajoutés
 Poire Conférence, pulpe, crue	53.1	
@@ -751,7 +751,7 @@ Pomme Golden, pulpe et peau, crue	57.1	pomme	150
 Raisin noir Muscat, cru	90.1	raisin noir
 Abricot, dénoyauté, sec, moelleux (réhydraté à 35-45%)	200	
 Poire au sirop léger, appertisée, égouttée	64.9	
-Fruit cru (aliment moyen)	59.5	
+Fruit cru (aliment moyen)	59.5	fruit|salade de fruits
 Chevreuil, rôti/cuit au four	150	
 Sanglier, cru	147	
 Sanglier, rôti/cuit au four	153	
@@ -762,7 +762,7 @@ Cerf, rôti/cuit au four	150
 Gibier à poil, cuit (aliment moyen)	152	
 Mélange apéritif de graines salées et raisins secs	560	
 Mélange apéritif de graines (non salées) et raisins secs	541	
-Noix de cajou, grillée, non salée	618	noix de cajou|cajou
+Noix de cajou, grillée, non salée	618	noix de cajou|cajou	2
 Noix de cajou, grillée à sec, non salée	630	
 Pâte d'amande, préemballée	432	
 Huile ou beurre de cacao	900	
@@ -873,12 +873,12 @@ Boisson au thé, aromatisée, sucrée	27.3
 Thé, feuille	232	
 Cacao, non sucré, poudre soluble	387	
 Poudre cacaotée ou au chocolat pour boisson, sucrée	379	
-Boisson cacaotée ou au chocolat, instantanée, sucrée, prête à boire (reconstituée avec du lait demi-écrémé standard)	69.3	
+Boisson cacaotée ou au chocolat, instantanée, sucrée, prête à boire (reconstituée avec du lait demi-écrémé standard)	69.3	chocolat chaud|cacao chaud|lait au chocolat
 Boisson cacaotée ou au chocolat, instantanée, sucrée, enrichie en vitamines, prête à boire (reconstituée avec du lait demi-écrémé standard)	71.9	
 Boisson à l'amande, nature, non sucrée, non enrichie, préemballée	36.3	
 Boisson à l'amande, sucrée, enrichie en calcium, préemballée	44.4	
 Chicorée et café, poudre soluble	332	
-Café au lait, café crème ou cappuccino, instantané ou non, non sucré, prêt à boire	21.5	
+Café au lait, café crème ou cappuccino, instantané ou non, non sucré, prêt à boire	21.5	café au lait|café crème|cappuccino
 Chicorée, poudre soluble	323	
 Chicorée et café, instantané, non sucré, prête à boire (reconstituée avec du lait demi-écrémé standard)	53.7	
 Thé noir, infusé, non sucré	1.26	
@@ -992,29 +992,29 @@ Betterave rouge, cuite	42.8	betterave
 Bette ou blette, crue	16.4	
 Bette ou blette, cuite	14.7	
 Carotte, appertisée, égouttée	21.9	
-Carotte, cuite	18.9	carottes cuites
-Carotte, crue	40.2	carotte|carottes râpées
+Carotte, cuite	18.9	carottes cuites	100
+Carotte, crue	40.2	carotte|carottes râpées	100
 Champignon, tout type, cru	21.7	
 Champignon, tout type, appertisé, égoutté	24.9	
 Chou rouge, cru	30	
 Chou-fleur, cru	26.2	
 Chou-fleur, cuit	20.9	chou-fleur
-Concombre, pulpe et peau, cru	15.6	concombre
+Concombre, pulpe et peau, cru	15.6	concombre	300
 Courgette, pulpe et peau, crue	16.5	
-Courgette, pulpe et peau, cuite	15.5	courgette
+Courgette, pulpe et peau, cuite	15.5	courgette	200
 Céleri branche, cru	17.6	
-Endive, crue	20.2	endive
+Endive, crue	20.2	endive	150
 Fenouil, cru	21.8	
 Haricot vert, cuit	29.4	haricots verts
 Petits pois, appertisés, égouttés	81.5	
 Poireau, cru	32.3	
-Radis rouge, cru	14.5	radis
+Radis rouge, cru	14.5	radis	10
 Tomate, crue	19.3	tomate	110
 Tomate, pelée, appertisée, égouttée	18.3	
 Topinambour, cuit	81.9	
 Macédoine de légumes, appertisée, égouttée	40.4	
 Céleri-rave, cru	29.3	
-Champignon de Paris ou champignon de couche, cru	28	champignons|champignons de paris
+Champignon de Paris ou champignon de couche, cru	28	champignons|champignons de paris	15
 Haricot vert, appertisé, égoutté	23.1	
 Maïs doux, appertisé, égoutté	106	maïs
 Tomate, concentré, appertisé	99.2	
@@ -1024,7 +1024,7 @@ Artichaut, cuit à la vapeur sous pression	47.3
 Céleri branche, appertisé, égoutté	13.1	
 Champignon de Paris ou champignon de couche, appertisé, égoutté	19.4	
 Poivron vert, cru	26	
-Poivron rouge, cru	36.6	poivron
+Poivron rouge, cru	36.6	poivron	150
 Radis noir, cru	29.2	
 Petits pois et carottes, appertisés, égouttés	49	
 Échalote, crue	63.6	
@@ -1061,7 +1061,7 @@ Pois mange-tout ou pois gourmand, bouilli/cuit à l'eau	30.5
 Champignon de Paris ou champignon de couche, surgelé, cru	15.9	
 Poireau, surgelé, cru	26.7	
 Oignon rouge, cru	36.3	
-Oignon jaune, cru	37.8	oignon
+Oignon jaune, cru	37.8	oignon	100
 Petit pot légumes, dès 4-6 mois	26.3	
 Petit pot légumes, avec féculent, dès 4/6 mois	41.7	
 Plat légumes, avec féculent, dès 6-8 mois	42.9	
@@ -1092,7 +1092,7 @@ Brèdes chou de Chine ou bok choy ou pak choï, tiges et feuilles, cuites à la 
 Chayote ou christophine ou chouchou, pulpe avec pépins, cuite à la vapeur, prélevée à La Réunion (Sechium edule)	22.2	
 Carotte, purée cuisinée à la crème, préemballée	44.4	
 Asperge verte, bouillie/cuite à l'eau	26.6	
-Aubergine, pulpe et peau, rôtie/cuite au four	33.8	aubergine
+Aubergine, pulpe et peau, rôtie/cuite au four	33.8	aubergine	250
 Bette ou blette, côte et feuille, bouillie/cuite à l'eau	16.9	
 Brocoli, bouilli/cuit à l'eau, croquant	23.5	
 Brocoli, bouilli/cuit à l'eau, fondant	23.1	
@@ -1131,7 +1131,7 @@ Tomate, rôtie/cuite au four	25.3
 Saucisse végétale au tofu (convient aux véganes ou végétaliens), préemballée	231	
 Quenelle au tofu (ne convient pas aux véganes ou végétaliens), préemballée	136	
 Légumes pour couscous, surgelés, crus	46.5	
-Légume cuit (aliment moyen)	43.5	
+Légume cuit (aliment moyen)	43.5	légumes|ratatouille|wok de légumes|poêlée de légumes
 Fève, bouillie/cuite à l'eau	82.9	
 Haricot blanc, bouilli/cuit à l'eau	112	haricots blancs
 Haricot rouge, bouilli/cuit à l'eau	116	haricots rouges
@@ -1221,7 +1221,7 @@ Omelette aux champignons	125
 Omelette aux fines herbes	147	
 Tortilla espagnole aux oignons (omelette aux pommes de terre et oignons), préemballée	165	
 Omelette, garnitures diverses : légumes, fromages, viandes... (aliment moyen)	184	omelette
-Brownie au chocolat, préemballé	458	brownie
+Brownie au chocolat, préemballé	458	brownie	50
 Pâte à pizza fine, crue	279	
 Pâte brisée, crue	377	
 Pâte brisée, matière grasse végétale, cuite	505	
@@ -1242,21 +1242,21 @@ Pâte phyllo ou Pâte filo, crue	289
 Pâte sablée pur beurre, surgelée, crue	423	
 Pâte sablée pur beurre, cuite	469	
 Chouquette	381	
-Profiterole avec glace vanille et sauce chocolat	286	
-Profiteroles (crème pâtissière et sauce chocolat), préemballées	273	
+Profiterole avec glace vanille et sauce chocolat	286	éclair|éclair au chocolat|pâtisserie|chou à la crème
+Profiteroles (crème pâtissière et sauce chocolat), préemballées	273	éclair|éclair au chocolat|pâtisserie|chou à la crème
 Chausson aux pommes	338		100
-Tarte normande aux pommes (garniture farine, oeufs, crème, sucre, calvados)	313	
+Tarte normande aux pommes (garniture farine, oeufs, crème, sucre, calvados)	313	tarte aux pommes|tarte aux fruits
 Gâteau de semoule aux raisins et caramel, rayon frais	146	
 Gâteau de semoule, appertisé	150	
 Gâteau de riz au caramel, rayon frais	143	
-Gaufre fine fourrée au miel, préemballée	455	
+Gaufre fine fourrée au miel, préemballée	455	gaufre
 Beignet rond moelleux, sans fourrage, saupoudré de sucre	404	
-Beignet à la confiture	378	
+Beignet à la confiture	378	beignet
 Beignet fourré aux fruits, préemballé	362	
 Beignet fourré goût chocolat, préemballé	420	
-Cake aux fruits, préemballé	360	
-Biscuit aux céréales pour petit déjeuner, enrichis en vitamines et minéraux	445	
-Biscuit sec fourré fruits à coque (non ou légèrement chocolaté)	511	
+Cake aux fruits, préemballé	360	gâteau|quatre-quarts|cake|madeleine
+Biscuit aux céréales pour petit déjeuner, enrichis en vitamines et minéraux	445	biscuit|cookie|petit gâteau
+Biscuit sec fourré fruits à coque (non ou légèrement chocolaté)	511	biscuit|cookie|petit gâteau
 Florentin (biscuit sec sucré chocolaté aux amandes)	514	
 Gaufrette, fourrée vanille, préemballée	538	
 Biscuit sec ou tuile, aux amandes	471	
@@ -1297,17 +1297,17 @@ Samossa ou Samoussa, préemballé, cuit	230
 Ravioli chinois à la vapeur à la crevette, cuit	190	
 Chili con carne, préemballé	118	
 Coq au vin	133	
-Gratin de pâtes	179	
+Gratin de pâtes	179	gratin|gratin de pâtes
 Moussaka	147	
 Navarin d'agneau aux légumes	133	
 Paupiette de veau	193	
 Paupiette de volaille	164	
-Couscous royal (avec plusieurs viandes), préemballé	132	
+Couscous royal (avec plusieurs viandes), préemballé	132	couscous
 Poisson blanc à la provençale ou niçoise (sauce tomate), préemballé	75.2	
 Lasagnes ou cannellonis aux légumes, préemballées, cuits	103	
 Pâtes à la carbonara (spaghetti, tagliatelles…)	161	pâtes carbonara|spaghetti carbonara
 Tartiflette, préemballée	161	
-Couscous au poulet	130	
+Couscous au poulet	130	couscous
 Lasagnes ou cannellonis au poisson, préemballées	148	
 Poisson blanc à la florentine (sauce aux épinards), préemballé	100	
 Poisson blanc à la marinière (sauce aux oignons, vin blanc, moules), préemballé	80	
@@ -1329,11 +1329,11 @@ Osso buco	96.7
 Spécialité chinoise type bouchée à la vapeur, préemballée, cuite	149	
 Viande en sauce (aliment moyen)	104	
 Veau, escalope panée, cuite	271	
-Poulet au curry et au lait de coco	124	
+Poulet au curry et au lait de coco	124	poulet curry|poulet au curry|curry de poulet
 Meloukhia, plat à base de boeuf et corete, fait maison	189	
 Pâtes fraîches farcies (ex : raviolis, tortellinis, ravioles du Dauphiné), au fromage, préemballées, crues	268	
 Pâtes fraîches farcies (ex : raviolis, tortellinis), au fromage et aux légumes, préemballées, crues	262	
-Nouilles sautées/poêlées aux crevettes	104	
+Nouilles sautées/poêlées aux crevettes	104	nouilles sautées
 Riz blanc, avec poulet, préemballé, cuit	175	
 Riz blanc, avec légumes et viande, préemballé, cuit	167	
 Boulettes au porc et au boeuf (à la suédoise), préemballées, crues	260	
@@ -1355,7 +1355,7 @@ Porc au caramel, préemballé	136
 Saumon farci, préemballé	227	
 Boulettes au boeuf, à la sauce tomate, préemballées	117	
 Paupiette de veau, préemballée, cuite au four	276	
-Pâtes fraîches farcies (ex : raviolis, tortellinis), cuites (aliment moyen)	199	
+Pâtes fraîches farcies (ex : raviolis, tortellinis), cuites (aliment moyen)	199	raviolis|tortellinis|tortellini|ravioles
 Feuille de vigne farcie au riz ou dolmas, égouttée, préemballée	150	
 Lasagnes ou cannellonis aux légumes, préemballés, cuits	122	
 Lasagnes ou cannellonis aux légumes et au fromage de chèvre, préemballés, cuits	179	
@@ -1375,23 +1375,23 @@ Galette de céréales aux légumes (sans soja), préemballé	211
 Feuilleté aux escargots, préemballé	321	
 Feuilleté ou Friand au fromage	302	
 Feuilleté ou Friand à la viande, préemballé	348	
-Hot-dog, préemballé	278	
+Hot-dog, préemballé	278	hot-dog
 Pizza au fromage ou Pizza margherita, préemballée	227	
 Quiche lorraine, préemballée	274	quiche|quiche lorraine
 Crêpe ou Galette fourrée béchamel jambon, préemballée	136	
-Crêpe ou Galette fourrée béchamel jambon fromage, préemballée	182	
+Crêpe ou Galette fourrée béchamel jambon fromage, préemballée	182	crêpe|galette|crêpe jambon fromage
 Crêpe ou Galette fourrée béchamel champignon, préemballée	150	
 Bouchée à la reine, à la viande/volaille/quenelle	292	
-Hamburger, provenant de fast food	246	hamburger|burger
-Cheeseburger, provenant de fast food	268	cheeseburger
+Hamburger, provenant de fast food	246	hamburger|burger	200
+Cheeseburger, provenant de fast food	268	cheeseburger	150
 Double cheeseburger, provenant de fast food	299	
 Burger au poisson, provenant de fast food	263	
 Tarte aux légumes, préemballée	216	
 Croissant au jambon	243	
 Rouleau de printemps	103	
-Nem ou Pâté impérial	216	nem
-Sandwich grec ou Kebab, pita, crudités	233	kebab
-Sandwich grec ou Kebab, baguette, crudités	246	kebab
+Nem ou Pâté impérial	216	nem	50
+Sandwich grec ou Kebab, pita, crudités	233	kebab|tacos|wrap	350
+Sandwich grec ou Kebab, baguette, crudités	246	kebab	350
 Sandwich baguette, thon, crudités (tomate, salade), mayonnaise	274	
 Accra de poisson	275	
 Sandwich panini, jambon cru, mozzarella, tomates	243	
@@ -1400,9 +1400,9 @@ Gougère	399
 Brick garni (garniture : crevettes, légumes, volaille, viande, poisson, etc.), fait maison, cuit	187	
 Tarte au fromage, préemballée	289	
 Tarte à la provençale, préemballée	241	
-Sushi ou Maki aux produits de la mer	171	sushi|maki
+Sushi ou Maki aux produits de la mer	171	sushi|maki	25
 Pizza à la viande, type bolognaise, préemballée	227	
-Burritos	170	
+Burritos	170	burrito|tacos|wrap|fajita
 Fajitas	158	
 Pizza au chorizo ou salami, préemballée	248	
 Pizza aux fruits de mer, préemballée	200	
@@ -1425,16 +1425,16 @@ Brochette mixte de viande	208
 Feuilleté ou Friand jambon fromage	290	
 Préparation à base de fromage(s) pour fondue savoyarde, préemballée	231	
 Gnocchi à la pomme de terre, cuit	177	
-Légumes farcis (sauf tomate)	69.8	
+Légumes farcis (sauf tomate)	69.8	ratatouille
 Volaille, croquette panée ou nuggets	239	
 Pan bagnat	215	
-Pizza (aliment moyen)	233	pizza
-Sandwich baguette, jambon, beurre	285	jambon-beurre|sandwich jambon beurre
+Pizza (aliment moyen)	233	pizza	350
+Sandwich baguette, jambon, beurre	285	jambon-beurre|sandwich jambon beurre	200
 Sandwich baguette, camembert, beurre	339	
 Sandwich baguette, pâté, cornichons	298	
 Sandwich baguette, saucisson, beurre	383	
 Sandwich baguette, jambon, emmental, beurre	286	
-Sandwich (aliment moyen)	243	sandwich
+Sandwich (aliment moyen)	243	sandwich	200
 Toasts ou Canapés salés, garnitures diverses, préemballés	233	
 Pizza, sauce garniture pour	38.5	
 Pissaladière, préemballée	284	
@@ -1454,7 +1454,7 @@ Croque-madame	264
 Sandwich baguette (aliment moyen)	277	
 Sandwich pain de mie, garnitures diverses, préemballé	267	
 Fromage pané au jambon	263	
-Croque-monsieur, préemballé	273	croque-monsieur
+Croque-monsieur, préemballé	273	croque-monsieur	150
 Pizza jambon fromage champignons ou pizza royale, reine ou regina, préemballée	205	
 Crêpe ou Galette fourrée béchamel fromage, préemballée	149	
 Flammenkueche ou Tarte flambée aux lardons, préemballée	300	
@@ -1467,13 +1467,13 @@ Brick au boeuf	342
 Brick à la pomme de terre, fait maison, cuit	215	
 Tourte au riesling, préemballée	251	
 Tarte à la tomate, préemballée	218	
-Crêpe ou Galette complète (oeuf, jambon, fromage), préemballée	209	
+Crêpe ou Galette complète (oeuf, jambon, fromage), préemballée	209	galette complète|crêpe complète|crêpe|galette
 Tarte aux noix de Saint-Jacques, préemballée	266	
 Yakitori (brochettes japonaises grillées en sauce)	172	
 Brochette de porc, crue	131	
 Pastilla au poulet, préemballée	218	
 Pizza aux lardons, oignons et fromage, préemballée	255	
-Falafel ou Boulette de pois-chiche et/ou fève, frite	252	falafel
+Falafel ou Boulette de pois-chiche et/ou fève, frite	252	falafel	20
 Crêpe ou Galette aux noix de St Jacques, préemballée	168	
 Tarte ou quiche salée (aliment moyen)	267	
 Sandwich pain de mie complet, jambon, crudités, fromage optionnel, préemballé	243	
@@ -1502,31 +1502,31 @@ Galette ou pavé au soja, fromage et légumes, préemballé	180
 Seitan, préemballé	134	
 Céleri rémoulade, préemballé	113	
 Taboulé ou Salade de couscous, préemballé	179	taboulé
-Salade de pomme de terre à la piémontaise, préemballée	130	
+Salade de pomme de terre à la piémontaise, préemballée	130	salade composée|salade césar|piémontaise|salade piémontaise
 Museau de boeuf en vinaigrette	167	
-Crudité, sans assaisonnement (aliment moyen)	29.9	
+Crudité, sans assaisonnement (aliment moyen)	29.9	crudités
 Tarte au maroilles ou Flamiche au maroilles, préemballée	315	
 Crêpe ou Galette fourrée au poisson et / ou fruits de mer, préemballée	206	
 Salade végétale à base de boulgour et/ou quinoa et légumes, préemballée	168	
 Lasagnes ou cannellonis au fromage et aux épinards, préemballés	133	
 Soupe aux lentilles, préemballée à réchauffer	55	
 Soupe à la volaille et aux légumes, préemballée à réchauffer	30.8	
-Soupe aux légumes variés, préemballée à réchauffer	39.4	
+Soupe aux légumes variés, préemballée à réchauffer	39.4	soupe de légumes|soupe aux légumes
 Soupe de poissons et / ou crustacés, préemballée à réchauffer	42.8	
 Soupe aux légumes variés, déshydratée reconstituée	34.5	
 Soupe aux poireaux et pommes de terre, préemballée à réchauffer	37.1	
 Soupe à la volaille et aux vermicelles, préemballée à réchauffer	30.8	
 Bouillon de viande et légumes type pot-au-feu, prêt à consommer	4.8	
-Soupe à l'oignon, préemballée à réchauffer	40.4	
+Soupe à l'oignon, préemballée à réchauffer	40.4	soupe à l'oignon
 Soupe aux champignons, préemballée à réchauffer	48.2	
 Soupe à la carotte, préemballée à réchauffer	33.2	
-Soupe à la tomate, préemballée à réchauffer	38.7	
+Soupe à la tomate, préemballée à réchauffer	38.7	soupe de tomates|soupe à la tomate
 Soupe chorba frik, à base de viande et de frik	62.9	
 Soupe minestrone, préemballée à réchauffer	48.8	
 Soupe au pistou, déshydratée reconstituée	30.4	
 Bouillon de viande et légumes type pot-au-feu, déshydraté	213	
 Soupe de poissons et / ou crustacés, déshydratée reconstituée	29	
-Soupe asiatique, avec pâtes, déshydratée reconstituée	29.8	
+Soupe asiatique, avec pâtes, déshydratée reconstituée	29.8	ramen|soupe chinoise|soupe de nouilles
 Soupe marocaine, déshydratée reconstituée	34.3	
 Soupe aux poireaux et pommes de terre, déshydratée reconstituée	26.1	
 Soupe à la volaille et aux légumes, déshydratée reconstituée	27.3	
@@ -1537,7 +1537,7 @@ Soupe aux céréales et aux légumes, déshydratée reconstituée	47.8
 Soupe à la tomate, déshydratée reconstituée	36.2	
 Soupe aux champignons, déshydratée reconstituée	37.8	
 Soupe à l'oignon, déshydratée reconstituée	24	
-Soupe au potiron, préemballée à réchauffer	35.9	
+Soupe au potiron, préemballée à réchauffer	35.9	soupe de potiron|soupe de courge|velouté de potiron
 Bouillon de volaille, déshydraté reconstitué	5.58	
 Bouillon de légumes, déshydraté reconstitué	5.38	
 Soupe à la tomate et aux vermicelles, déshydratée reconstituée	21.6	
@@ -1595,7 +1595,7 @@ Poisson pané, surgelé, cru	162
 Poisson pané, frit	193	poisson pané
 Raie, rôtie/cuite au four	96.3	
 Roussette ou petite roussette ou saumonette, cuite	256	
-Sardine, à l'huile, appertisée, égouttée	207	sardines|sardines à l'huile
+Sardine, à l'huile, appertisée, égouttée	207	sardines|sardines à l'huile	25
 Sardine, sauce tomate, appertisée, égouttée	193	
 Saumon, cru, élevage	194	saumon|pavé de saumon|saumon cru
 Saumon fumé	178	
@@ -1606,7 +1606,7 @@ Thon, rôti/cuit au four	136	thon
 Turbot sauvage, cru	91.5	
 Cabillaud, cru	77.6	cabillaud
 Merlu, cru	82.6	
-Surimi, bâtonnets, tranche ou râpé saveur crabe	125	surimi|bâtonnets de surimi
+Surimi, bâtonnets, tranche ou râpé saveur crabe	125	surimi|bâtonnets de surimi	16
 Lieu noir, surgelé, cru	82.4	
 Merlu, filet, surgelé, cru	82	
 Maquereau, cru	194	
@@ -1742,7 +1742,7 @@ Sole, poêlée	96.7
 Poisson blanc, cuit (aliment moyen)	107	poisson blanc
 Poisson blanc, de mer, cuit (aliment moyen)	106	
 Ficelle picarde, préemballée	151	
-Salade de chou ou Coleslaw, avec sauce, préemballée	105	
+Salade de chou ou Coleslaw, avec sauce, préemballée	105	salade composée|salade césar|coleslaw
 Gnocchi à la pomme de terre, cru	176	
 Gnocchi à la semoule, cru	200	
 Croissant au jambon fromage, préemballé	258	
@@ -1862,7 +1862,7 @@ Jambon de poulet ou Blanc de poulet en tranche	106	jambon de poulet
 Jambon de dinde ou Blanc de dinde en tranche	104	jambon de dinde|blanc de dinde
 Rôti de volaille en salaison, cuit	110	
 Boisson au soja et jus de fruits concentrés, préemballée	56.2	
-Chipolata, cuite	282	chipolata
+Chipolata, cuite	282	chipolata	60
 Saucisse de Toulouse, cuite	274	
 Chair à saucisse, crue	323	
 Chair à saucisse, pur porc, crue	273	
@@ -1876,7 +1876,7 @@ Saucisse de volaille, façon charcutière	231
 Saucisse de volaille, type Knack	236	
 Saucisse de Francfort	271	
 Merguez, crue	316	
-Merguez, boeuf et mouton, cuite	283	merguez
+Merguez, boeuf et mouton, cuite	283	merguez	60
 Merguez, boeuf et mouton, crue	315	
 Saucisse de foie	374	
 Haché végétal à base de soja, préemballé	143	
@@ -1901,10 +1901,10 @@ Saucisson brioché, cuit	309
 Cervelas	278	
 Cervelas obernois	305	
 Cervelas à l'ail, pur porc	297	
-Saucisse de Strasbourg ou Knack	291	saucisse de strasbourg|knack
+Saucisse de Strasbourg ou Knack	291	saucisse de strasbourg|knack	35
 Saucisse cocktail	290	
 Saucisse de jambon pur porc	224	
-Saucisse (aliment moyen)	281	saucisse
+Saucisse (aliment moyen)	281	saucisse	100
 Mortadelle	305	
 Mortadelle, pur porc	298	
 Mortadelle, porc et boeuf	297	
@@ -1947,7 +1947,7 @@ Barre céréalière chocolatée	451
 Pollen, partiellement séché	358	
 Confiture, tout type de fruits, allégée en sucres (extra ou classique)	162	
 Pollen,frais	285	
-Barre céréalière aux fruits	377	
+Barre céréalière aux fruits	377	barre de céréales|barre céréalière
 Barre céréalière aux amandes ou noisettes	444	
 Chocolat, en tablette (aliment moyen)	557	chocolat
 Chewing-gum, teneur en sucre inconnue (aliment moyen)	279	
@@ -2081,7 +2081,7 @@ Chips de maïs ou tortilla chips	495
 Biscuit apéritif soufflé, à base de pomme de terre	484	
 Biscuit apéritif, mini bretzel ou sticks	379	
 Biscuit apéritif soufflé, à base de pomme de terre et de soja	409	
-Biscuit apéritif (aliment moyen)	486	
+Biscuit apéritif (aliment moyen)	486	gâteaux apéro|biscuits apéritifs|apéro
 Biscuit apéritif soufflé, à base de maïs, sans cacahuète	489	
 Biscuit apéritif, crackers, garni ou fourré, au fromage	537	
 Biscuit apéritif, crackers, nature	499	
@@ -2107,9 +2107,9 @@ Semoule au lait, rayon frais	121
 Liégeois aux fruits, préemballé	147	
 Mousse aux fruits, rayon frais	53.1	
 Crème dessert à la vanille, rayon frais	105	
-Crème dessert, rayon frais (aliment moyen)	133	
+Crème dessert, rayon frais (aliment moyen)	133	crème dessert
 Gâteau de riz, appertisé	115	
-Gâteau au chocolat, coeur fondant, préemballé (rayon frais)	364	
+Gâteau au chocolat, coeur fondant, préemballé (rayon frais)	364	gâteau au chocolat|fondant au chocolat|moelleux au chocolat|gâteau|quatre-quarts|madeleine
 Mousse liégeoise (chocolat, café, caramel ou vanille), rayon frais	186	
 Pain perdu	218	
 Crème dessert au café, rayon frais	116	
@@ -2118,7 +2118,7 @@ Mousse au chocolat végétale, préemballée	262
 Lait de poule, sans alcool	87.8	
 Pêche melba	119	
 Dessert glacé type mystère ou vacherin	275	
-Glace ou crème glacée, bâtonnet, enrobé de chocolat	328	
+Glace ou crème glacée, bâtonnet, enrobé de chocolat	328	glace|crème glacée
 Crème dessert, appertisée (aliment moyen)	135	
 Crème dessert au chocolat, appertisée	138	
 Crème dessert, rayon frais ou appertisée (aliment moyen)	133	
@@ -2128,7 +2128,7 @@ Omelette norvégienne	212
 Poire belle Hélène	196	
 Nougat glacé	263	
 Citron givré ou Orange givrée (sorbet)	133	
-Coupe glacée type café ou chocolat liégeois	220	
+Coupe glacée type café ou chocolat liégeois	220	coupe glacée|glace
 Bûche glacée	226	
 Coupe glacée parfum pêche Melba ou poire Belle-Hélène	163	
 Crème anglaise, préemballée	105	

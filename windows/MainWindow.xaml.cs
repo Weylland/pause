@@ -819,23 +819,25 @@ public partial class MainWindow : Window
                 quantities.ColumnDefinitions.Add(new ColumnDefinition());
                 bool barcode = next.Source == "Open Food Facts";
                 TextBox grams = AddEstimateField(quantities, 0, barcode ? "Quantité (g ou ml)"
-                    : food.Usual ? "Quantité (g) · poids usuel à vérifier" : "Quantité (g)", food.Grams);
+                    : food.Usual ? "Quantité estimée (g)" : "Quantité (g)", food.Grams);
                 TextBox energy = AddEstimateField(quantities, 1, barcode ? "kcal pour 100 g ou 100 ml" : "kcal pour 100 g", food.Per100);
                 foreach (TextBox field in new[] { name, grams, energy })
                     field.TextChanged += (_, _) => { if (!updating) edited = true; ShowTotal(); };
-                FoodReference.Item[] options = food.Per100.HasValue ? [] : FoodReference.Match(food.Name).Options;
+                FoodReference.Result match = FoodReference.Match(food.Name);
+                FoodReference.Item[] options = food.Per100.HasValue && (food.Source != "Ciqual" || match.Reference is not null) ? [] : match.Options;
                 ComboBox? choice = null;
                 if (options.Length > 0)
                 {
                     choice = new ComboBox { ItemsSource = options, DisplayMemberPath = nameof(FoodReference.Item.Name), Margin = new Thickness(0, 0, 0, 6) };
                     ComboBox references = choice;
+                    references.SelectedItem = options.FirstOrDefault(item => item.Per100 == food.Per100);
                     references.SelectionChanged += (_, _) =>
                     {
                         if (references.SelectedItem is not FoodReference.Item item) return;
                         name.Text = item.Name.Length <= 90 ? item.Name : item.Name[..90];
                         energy.Text = Format(item.Per100, "0.####");
                     };
-                    form.Children.Add(new Label { Content = "Choisir une référence Ciqual", Target = choice, FontSize = 12, Padding = new Thickness(0, 0, 0, 2) });
+                    form.Children.Add(new Label { Content = "Référence Ciqual", Target = choice, FontSize = 12, Padding = new Thickness(0, 0, 0, 2) });
                     form.Children.Add(choice);
                 }
                 form.Children.Add(quantities);
@@ -950,7 +952,7 @@ public partial class MainWindow : Window
     {
         JournalState before = store.Snapshot();
         string key = meal?.Key ?? $"meal/{JournalState.Iso(selected)}/{Guid.NewGuid():D}";
-        var name = new TextBox { Text = meal?.Name ?? "", MaxLength = 90 };
+        var name = new TextBox { Text = meal?.Name ?? "", MaxLength = meal is null ? 700 : 90 };
         var modes = new ComboBox
         {
             ItemsSource = new[] { "Total de la portion", "Calculer avec la quantité" },
@@ -960,7 +962,12 @@ public partial class MainWindow : Window
         var amount = new TextBox { Text = meal?.Amount is double portion ? Format(portion) : "", MaxLength = 12 };
         var per100 = new TextBox { Text = meal?.Per100 is double energy ? Format(energy) : "", MaxLength = 12 };
         var dialog = new Editor(this, meal is null ? "Ajouter un aliment" : "Modifier l’aliment");
-        dialog.Field("Nom", name);
+        dialog.Field(meal is null ? "Ce que tu as mangé" : "Nom", name);
+        if (meal is null)
+        {
+            dialog.Note("Exemple : un bol de soupe et deux tartines. Laisse les calories vides pour une estimation.");
+            name.Loaded += (_, _) => name.Focus();
+        }
         dialog.Field("Saisie", modes);
         StackPanel totalField = dialog.Field("Calories de la portion (kcal)", calories);
         StackPanel energyField = dialog.Field("Calories pour 100 g ou 100 ml", per100);
@@ -975,6 +982,19 @@ public partial class MainWindow : Window
         dialog.Show(() =>
         {
             if (string.IsNullOrWhiteSpace(name.Text)) return "Saisis le nom de l’aliment.";
+            if (meal is null && modes.SelectedIndex == 0 && string.IsNullOrWhiteSpace(calories.Text))
+            {
+                EstimatedFood[] foods = MealEstimate.ParseLocal(name.Text);
+                if (foods.Length == 0) return "Indique entre 1 et 20 aliments.";
+                if (foods.FirstOrDefault(food => food.Grams is null || food.Per100 is null) is EstimatedFood missing)
+                    return $"« {missing.Name} » n’a pas d’estimation. Indique ses calories.";
+                return SaveEdits(before, foods.Select(food => ($"meal/{JournalState.Iso(selected)}/{Guid.NewGuid():D}", (JsonNode?)new JsonObject
+                {
+                    ["name"] = food.Name, ["kcal"] = food.Grams!.Value * food.Per100!.Value / 100,
+                    ["kcalPer100"] = food.Per100, ["amount"] = food.Grams, ["source"] = "Ciqual"
+                })).ToArray());
+            }
+            if (name.Text.Trim().Length > 90) return "Raccourcis le nom de l’aliment.";
             var value = new JsonObject { ["name"] = name.Text.Trim(), ["source"] = meal?.Source ?? "Manuel" };
             if (modes.SelectedIndex == 1)
             {

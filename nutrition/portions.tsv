@@ -1,0 +1,154 @@
+# contenant	aliments	grammes
+verre	vin|champagne|cidre	125
+verre	whisky|rhum|vodka|pastis|digestif	40
+verre	biere	250
+verre		200
+tasse	cafe|expresso	100
+tasse		150
+bol	cereales|muesli|flocons d avoine	50
+bol	salade	80
+bol	chips	30
+bol	riz|pates|semoule|quinoa|boulgour|frites	200
+bol		300
+assiette	soupe|potage|veloute|bouillon	300
+assiette	salade	100
+assiette	frites	200
+assiette	charcuterie|fromage	80
+assiette		250
+part	pizza	130
+part	quiche	150
+part	lasagnes|hachis|gratin	300
+part	gateau|cake|brownie	90
+part	fromage|camembert|brie|comte	30
+part		120
+tranche	pain de mie	25
+tranche	pain d epices	20
+tranche	pain	30
+tranche	jambon cru|jambon sec	20
+tranche	jambon	40
+tranche	saucisson|chorizo|salami	6
+tranche	bacon	15
+tranche	saumon fume	35
+tranche	brioche|gateau|cake	50
+tranche	roti|rosbif|viande	50
+tranche	tomate|fromage|concombre	20
+tranche	citron	10
+tranche	ananas	80
+tranche	melon|pasteque	150
+tranche		30
+morceau	sucre	5
+morceau	chocolat	5
+morceau	pain	40
+morceau	poulet|viande|poisson	120
+morceau		30
+poignee	salade	25
+poignee	chips	20
+poignee		30
+pot	compote	100
+pot		125
+canette		330
+bouteille	vin|champagne	750
+bouteille	biere	330
+bouteille		500
+carre		5
+rondelle	saucisson|chorizo	5
+rondelle		10
+pincee		1
+sachet	the|tisane|infusion	200
+sachet		30
+paquet		150
+barquette		250
+brique	soupe|potage|veloute	500
+brique	lait	1000
+brique		200
+louche		125
+gousse		4
+cuillere a soupe	huile	10
+cuillere a soupe	beurre	15
+cuillere a soupe	sucre	12
+cuillere a soupe	confiture|miel|marmelade	20
+cuillere a soupe	riz|pates|semoule	25
+cuillere a soupe		15
+cuillere a cafe	huile	4
+cuillere a cafe	sucre	4
+cuillere a cafe		5
+*	tartine	40
+*	sushi|maki	150
+*	nem	100
+*	tacos|burrito|wrap|fajita	300
+*	kebab	350
+*	ramen|soupe chinoise|soupe de nouilles	400
+*	salade de fruits	150
+*	salade composee|salade cesar	250
+*	galette complete|crepe complete|crepe jambon fromage	200
+*	crepe|gaufre|beignet	70
+*	eclair|patisserie|chou a la creme	90
+*	boeuf bourguignon|blanquette|poulet curry|poulet au curry|curry de poulet	300
+*	curry|paprika|poivre|cannelle|epice	2
+*	barre de cereales|barre cerealiere	25
+*	biscuit aperitif|apero	30
+*	cafe au lait|cafe creme|cappuccino|cacao chaud	200
+*	nouille	200
+*	pizza	350
+*	sandwich	200
+*	soupe|potage|veloute|bouillon|gaspacho	300
+*	chocolat chaud|lait|jus|eau|smoothie	200
+*	the|tisane|infusion	200
+*	coca|cola|soda|limonade	330
+*	cafe|expresso	100
+*	vin|champagne	125
+*	biere	250
+*	whisky|rhum|vodka|pastis	40
+*	huile|beurre|margarine	10
+*	sauce|vinaigrette|mayonnaise|ketchup|moutarde|pesto	15
+*	confiture|miel|marmelade|pate a tartiner	20
+*	sucre	5
+*	creme caramel|creme brulee|creme dessert	120
+*	creme	30
+*	jambon beurre	200
+*	pain pita	70
+*	pain|baguette	60
+*	pates bolognaise|pates carbonara|pates a la|spaghetti bolognaise|spaghetti carbonara	300
+*	pates	200
+*	pate	50
+*	riz au lait	100
+*	riz|semoule|quinoa|boulgour|lentilles|pois chiches|haricot blanc|haricot rouge	180
+*	puree de fruits|puree de pommes type	100
+*	puree|pomme de terre|gnocchi	200
+*	frites	150
+*	chips	30
+*	salade de	250
+*	salade	60
+*	taboule	150
+*	haricot|carotte|courgette|brocoli|chou|epinard|petits pois|poireau|endive|aubergine|betterave|poivron|champignon|radis|ratatouille|legume|crudite|fruit	150
+*	concombre	100
+*	mais|tofu	80
+*	oignon	50
+*	olive|cornichon	25
+*	poulet croquette	120
+*	poulet|dinde|boeuf|steak|porc|veau|agneau|canard|escalope|rosbif|roti|viande	130
+*	saucisson|chorizo|rillettes|bacon	30
+*	foie gras|jambon|charcuterie	40
+*	lardon	50
+*	saumon fume	60
+*	saumon|cabillaud|thon|poisson|colin|truite|sole|merlu	130
+*	crevette|sardine|oeuf	100
+*	moule	200
+*	surimi	50
+*	fromage blanc	100
+*	fromage a raclette|raclette	150
+*	mozzarella	60
+*	fromage|camembert|brie|emmental|comte|roquefort|chevre|feta|gruyere|parmesan	30
+*	omelette|quiche	150
+*	lasagnes|hachis|tartiflette|chili	300
+*	gratin	250
+*	couscous|paella|cassoulet|tajine|choucroute	350
+*	tarte	120
+*	gateau|cake	80
+*	mousse|compote|glace|sorbet	100
+*	biscuit|cookie	30
+*	chocolat	20
+*	cereales|muesli|flocon	45
+*	noix|amande|noisette|cacahuete|pistache|raisin sec|raisins secs	30
+*	fraise|cerise|framboise|myrtille|raisin|melon|pasteque|ananas|mangue	150
+*		100

@@ -14,7 +14,8 @@ public class FoodDescriptionTest {
 
     @Test
     public void sharedMeals() throws Exception {
-        List<FoodDescription.Reference> table = FoodDescription.load(Files.newInputStream(ROOT.resolve("nutrition/ciqual.tsv")));
+        FoodDescription.Table table = FoodDescription.load(Files.newInputStream(ROOT.resolve("nutrition/ciqual.tsv")),
+                Files.newInputStream(ROOT.resolve("nutrition/portions.tsv")));
         for (String line : Files.readAllLines(ROOT.resolve("tests/repas.tsv"))) {
             String[] columns = line.split("\t", 2);
             String actual = FoodDescription.parse(columns[0].replace("\\n", "\n"), table).stream()
@@ -27,7 +28,7 @@ public class FoodDescriptionTest {
         String grams = portion.grams() == null ? "?"
                 : java.math.BigDecimal.valueOf(portion.grams()).stripTrailingZeros().toPlainString() + (portion.usual() ? "*" : "");
         String reference = portion.reference() != null ? "=" + portion.reference().name()
-                : portion.options().isEmpty() ? "-" : "?" + portion.options().get(0).name();
+                : portion.guess() == null ? "-" : "~" + portion.guess().name();
         return portion.name() + "|" + grams + "|" + reference;
     }
 }

@@ -25,16 +25,18 @@ internal sealed record MealEstimate(string Source, EstimatedFood[] Foods)
     private static readonly Regex Count = new("^(?:(" + Digits + @")(?:\s*([x×])(?=[\s0-9])\s*|\s+)|(" + Words + "))(.+)$", Flags);
     private static readonly Regex Correction = new(@"^.+?\s*:\s*(?:" + Digits + @")\s*" + Unit + "$", Flags);
     private static readonly Regex Separator = new(@"\s+(?:et|avec|puis)\s+|[;+&•]|(?<![0-9]),|,(?![0-9])", Flags);
-    private static readonly Regex Little = new(@"^(?:(?:un\s+)?(?:petit\s+)?peu|beaucoup)\s+(?:de\s+|d['’]\s*)", Flags);
+    private static readonly Regex Little = new(@"^((?:un\s+)?(?:petit\s+)?peu|beaucoup)\s+(?:de\s+|d['’]\s*)", Flags);
     private static readonly Regex Article = new(@"^(?:(?:des|du|de|une|un|la|les|le|quelques)\s+|[dl]['’]\s*)+", Flags);
-    private static readonly Regex Container = new(@"^(?:(?:petite?s?|grande?s?|gros(?:se)?s?|bonne?s?|bons?)\s+)?"
-        + "(?:verres?|tasses?|bols?|parts?|tranches?|portions?|assiettes?|morceaux?|poign[ée]es?|pots?|canettes?|bouteilles?|carr[ée]s?"
+    private const string Sizes = "(petite?s?|grande?s?|gros(?:se)?s?|bonne?s?|bons?)";
+    private static readonly Regex Sized = new("^" + Sizes + @"\s+(.+)$", Flags);
+    private static readonly Regex Container = new("^(?:" + Sizes + @"\s+)?"
+        + "(verres?|tasses?|bols?|parts?|tranches?|portions?|assiettes?|morceaux?|poign[ée]es?|pots?|canettes?|bouteilles?|carr[ée]s?"
         + "|rondelles?|pinc[ée]es?|sachets?|paquets?|barquettes?|briques?|louches?|gousses?"
         + @"|cuill(?:[èe]res?|[ée]r[ée]es?)(?:\s+[àa]\s+(?:soupe|caf[ée]))?|c\.?\s*[àa]\.?\s*[sc]\.?)\s+(?:de\s+|du\s+|des\s+|d['’]\s*)", Flags);
     private static readonly string[] Numbers = ["un", "deux", "trois", "quatre", "cinq", "six", "sept", "huit", "neuf", "dix", "onze", "douze"];
     private static readonly Regex Barcode = new(@"^Code-barres (\d{8}|\d{12,14})(?:\r?\n(.+))?$", RegexOptions.IgnoreCase);
     private static string CacheFile(MealDraft draft) => Path.Combine(JournalStore.DirectoryPath, "estimates", draft.Id + ".json");
-    private static string Fingerprint(MealDraft draft) => Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes("ciqual-v3\n" + draft.Description)));
+    private static string Fingerprint(MealDraft draft) => Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes("ciqual-v4\n" + draft.Description)));
     private sealed record Cached(string Fingerprint, MealEstimate Estimate);
 
     internal static MealEstimate? Read(MealDraft draft)
@@ -105,25 +107,36 @@ internal sealed record MealEstimate(string Source, EstimatedFood[] Foods)
                     ? (item.Name, correction.Grams, false) : item).ToList();
                 continue;
             }
-            foreach (string piece in Separator.Split(line))
-                if (ParsePortion(Clean(piece)) is { } portion) portions.Add(portion);
+            foreach (string piece in Separator.Split(line).SelectMany(piece => Parts(Clean(piece))))
+                if (ParsePortion(piece) is { } portion) portions.Add(portion);
         }
         if (portions.Count > 20) return [];
         return portions.Select(portion =>
         {
-            FoodReference.Item? item = FoodReference.Match(portion.Name).Reference;
-            return new EstimatedFood(Shorten(item?.Name ?? portion.Name), portion.Grams, item?.Per100,
-                item is null ? null : "Ciqual", portion.Usual);
+            FoodReference.Result match = FoodReference.Match(portion.Name);
+            return new EstimatedFood(Shorten(match.Reference?.Name ?? portion.Name), portion.Grams, match.Guess?.Per100,
+                match.Guess is null ? null : "Ciqual", portion.Usual);
         }).ToArray();
+    }
+
+    private static string[] Parts(string piece)
+    {
+        if (ParsePortion(piece) is not { Usual: true } portion || !piece.EndsWith(portion.Name, StringComparison.Ordinal)) return [piece];
+        string[] names = FoodReference.Split(portion.Name);
+        return names.Length < 2 ? [piece] : [piece[..^portion.Name.Length] + names[0], .. names[1..]];
     }
 
     private static (string Name, double? Grams, bool Usual)? ParsePortion(string piece)
     {
         double? grams = null, count = null;
-        string name = Little.Replace(piece, "", 1);
+        Match little = Little.Match(piece);
+        double factor = !little.Success ? 1 : little.Groups[1].Value.StartsWith("b", StringComparison.OrdinalIgnoreCase) ? 1.5 : .5;
+        bool measured = false;
+        string name = piece[little.Length..];
         Match prefix = Prefix.Match(name);
         if (prefix.Success)
         {
+            measured = true;
             grams = ReadGrams(Number(prefix.Groups[1].Value), prefix.Groups[2].Value);
             name = prefix.Groups[3].Value;
         }
@@ -142,33 +155,41 @@ internal sealed record MealEstimate(string Source, EstimatedFood[] Foods)
             {
                 grams = ReadGrams(count!.Value * Number(repeated.Groups[1].Value), repeated.Groups[2].Value);
                 name = repeated.Groups[3].Value;
-                count = null;
+                measured = true;
             }
             else if (suffix.Success)
             {
                 double each = suffix.Groups[2].Success && count is double items ? items : 1;
                 grams = ReadGrams(each * Number(suffix.Groups[3].Value), suffix.Groups[4].Value);
                 name = suffix.Groups[1].Value;
-                count = null;
+                measured = true;
             }
         }
         name = Article.Replace(name, "", 1);
-        Match container = Container.Match(name);
-        if (container.Success)
+        string? container = null;
+        Match held = Container.Match(name), sized = Sized.Match(name);
+        if (held.Success)
         {
-            count = null;
-            name = Article.Replace(name[container.Length..], "", 1);
+            container = FoodReference.Container(held.Groups[2].Value);
+            factor *= Size(held.Groups[1].Value);
+            name = Article.Replace(name[held.Length..], "", 1);
+        }
+        else if (sized.Success && !FoodReference.Known(name))
+        {
+            factor *= Size(sized.Groups[1].Value);
+            name = Article.Replace(sized.Groups[2].Value, "", 1);
         }
         name = Shorten(name).Trim();
         if (FoodReference.Normalize(name).Length < 2) return null;
-        bool usual = false;
-        if (count is double number)
-        {
-            if (FoodReference.Match(name).Unit is double weight) grams = ReadGrams(number * weight, "g");
-            usual = grams.HasValue;
-        }
-        return (name, grams, usual);
+        if (measured) return (name, grams, false);
+        FoodReference.Result match = FoodReference.Match(name);
+        double weight = container is null && count.HasValue && match.Unit is double unit ? count.Value * unit
+            : FoodReference.Portion(container, name, match.Guess) * (container is not null || count is <= 3 ? count ?? 1 : 1);
+        return (name, ReadGrams(Math.Floor(weight * factor * 10 + .5) / 10, "g"), true);
     }
+
+    private static double Size(string adjective) => adjective.Length == 0 || char.ToLowerInvariant(adjective[0]) == 'b' ? 1
+        : char.ToLowerInvariant(adjective[0]) == 'p' ? .7 : 1.3;
 
     private static bool SameName(string first, string second) => FoodReference.Normalize(first) == FoodReference.Normalize(second);
 
