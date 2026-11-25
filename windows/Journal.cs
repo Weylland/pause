@@ -189,7 +189,7 @@ internal sealed class JournalStore
                 throw new InvalidDataException("Complète la quantité et les calories pour 100 de chaque aliment.");
             double kcal = grams * per100 / 100;
             string mealKey = $"meal/{JournalState.Iso(draft.Date)}/{Guid.NewGuid():D}";
-            var value = new JsonObject { ["name"] = food.Name.Trim(), ["source"] = source,
+            var value = new JsonObject { ["name"] = food.Name.Trim(), ["source"] = food.Source ?? source,
                 ["kcal"] = kcal, ["amount"] = grams, ["kcalPer100"] = per100 };
             changes.Add(new Change(mealKey, null, Normalize(mealKey, value)));
             total += kcal;

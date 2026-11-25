@@ -384,7 +384,7 @@ internal static class McpJournalTools
         return new
         {
             source = "Anses-Ciqual", poids_g = grams,
-            resultats = FoodReference.Search(name).Select(item => new
+            resultats = FoodReference.Match(name).Options.Select(item => new
             {
                 nom = item.Name, kcal_pour_100 = item.Per100,
                 kcal_estimees = grams is double weight ? Math.Round(weight * item.Per100 / 100, 1) : (double?)null

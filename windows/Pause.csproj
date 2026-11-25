@@ -12,6 +12,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Resource Include="../design/fonts/*.ttf" Link="Fonts/%(Filename)%(Extension)" />
+    <InternalsVisibleTo Include="Pause.Tests" />
     <EmbeddedResource Include="../nutrition/ciqual.tsv" LogicalName="Pause.ciqual.tsv" />
     <PackageReference Include="QRCoder" Version="1.7.0" />
   </ItemGroup>

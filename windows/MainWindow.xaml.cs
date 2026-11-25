@@ -760,7 +760,7 @@ public partial class MainWindow : Window
         var form = new StackPanel();
         dialog.Content.Children.Add(new ScrollViewer { MaxHeight = 305, Content = form,
             VerticalScrollBarVisibility = ScrollBarVisibility.Auto });
-        var fields = new List<(TextBox Name, TextBox Grams, TextBox Energy)>();
+        var fields = new List<(TextBox Name, TextBox Grams, TextBox Energy, ComboBox? Choice, EstimatedFood Food)>();
         MealDraft? shown = null;
         MealEstimate? proposal = null;
         bool edited = false, updating = false, asking = false;
@@ -770,19 +770,23 @@ public partial class MainWindow : Window
         {
             if (proposal is null || fields.Count == 0) return;
             double total = 0;
-            foreach (var (_, grams, energy) in fields)
+            foreach (var (_, grams, energy, _, _) in fields)
             {
                 if (!TryNumber(grams.Text, out double amount) || amount is not (>= .0001 and <= 10000)
                     || !TryNumber(energy.Text, out double per100) || per100 is not (>= 0 and <= 1000))
                 {
                     details.Text = proposal.Source == "Saisie" && estimateError is not null ? estimateError
-                        : proposal.Source + " · Vérifie les quantités. ChatGPT ou Claude peuvent chercher les calories manquantes.";
+                        : proposal.Source + " · Vérifie les quantités et choisis les références. ChatGPT ou Claude peuvent chercher les calories manquantes.";
                     return;
                 }
                 total += amount * per100 / 100;
             }
             details.Text = $"{proposal.Source} · Total estimé {Format(total, "0.#")} kcal";
         }
+
+        static string? SourceOf(double per100, ComboBox? choice, EstimatedFood food) =>
+            choice?.SelectedItem is FoodReference.Item item && Math.Abs(per100 - item.Per100) < .0001 ? "Ciqual"
+            : food.Per100 is double proposed && Math.Abs(per100 - proposed) < .0001 ? food.Source : "Saisie";
 
         void ShowEstimate(bool reload = false)
         {
@@ -804,12 +808,28 @@ public partial class MainWindow : Window
                 quantities.ColumnDefinitions.Add(new ColumnDefinition());
                 quantities.ColumnDefinitions.Add(new ColumnDefinition());
                 bool barcode = next.Source == "Open Food Facts";
-                TextBox grams = AddEstimateField(quantities, 0, barcode ? "Quantité (g ou ml)" : "Quantité (g)", food.Grams);
+                TextBox grams = AddEstimateField(quantities, 0, barcode ? "Quantité (g ou ml)"
+                    : food.Usual ? "Quantité (g) · poids usuel à vérifier" : "Quantité (g)", food.Grams);
                 TextBox energy = AddEstimateField(quantities, 1, barcode ? "kcal pour 100 g ou 100 ml" : "kcal pour 100 g", food.Per100);
                 foreach (TextBox field in new[] { name, grams, energy })
                     field.TextChanged += (_, _) => { if (!updating) edited = true; ShowTotal(); };
+                FoodReference.Item[] options = food.Per100.HasValue ? [] : FoodReference.Match(food.Name).Options;
+                ComboBox? choice = null;
+                if (options.Length > 0)
+                {
+                    choice = new ComboBox { ItemsSource = options, DisplayMemberPath = nameof(FoodReference.Item.Name), Margin = new Thickness(0, 0, 0, 6) };
+                    ComboBox references = choice;
+                    references.SelectionChanged += (_, _) =>
+                    {
+                        if (references.SelectedItem is not FoodReference.Item item) return;
+                        name.Text = item.Name.Length <= 90 ? item.Name : item.Name[..90];
+                        energy.Text = Format(item.Per100, "0.####");
+                    };
+                    form.Children.Add(new Label { Content = "Choisir une référence Ciqual", Target = choice, FontSize = 12, Padding = new Thickness(0, 0, 0, 2) });
+                    form.Children.Add(choice);
+                }
                 form.Children.Add(quantities);
-                fields.Add((name, grams, energy));
+                fields.Add((name, grams, energy, choice, food));
             }
             updating = false;
             edited = false;
@@ -836,9 +856,13 @@ public partial class MainWindow : Window
         useChatGpt.Click += async (_, _) =>
         {
             if (asking || shown is not MealDraft draft) return;
-            EstimatedFood[] foods = fields.Select(field => new EstimatedFood(field.Name.Text.Trim(),
-                TryNumber(field.Grams.Text, out double grams) ? grams : null,
-                TryNumber(field.Energy.Text, out double energy) ? energy : null)).ToArray();
+            EstimatedFood[] foods = fields.Select(field =>
+            {
+                double? grams = TryNumber(field.Grams.Text, out double amount) ? amount : null;
+                double? energy = TryNumber(field.Energy.Text, out double per100) ? per100 : null;
+                return new EstimatedFood(field.Name.Text.Trim(), grams, energy,
+                    energy is double known ? SourceOf(known, field.Choice, field.Food) : null, field.Food.Usual && grams == field.Food.Grams);
+            }).ToArray();
             if (!foods.Any(food => !food.Per100.HasValue)) { details.Text = "Les calories sont déjà renseignées."; return; }
             if (foods.Any(food => !food.Per100.HasValue && food.Name.Length == 0)) { details.Text = "Indique le nom du produit pour que ChatGPT puisse l’identifier."; return; }
             asking = true;
@@ -875,7 +899,7 @@ public partial class MainWindow : Window
                 if (shown is null || proposal is null || fields.Count == 0) return "Aucune estimation à ajouter.";
                 var completed = new List<EstimatedFood>();
                 if (asking) return "Attends la fin de l’estimation ChatGPT.";
-                foreach (var (name, grams, energy) in fields)
+                foreach (var (name, grams, energy, choice, proposed) in fields)
                 {
                     string food = name.Text.Trim();
                     if (food.Length == 0) { name.Focus(); return "Indique le nom de l’aliment."; }
@@ -883,9 +907,9 @@ public partial class MainWindow : Window
                     { grams.Focus(); return $"Indique la quantité pour {food}."; }
                     if (!TryNumber(energy.Text, out double per100) || per100 is not (>= 0 and <= 1000))
                     { energy.Focus(); return $"Indique les calories pour 100 g de {food} ou choisis ChatGPT ou Claude."; }
-                    completed.Add(new(food, amount, per100));
+                    completed.Add(new(food, amount, per100, SourceOf(per100, choice, proposed)));
                 }
-                try { store.SaveEstimate(shown, completed, proposal.Source == "Claude" ? "Estimation IA" : proposal.Source); }
+                try { store.SaveEstimate(shown, completed, proposal.Source); }
                 catch (Exception error) when (JournalStore.IsFailure(error) || error is InvalidOperationException) { return error.Message; }
                 Refresh();
                 return null;

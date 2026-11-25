@@ -16,7 +16,7 @@ Télécharge la version qui convient depuis les [versions GitHub](https://github
 - **Poids et calories**. Saisis tes pesées, fixe tes objectifs et ajoute des aliments à la main, par code-barres, par photo du tableau nutritionnel ou en décrivant un repas. Les produits scannés sans calories passent dans **À estimer** pour la prochaine synchro. Les graphiques montrent l’évolution du poids, les calories et, sur Windows, les jours de pause.
 - **Rappels**. Sur Android, choisis l’heure du rappel de journal. Active **Me rappeler aussi la pesée** pour recevoir un rappel si le poids du jour manque.
 - **Synchro**. L’onglet **Synchro** sur Android et le bouton **Google Drive** sur Windows permettent de connecter le même compte Google. L’app synchronise les entrées à l’ouverture, après une saisie et périodiquement tant qu’elle reste ouverte. Le bouton **Associer Android** donne accès à la synchro Wi-Fi avec un QR code.
-- **Estimations**. Sur Android, **À la synchro** garde le repas en un appui. Tu peux reprendre un brouillon avec **Estimer ici**. Sur Windows, Fil des jours prépare une proposition à partir de Ciqual ou d’Open Food Facts après la réception du brouillon. Ouvre **Repas à estimer**, complète les quantités manquantes et valide avec **Ajouter au journal**.
+- **Estimations**. Sur Android, **À la synchro** garde le repas en un appui. Tu peux reprendre un brouillon avec **Estimer ici**. Sur Windows, Fil des jours prépare une proposition à partir de Ciqual ou d’Open Food Facts après la réception du brouillon. Ouvre **Repas à estimer**, choisis une référence Ciqual si plusieurs correspondent, complète les quantités manquantes et valide avec **Ajouter au journal**. Les quantités se lisent en grammes, en litres ou en nombre d’unités ; un nombre utilise un poids usuel à vérifier et 1 ml compte pour 1 g.
 - **ChatGPT sur Android**. Dans **Calories**, utilise **Continuer avec ChatGPT** et autorise l’usage de ton abonnement éligible. Lorsque Ciqual ne reconnaît pas un aliment, seuls les noms inconnus sont envoyés pour l’estimation. Tu peux vérifier les valeurs avant de les enregistrer. L’estimation Ciqual fonctionne aussi hors connexion.
 - **MCP**. Sur Windows, le bouton **Connecteur MCP** donne la configuration pour Claude Desktop, Claude Code et Codex. Le connecteur peut lire le journal, ajouter ou corriger des saisies et enregistrer un bilan à la demande.
 
@@ -39,5 +39,9 @@ Utilise le SDK .NET 8 sous Windows. Depuis le dossier `windows`, lance cette com
 ```powershell
 dotnet publish -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=true
 ```
+
+### Tester l’estimation des repas
+
+`tests/repas.tsv` contient les phrases et les résultats attendus, communs aux deux applications. Lance `.\gradlew.bat :app:testDebugUnitTest` depuis `android` et `dotnet test` depuis `windows-tests`.
 
 La lecture des codes-barres utilise ZXing. La reconnaissance de texte utilise ML Kit. Le QR code sur Windows utilise QRCoder. Les fichiers de licence ZXing et QRCoder sont joints dans leurs dossiers respectifs.

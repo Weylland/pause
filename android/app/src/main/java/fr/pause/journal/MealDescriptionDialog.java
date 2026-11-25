@@ -55,7 +55,7 @@ final class MealDescriptionDialog {
 
     private void showDescription(String initial) {
         LinearLayout form = form();
-        text(form, "Écris ton repas ou utilise le micro de ton clavier. Exemple : 90 g de baguette et 10 g de beurre.");
+        text(form, "Écris ton repas ou utilise le micro de ton clavier. Exemple : 90 g de baguette, 10 g de beurre et 2 œufs.");
         EditText input = new EditText(activity);
         input.setHint("Décris ton repas");
         input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
@@ -83,7 +83,7 @@ final class MealDescriptionDialog {
             }
             List<FoodDescription.Portion> parts;
             try {
-                parts = FoodDescription.parse(description, FoodDescription.load(activity));
+                parts = FoodDescription.parse(description, FoodDescription.load(activity.getAssets().open("ciqual.tsv")));
             } catch (Exception error) {
                 parts = FoodDescription.parse(description, java.util.Collections.emptyList());
             }
@@ -208,7 +208,7 @@ final class MealDescriptionDialog {
             heading.setTypeface(PaperStyle.title(activity));
             note = text(form, reference == null ? estimate == null ? "Référence à choisir ou à renseigner." : "Estimation ChatGPT"
                     : "Ciqual · " + reference.name());
-            grams = decimal(form, "Quantité (g)", part.grams());
+            grams = decimal(form, part.usual() ? "Quantité (g) · poids usuel à vérifier" : "Quantité (g)", part.grams());
             energy = decimal(form, "Calories pour 100 g", reference == null ? estimate : Double.valueOf(reference.per100()));
             if (!part.options().isEmpty() && reference == null) {
                 android.widget.Button choose = new android.widget.Button(activity);

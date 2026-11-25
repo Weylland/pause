@@ -8,7 +8,7 @@ using System.Text.RegularExpressions;
 
 namespace Pause;
 
-internal sealed record EstimatedFood(string Name, double? Grams, double? Per100);
+internal sealed record EstimatedFood(string Name, double? Grams, double? Per100, string? Source = null, bool Usual = false);
 
 internal sealed record MealEstimate(string Source, EstimatedFood[] Foods)
 {
@@ -16,14 +16,25 @@ internal sealed record MealEstimate(string Source, EstimatedFood[] Foods)
     {
         Timeout = TimeSpan.FromSeconds(25), MaxResponseContentBufferSize = 262144
     };
-    private const string Amount = @"(\d+(?:[.,]\d+)?)\s*(kg|grammes?|g)\b";
-    private static readonly Regex Prefix = new("^" + Amount + @"\s*(.+)$", RegexOptions.IgnoreCase);
-    private static readonly Regex Suffix = new(@"^(.+?)\s*[:]?\s+" + Amount + "$", RegexOptions.IgnoreCase);
-    private static readonly Regex Separator = new(@"\s+(?:et|avec)\s+|[;\n+]|(?<!\d),|,(?!\d)", RegexOptions.IgnoreCase);
-    private static readonly Regex Article = new(@"^(?:(?:(?:un\s+)?peu\s+de\s+|(?:de la|des|du|de|une|un|la|le|les)\s+|(?:de\s+)?[dl]['’]\s*))+", RegexOptions.IgnoreCase);
+    private const RegexOptions Flags = RegexOptions.IgnoreCase | RegexOptions.CultureInvariant;
+    private const string Digits = @"[0-9]+\s*/\s*[0-9]+|[0-9]+(?:[.,][0-9]+)?|[½¼¾]";
+    private const string Words = @"(?:une?\s+)?demie?[\s-]+|(?:une?|deux|trois|quatre|cinq|six|sept|huit|neuf|dix|onze|douze)\s+";
+    private const string Unit = @"(kilogrammes?|kilos?|kg|grammes?|gr|g|litres?|l|dl|cl|ml)(?![\p{L}'’])\.?";
+    private static readonly Regex Prefix = new("^((?:" + Digits + @")\s*|" + Words + ")" + Unit + @"\s*(.+)$", Flags);
+    private static readonly Regex Suffix = new(@"^(.+?)(?:\s*:\s*|\s+(de\s+)?)(" + Digits + @")\s*" + Unit + "$", Flags);
+    private static readonly Regex Count = new("^(?:(" + Digits + @")(?:\s*([x×])(?=[\s0-9])\s*|\s+)|(" + Words + "))(.+)$", Flags);
+    private static readonly Regex Correction = new(@"^.+?\s*:\s*(?:" + Digits + @")\s*" + Unit + "$", Flags);
+    private static readonly Regex Separator = new(@"\s+(?:et|avec|puis)\s+|[;+&•]|(?<![0-9]),|,(?![0-9])", Flags);
+    private static readonly Regex Little = new(@"^(?:(?:un\s+)?(?:petit\s+)?peu|beaucoup)\s+(?:de\s+|d['’]\s*)", Flags);
+    private static readonly Regex Article = new(@"^(?:(?:des|du|de|une|un|la|les|le|quelques)\s+|[dl]['’]\s*)+", Flags);
+    private static readonly Regex Container = new(@"^(?:(?:petite?s?|grande?s?|gros(?:se)?s?|bonne?s?|bons?)\s+)?"
+        + "(?:verres?|tasses?|bols?|parts?|tranches?|portions?|assiettes?|morceaux?|poign[ée]es?|pots?|canettes?|bouteilles?|carr[ée]s?"
+        + "|rondelles?|pinc[ée]es?|sachets?|paquets?|barquettes?|briques?|louches?|gousses?"
+        + @"|cuill(?:[èe]res?|[ée]r[ée]es?)(?:\s+[àa]\s+(?:soupe|caf[ée]))?|c\.?\s*[àa]\.?\s*[sc]\.?)\s+(?:de\s+|du\s+|des\s+|d['’]\s*)", Flags);
+    private static readonly string[] Numbers = ["un", "deux", "trois", "quatre", "cinq", "six", "sept", "huit", "neuf", "dix", "onze", "douze"];
     private static readonly Regex Barcode = new(@"^Code-barres (\d{8}|\d{12,14})(?:\r?\n(.+))?$", RegexOptions.IgnoreCase);
     private static string CacheFile(MealDraft draft) => Path.Combine(JournalStore.DirectoryPath, "estimates", draft.Id + ".json");
-    private static string Fingerprint(MealDraft draft) => Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes("ciqual-v2\n" + draft.Description)));
+    private static string Fingerprint(MealDraft draft) => Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes("ciqual-v3\n" + draft.Description)));
     private sealed record Cached(string Fingerprint, MealEstimate Estimate);
 
     internal static MealEstimate? Read(MealDraft draft)
@@ -82,51 +93,107 @@ internal sealed record MealEstimate(string Source, EstimatedFood[] Foods)
 
     internal static EstimatedFood[] ParseLocal(string description)
     {
-        string[] lines = description.Replace('\u00a0', ' ').Replace('\u202f', ' ').Split('\n', StringSplitOptions.TrimEntries);
-        // Android appends edits as “aliment : quantité” after the original description.
-        string first = lines[0];
-        var overrides = new Dictionary<string, double>(StringComparer.OrdinalIgnoreCase);
-        foreach (string line in lines.Skip(1))
+        var portions = new List<(string Name, double? Grams, bool Usual)>();
+        string text = description.Normalize(NormalizationForm.FormC).Replace('\u00a0', ' ').Replace('\u202f', ' ').Replace("\r", "");
+        foreach (string line in text.Split('\n'))
         {
-            Match match = Regex.Match(line, "^(.+?)\\s*:\\s*" + Amount + "$", RegexOptions.IgnoreCase);
-            if (!match.Success || ReadGrams(match.Groups[2].Value, match.Groups[3].Value) is not double grams) return [];
-            overrides[FoodName(match.Groups[1].Value)] = grams;
+            string whole = Clean(line);
+            if (Correction.IsMatch(whole) && ParsePortion(whole) is { Grams: not null } correction
+                && portions.Any(item => SameName(item.Name, correction.Name)))
+            {
+                portions = portions.Select(item => SameName(item.Name, correction.Name)
+                    ? (item.Name, correction.Grams, false) : item).ToList();
+                continue;
+            }
+            foreach (string piece in Separator.Split(line))
+                if (ParsePortion(Clean(piece)) is { } portion) portions.Add(portion);
         }
-        string[] parts = Separator.Split(first);
-        if (parts.Length > 20) return [];
-        var foods = new List<EstimatedFood>();
-        foreach (string part in parts)
+        if (portions.Count > 20) return [];
+        return portions.Select(portion =>
         {
-            string name = part.Trim();
-            if (name.Length == 0) continue;
-            double? grams = null;
-            Match match = Prefix.Match(name);
-            if (match.Success)
-            {
-                grams = ReadGrams(match.Groups[1].Value, match.Groups[2].Value);
-                name = match.Groups[3].Value;
-            }
-            else if ((match = Suffix.Match(name)).Success)
-            {
-                grams = ReadGrams(match.Groups[2].Value, match.Groups[3].Value);
-                name = match.Groups[1].Value;
-            }
-            name = FoodName(name);
-            if (name.Length is < 2 or > 90) return [];
-            if (overrides.TryGetValue(name, out double corrected)) grams = corrected;
-            FoodReference.Item? item = FoodReference.Exact(name);
-            foods.Add(new(item?.Name ?? name, grams, item?.Per100));
-        }
-        return foods.ToArray();
+            FoodReference.Item? item = FoodReference.Match(portion.Name).Reference;
+            return new EstimatedFood(Shorten(item?.Name ?? portion.Name), portion.Grams, item?.Per100,
+                item is null ? null : "Ciqual", portion.Usual);
+        }).ToArray();
     }
 
-    private static string FoodName(string name) => Article.Replace(name.Trim(), "").Trim();
-
-    private static double? ReadGrams(string text, string unit)
+    private static (string Name, double? Grams, bool Usual)? ParsePortion(string piece)
     {
-        if (!double.TryParse(text.Replace(',', '.'), CultureInfo.InvariantCulture, out double value)) return null;
-        if (unit.Equals("kg", StringComparison.OrdinalIgnoreCase)) value *= 1000;
-        return value is >= .0001 and <= 10000 ? value : null;
+        double? grams = null, count = null;
+        string name = Little.Replace(piece, "", 1);
+        Match prefix = Prefix.Match(name);
+        if (prefix.Success)
+        {
+            grams = ReadGrams(Number(prefix.Groups[1].Value), prefix.Groups[2].Value);
+            name = prefix.Groups[3].Value;
+        }
+        else
+        {
+            bool times = false;
+            Match counted = Count.Match(name);
+            if (counted.Success)
+            {
+                count = Number(counted.Groups[1].Success ? counted.Groups[1].Value : counted.Groups[3].Value);
+                times = counted.Groups[2].Success;
+                name = counted.Groups[4].Value;
+            }
+            Match repeated = Prefix.Match(name), suffix = Suffix.Match(name);
+            if (times && repeated.Success)
+            {
+                grams = ReadGrams(count!.Value * Number(repeated.Groups[1].Value), repeated.Groups[2].Value);
+                name = repeated.Groups[3].Value;
+                count = null;
+            }
+            else if (suffix.Success)
+            {
+                double each = suffix.Groups[2].Success && count is double items ? items : 1;
+                grams = ReadGrams(each * Number(suffix.Groups[3].Value), suffix.Groups[4].Value);
+                name = suffix.Groups[1].Value;
+                count = null;
+            }
+        }
+        name = Article.Replace(name, "", 1);
+        Match container = Container.Match(name);
+        if (container.Success)
+        {
+            count = null;
+            name = Article.Replace(name[container.Length..], "", 1);
+        }
+        name = Shorten(name).Trim();
+        if (FoodReference.Normalize(name).Length < 2) return null;
+        bool usual = false;
+        if (count is double number)
+        {
+            if (FoodReference.Match(name).Unit is double weight) grams = ReadGrams(number * weight, "g");
+            usual = grams.HasValue;
+        }
+        return (name, grams, usual);
+    }
+
+    private static bool SameName(string first, string second) => FoodReference.Normalize(first) == FoodReference.Normalize(second);
+
+    private static string Shorten(string name) => name.Length <= 90 ? name : name[..90];
+
+    private static string Clean(string piece) => Regex.Replace(Regex.Replace(Regex.Replace(piece, @"[()\[\]]", " "), @"\s+", " "),
+        @"^[\s*–—-]+|[\s.!?…:]+$", "");
+
+    private static double Number(string value)
+    {
+        string text = Regex.Replace(value, @"[\s-]+$", "").ToLowerInvariant();
+        if (text.Contains("demi", StringComparison.Ordinal)) return .5;
+        if (text == "une") return 1;
+        if (Array.IndexOf(Numbers, text) is >= 0 and int word) return word + 1;
+        if (text.Length == 1 && "¼½¾".IndexOf(text[0]) is >= 0 and int quarters) return (quarters + 1) / 4.0;
+        string[] parts = text.Replace(',', '.').Split('/');
+        double amount = double.Parse(parts[0], CultureInfo.InvariantCulture);
+        return parts.Length == 1 ? amount : amount / double.Parse(parts[1], CultureInfo.InvariantCulture);
+    }
+
+    private static double? ReadGrams(double value, string unit)
+    {
+        string name = unit.ToLowerInvariant();
+        double grams = value * (name[0] is 'k' or 'l' ? 1000 : name == "dl" ? 100 : name == "cl" ? 10 : 1);
+        return grams is >= .0001 and <= 10000 ? grams : null;
     }
 
     private static async Task<EstimatedFood?> LookupBarcodeAsync(string barcode, string knownName, CancellationToken cancellation)

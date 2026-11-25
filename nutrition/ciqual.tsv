@@ -19,11 +19,11 @@ Spécialité végétale type fromage en tranche ou râpé, sans soja, préemball
 Spécialité végétale type jambon cuit, préemballée	242	
 Spécialité végétale type pâté, préemballée	197	
 Jus d'ananas, à base de concentré	52.3	
-Jus de fruits (aliment moyen)	47	
+Jus de fruits (aliment moyen)	47	jus de fruits
 Jus d'orange, à base de concentré	45.6	
 Jus de pomme, à base de concentré	48.5	
 Jus de pamplemousse (pomélo), à base de concentré	40.9	
-Jus de raisin, pur jus	69.2	
+Jus de raisin, pur jus	69.2	jus de raisin
 Jus de raisin, à base de concentré	68.8	
 Jus de tomate, pur jus, salé à 3 g/L	23.2	
 Jus de pamplemousse (pomelo), pur jus	42.5	
@@ -31,10 +31,10 @@ Jus de tomate, pur jus, salé à 6g/L	20.1
 Jus multifruit, pur jus, standard	48.9	
 Jus de tomate, pur jus (aliment moyen)	21.7	
 Nectar multifruit, standard	49.7	
-Jus d'orange, pur jus	45.4	
+Jus d'orange, pur jus	45.4	jus d'orange
 Jus de fruits, pur jus (aliment moyen)	46.9	
-Jus d'ananas, pur jus	52.9	
-Jus de pomme, pur jus	48.9	
+Jus d'ananas, pur jus	52.9	jus d'ananas
+Jus de pomme, pur jus	48.9	jus de pomme
 Jus de légumes, pur jus (aliment moyen)	21.7	
 Jus de fruits, à base de concentré (aliment moyen)	47.1	
 Lait 1er âge, poudre soluble (préparation pour nourrissons)	496	
@@ -42,7 +42,7 @@ Lait 2e âge, poudre soluble (préparation de suite)	484
 Tapioca ou Perles du Japon, cru	354	
 Pomme de terre, sans peau, rôtie/cuite au four	91.9	
 Pomme de terre, bouillie/cuite à l'eau	80.5	
-Chips de pommes de terre nature ou aromatisées, standard	545	
+Chips de pommes de terre nature ou aromatisées, standard	545	chips
 Pomme de terre, sans peau, crue	80.5	
 Pomme de terre, appertisée, égouttée	59.9	
 Pomme de terre noisette, surgelée, crue	181	
@@ -61,8 +61,8 @@ Pomme de terre, rôtie/cuite au four	89.4
 Pomme de terre sautée/rissolée, pré-frite, surgelée, cuite	156	
 Pomme de terre de conservation, sans peau, bouillie/cuite à l'eau	76.1	
 Pomme de terre primeur, sans peau, bouillie/cuite à l'eau	71.6	
-Frites de pommes de terre, surgelées, rôties/cuites au four	213	
-Frites de pommes de terre, surgelées, cuites en friteuse	285	
+Frites de pommes de terre, surgelées, rôties/cuites au four	213	frites|frites au four
+Frites de pommes de terre, surgelées, cuites en friteuse	285	frites
 Pomme de terre duchesse, surgelée, cuite	218	
 Pomme de terre noisette, surgelée, cuite	191	
 Pomme de terre sautée/poêlée à la graisse de canard	213	
@@ -75,8 +75,8 @@ Pomme de terre sautée/ rissolée, pré-frites, surgelée, crue	135
 Frites de pommes de terre, surgelées, préfrites, pour cuisson rôtie/ au four	154	
 Frites de pommes de terre, surgelées, préfrites, pour cuisson micro-ondes	254	
 Frites de pommes de terre, surgelées, préfrites, pour cuisson en friteuse	244	
-Pomme de terre, purée (aliment moyen)	91.8	
-Pomme de terre, cuite (aliment moyen)	93.2	
+Pomme de terre, purée (aliment moyen)	91.8	purée|purée de pommes de terre
+Pomme de terre, cuite (aliment moyen)	93.2	pomme de terre|pommes de terre cuites
 Fécule de pomme de terre	348	
 Patate douce, crue	86.3	
 Patate douce, cuite	62.8	
@@ -88,18 +88,18 @@ Bière blanche	34.6
 Cidre bouché demi-sec	48	
 Cidre aromatisé (framboise)	35.4	
 Bière sans alcool (<1,2° alcool)	25.3	
-Vin rouge	82.1	
+Vin rouge	82.1	vin rouge
 Boeuf, côte, crue	251	
 Boeuf, épaule, crue	168	
 Boeuf, basse-côte, crue	201	
-Boeuf, entrecôte, partie maigre, grillée/poêlée	198	
+Boeuf, entrecôte, partie maigre, grillée/poêlée	198	steak|bœuf|entrecôte
 Boeuf, braisé	240	
 Boeuf, gîte à la noix, cru	148	
 Boeuf, entrecôte, crue	231	
 Boeuf, gîte à la noix, cuit	102	
 Boeuf, faux-filet, rôti/cuit au four	194	
 Boeuf, rond de gîte, cru	111	
-Boeuf, faux-filet, grillé/poêlé	182	
+Boeuf, faux-filet, grillé/poêlé	182	steak|bœuf|faux-filet
 Boeuf, faux-filet, cru	152	
 Boeuf, filet, cru	132	
 Boeuf, plat de côtes, cru	287	
@@ -122,19 +122,19 @@ Boeuf, rumsteck, cru	114
 Boeuf, rumsteck, grillé	123	
 Boeuf, boule de macreuse, grillée/poêlée	144	
 Boeuf, rosbif, rôti/cuit au four	117	
-Boeuf, bavette d'aloyau, grillée/poêlée	162	
+Boeuf, bavette d'aloyau, grillée/poêlée	162	steak|bœuf|bavette
 Boeuf, bavette d'aloyau, crue	133	
 Boeuf, boule de macreuse, rôtie/cuite au four	147	
 Boeuf, à bourguignon ou pot-au-feu, cuit	172	
 Boeuf, à bourguignon ou pot-au-feu, cru	164	
 Boeuf, collier, cru	198	
 Boeuf, collier, braisé	184	
-Boeuf, steak haché 5% MG, cru	130	
-Boeuf, steak haché 5% MG, cuit	155	
+Boeuf, steak haché 5% MG, cru	130	steak haché|steak haché 5%|viande hachée|bœuf haché	100
+Boeuf, steak haché 5% MG, cuit	155	steak haché|steak haché 5%|viande hachée|bœuf haché
 Boeuf, steak haché 10% MG, cru	171	
 Boeuf, steak haché 10% MG, cuit	210	
-Boeuf, steak haché 15% MG, cru	209	
-Boeuf, steak haché 15% MG, cuit	239	
+Boeuf, steak haché 15% MG, cru	209	steak haché|steak haché 15%|viande hachée|bœuf haché	100
+Boeuf, steak haché 15% MG, cuit	239	steak haché|steak haché 15%|viande hachée|bœuf haché
 Boeuf, steak haché 20% MG, cru	249	
 Boeuf, steak haché 20% MG, cuit	265	
 Boeuf, steak haché, cuit (aliment moyen)	231	
@@ -182,17 +182,17 @@ Cheval, entrecôte, grillée/poêlée	169
 Cheval, faux-filet, rôti/cuit au four	173	
 Cheval, tende de tranche, rôtie/cuite au four	144	
 Viande cuite (aliment moyen)	182	
-Pain (aliment moyen)	276	
-Pain, baguette, courante	287	baguette|baguette courante|pain baguette|baguette de pain
+Pain (aliment moyen)	276	pain
+Pain, baguette, courante	287	baguette|baguette courante|pain baguette|baguette de pain	250
 Pain, baguette ou boule, au levain	261	
-Pain grillé, domestique	317	
-Pain, baguette, de tradition française	279	baguette tradition|baguette de tradition|tradition
+Pain grillé, domestique	317	pain grillé
+Pain, baguette, de tradition française	279	baguette tradition|baguette de tradition|tradition|baguette de tradition française	250
 Pain, baguette ou boule, bis (à la farine T80 ou T110)	265	
-Pain courant, 400g ou boule	266	
+Pain courant, 400g ou boule	266	pain blanc|boule de pain|pain de campagne|gros pain
 Pain, baguette ou boule, bio (à la farine T55 jusqu'à T110)	257	
 Pain, baguette ou boule, de campagne	253	
 Pain complet ou intégral (à la farine T150)	244	
-Pain de mie, complet	262	
+Pain de mie, complet	262	pain de mie complet
 Pain de mie, au son	278	
 Pain de mie, multicéréale	274	
 Pain au son	249	
@@ -200,8 +200,8 @@ Pain de seigle, et froment	260
 Pain, sans gluten	261	
 Pain, baguette, sans sel	279	
 Pain panini	272	
-Pain pita	259	
-Pain de mie, courant	278	
+Pain pita	259	pita
+Pain de mie, courant	278	pain de mie
 Pain de mie, sans croûte, préemballé	271	
 Pain de mie brioché, préemballé	309	
 Pain brioché ou viennois	356	
@@ -214,7 +214,7 @@ Pain blanc maison (avec farine pour machine à pain)	256
 Pain de campagne maison (avec farine pour machine à pain)	240	
 Pain pour hamburger ou hot dog (bun), complet, préemballé	285	
 Bretzel, pain frais	330	
-Biscotte classique	409	
+Biscotte classique	409	biscotte	9
 Biscotte briochée	417	
 Biscotte sans adjonction de sel	405	
 Biscotte multicéréale	398	
@@ -235,22 +235,22 @@ Croûtons nature, préemballés	495
 Chapelure	374	
 Gressin	433	
 Viennoiserie (aliment moyen)	380	
-Croissant, sans précision	375	
+Croissant, sans précision	375	croissant	50
 Croissant ordinaire, artisanal	412	
-Croissant au beurre, artisanal	420	
+Croissant au beurre, artisanal	420	croissant au beurre	50
 Croissant aux amandes, artisanal	446	
-Pain au lait, artisanal	382	
+Pain au lait, artisanal	382	pain au lait	35
 Pain au lait, préemballé	359	
 Pain au lait aux pépites de chocolat, préemballé	369	
-Pain aux raisins (viennoiserie)	333	
-Pain au chocolat feuilleté, artisanal	423	
+Pain aux raisins (viennoiserie)	333	pain aux raisins	100
+Pain au chocolat feuilleté, artisanal	423	pain au chocolat|chocolatine	65
 Pain au chocolat, préemballé	425	
 Brioche (ou briochettes) aux pépites de chocolat, préemballée	348	
 Brioche fourrée au chocolat	351	
 Brioche fourrée aux fruits, préemballée	346	
 Brioche fourrée crème pâtissière (type "chinois"), préemballée	300	
 Brioche, préemballée	354	
-Brioche, sans précision	401	
+Brioche, sans précision	401	brioche
 Brioche, de boulangerie traditionnelle	374	
 Couronne de Noël (Brioche) aux fruits confits, préemballée	355	
 Brioche pur beurre, préemballée	366	
@@ -260,7 +260,7 @@ Tortilla souple (à garnir), à base de maïs	313
 Cake salé (garniture : fromage, légumes, viande, poisson, volaille, etc.), préemballé	321	
 Tortilla souple (à garnir), à base de blé	327	
 Rillettes traditionnelles de porc	390	
-Rillettes pur porc	414	
+Rillettes pur porc	414	rillettes
 Rillettes de Tours	522	
 Rillettes du Mans	420	
 Rillettes pur oie	417	
@@ -301,7 +301,7 @@ Foie gras, canard, bloc, 50% de morceaux	479
 Pâté de foie d'oie	459	
 Foie gras de canard, cru	600	
 Foie gras, canard, bloc (aliment moyen)	489	
-Pâté (aliment moyen)	325	
+Pâté (aliment moyen)	325	pâté
 Galantine (aliment moyen)	279	
 Roulade de porc pistachée	258	
 Pâté en croûte	292	
@@ -340,11 +340,11 @@ Blé dur précuit cuisiné, en sachet micro-ondable	188
 Blé dur précuit, grains entiers, cuisiné, à poêler	344	
 Nouilles asiatiques cuites, aromatisées	147	
 Pâtes ou nouilles asiatiques au blé, cuites, nature, non salées	165	
-Riz blanc, cru	352	
+Riz blanc, cru	352	riz|riz blanc|riz cru
 Riz blanc étuvé, cru	356	
-Riz complet, cru	350	
-Riz complet, cuit, non salé	158	
-Riz blanc, cuit, non salé	145	
+Riz complet, cru	350	riz complet
+Riz complet, cuit, non salé	158	riz complet
+Riz blanc, cuit, non salé	145	riz|riz blanc|riz cuit|riz blanc cuit
 Riz blanc étuvé, cuit, non salé	146	
 Riz sauvage, cru	344	
 Riz rouge, cru	352	
@@ -352,22 +352,22 @@ Riz rouge, cuit, non salé	141
 Riz sauvage, cuit, non salé	102	
 Riz thaï ou basmati, cru	353	
 Riz, mélange de variétés (blanc, complet, rouge, sauvage, etc.), cru	355	
-Riz thaï, cuit, non salé	143	
-Riz basmati, cuit, non salé	117	
+Riz thaï, cuit, non salé	143	riz thaï
+Riz basmati, cuit, non salé	117	riz basmati
 Maïs entier, cru	346	
 Pop-corn ou Maïs éclaté, à l'huile, salé	485	
 Pop-corn ou Maïs éclaté, à l'air, non salé	417	
 Pop-corn ou Maïs éclaté, au caramel	418	
 Avoine, crue	378	
-Flocon d'avoine	367	
+Flocon d'avoine	367	flocons d'avoine|avoine
 Flocons d'avoine, bouillis/cuits à l'eau	75.5	
 Orge entière, crue	334	
 Orge perlée, crue	346	
 Orge perlée, bouilli/cuite à l'eau, non salée	119	
 Mil entier, cru	359	
 Mil, cuit, non salé	116	
-Quinoa, cru	358	
-Quinoa, bouilli/cuit à l'eau, non salé	149	
+Quinoa, cru	358	quinoa
+Quinoa, bouilli/cuit à l'eau, non salé	149	quinoa|quinoa cuit
 Amarante, crue	369	
 Sorgho entier, cru	349	
 Sarrasin entier, cru	356	
@@ -390,8 +390,8 @@ Farine de maïs	361
 Farine d'orge	339	
 Farine de millet	350	
 Farine de pois chiche	359	
-Semoule de blé dur, crue	352	
-Semoule de blé dur, cuite, non salée	122	
+Semoule de blé dur, crue	352	semoule|semoule crue
+Semoule de blé dur, cuite, non salée	122	semoule|semoule cuite
 Mélange de céréales et légumineuses, cru	354	
 Polenta ou semoule de maïs, précuite, sèche	350	
 Polenta ou semoule de maïs, cuite, non salée	77.5	
@@ -403,10 +403,10 @@ Son (aliment moyen)	344
 Germe de blé	375	
 Graine de couscous (semoule de blé dur précuite), crue	365	
 Graine de couscous (semoule de blé dur précuite), cuite, non salée	157	
-Boulgour de blé, cru	351	
-Boulgour de blé, cuit, non salé	111	
-Pâtes sèches standard, crues	336	
-Pâtes sèches standard, cuites, non salées	126	
+Boulgour de blé, cru	351	boulgour|boulgour cru
+Boulgour de blé, cuit, non salé	111	boulgour|boulgour cuit
+Pâtes sèches standard, crues	336	pâtes|pâtes crues|pâtes sèches|spaghetti|coquillettes|macaronis|penne|tagliatelles
+Pâtes sèches standard, cuites, non salées	126	pâtes|pâtes cuites|spaghetti|coquillettes|macaronis|penne|tagliatelles
 Pâtes fraîches, aux oeufs, crues	283	
 Pâtes fraîches, aux oeufs, cuites, non salées	168	
 Pâtes sèches, aux oeufs, crues	381	
@@ -428,13 +428,13 @@ Coquille Saint-Jacques, noix et corail, crue	83
 Coquille Saint-Jacques, noix et corail, cuite	110	
 Crabe, miettes et ou pattes décortiquées, appertisé, égoutté	111	
 Crevette grise, cuite	89.9	
-Crevette, cuite	93.8	
+Crevette, cuite	93.8	crevettes
 Escargot, cru	77.9	
 Homard, bouilli/cuit à l'eau	90.9	
 Homard, cru	85.5	
 Huître, sans précision, crue	67.2	
 Langoustine, panée, frite	282	
-Moule, bouillie/cuite à l'eau	108	
+Moule, bouillie/cuite à l'eau	108	moules
 Moule commune, crue	71.8	
 Langouste, crue	86.9	
 Seiche, crue	76.3	
@@ -475,11 +475,11 @@ Ail, cru	111
 Bouillon de boeuf, déshydraté	240	
 Cerfeuil, frais	39.9	
 Ciboule ou Ciboulette, fraîche	29.7	
-Cornichon, au vinaigre	19.4	
+Cornichon, au vinaigre	19.4	cornichon
 Curry, poudre	301	
 Gingembre, poudre	335	
 Gélatine, sèche	348	
-Ketchup, préemballé	99	
+Ketchup, préemballé	99	ketchup
 Levure alimentaire	334	
 Moutarde	152	
 Persil, frais	43	
@@ -536,7 +536,7 @@ Sel blanc alimentaire, iodé, fluoré à 25 mg /100 g (marin, ignigène ou gemme
 Cornichon, aigre-doux	36	
 Vanille, extrait aqueux	57.7	
 Sauce barbecue, préemballée	136	
-Sauce soja, préemballée	45.5	
+Sauce soja, préemballée	45.5	sauce soja
 Sauce au curry, préemballée	77.4	
 Fond de veau pour sauces et cuisson, déshydraté	343	
 Sauce basquaise ou Sauce aux poivrons, préemballée	63.1	
@@ -545,7 +545,7 @@ Court-bouillon pour poissons, déshydraté	260
 Bouillon de volaille, déshydraté	233	
 Gelée au madère, déshydratée	248	
 Gelée au madère	11.3	
-Sauce pesto, préemballée	370	
+Sauce pesto, préemballée	370	pesto
 Sauce Nuoc Mâm ou Sauce au poisson, préemballée	81.2	
 Caviar de tomates	218	
 Sauce pour nems à base de nuoc-mam dilué, préemballée	135	
@@ -557,7 +557,7 @@ Ail, rôti/cuit au four	127
 Ail, sauté/poêlé, sans matière grasse	130	
 Édulcorant à l'aspartame, en pastilles	216	
 Bicarbonate de soude	0.4	
-Camembert, sans précision	280	
+Camembert, sans précision	280	camembert
 Fromage à pâte molle et croûte fleurie (type camembert)	359	
 Camembert au lait cru	267	
 Fromage à pâte molle et croûte fleurie double crème environ 30% MG	333	
@@ -565,7 +565,7 @@ Fromage rond à pâte molle et croûte fleurie 5 à 11% MG type camembert allég
 Coulommiers	279	
 Fromage rond à pâte molle et croûte fleurie environ 11% MG type coulommiers allégé en matière grasse	187	
 Fromage rond à pâte molle et croûte fleurie environ 5% MG type camembert allégé en matière grasse	150	
-Brie, sans précision	297	
+Brie, sans précision	297	brie
 Brie de Meaux	271	
 Brie de Melun	288	
 Carré de l'Est	327	
@@ -591,22 +591,22 @@ Saint-Félicien	281
 Fromage type feta, au lait de vache	270	
 Fromage type feta, au lait de vache, à l'huile et aux aromates	283	
 Boulette d'Avesne	355	
-Feta AOP	285	
+Feta AOP	285	feta
 Fromage à pâte pressée cuite (aliment moyen)	390	
 Beaufort	410	
 Comté	418	
 Abondance	393	
 Gruyère IGP France	396	
 Gruyère	423	
-Emmental ou emmenthal	373	
+Emmental ou emmenthal	373	emmental|emmenthal
 Fromage à pate pressée cuite type emmental ou emmenthal, allégé en matière grasse	282	
-Emmental ou emmenthal râpé	367	
+Emmental ou emmenthal râpé	367	emmental râpé|fromage râpé|gruyère râpé
 Ossau-Iraty	428	
 Parmesan	406	
 Fontina	381	
 Grana Padano	396	
 Fromage fondu en tranchettes	246	
-Fromage fondu en portions ou en cubes environ 20% MG	242	
+Fromage fondu en portions ou en cubes environ 20% MG	242	fromage fondu
 Spécialité fromagère non affinée environ 25% MG, type fromage en barquette à tartiner ou coque fromagère	255	
 Fromage fondu double crème, environ 31% MG	311	
 Cancoillotte (spécialité fromagère fondue)	151	
@@ -638,7 +638,7 @@ Mimolette extra-vieille	387
 Morbier	355	
 Fromage de brebis des Pyrénées	397	
 Saint-Nectaire, laitier	332	
-Raclette (fromage)	342	
+Raclette (fromage)	342	raclette|fromage à raclette
 Saint-Nectaire, fermier	355	
 Saint-Nectaire, sans précision	344	
 Saint-Paulin (fromage à pâte pressée non cuite demi-ferme)	327	
@@ -653,7 +653,7 @@ Fromage de chèvre lactique affiné, au lait pasteurisé (type bûchette ou crot
 Fromage de chèvre lactique affiné (type bûchette, crottin, Sainte-Maure)	315	
 Sainte-Maure de Touraine (fromage de chèvre)	294	
 Fromage de chèvre demi-sec	353	
-Fromage de chèvre bûche	285	
+Fromage de chèvre bûche	285	chèvre|fromage de chèvre|bûche de chèvre
 Fromage de chèvre bûche, allégé en matière grasse	179	
 Fromage de chèvre à pâte molle non pressée non cuite croûte naturelle, au lait pasteurisé	279	
 Fromage de chèvre sec	440	
@@ -673,52 +673,52 @@ Selles-sur-Cher (fromage de chèvre)	291
 Chevrot (fromage de chèvre)	277	
 Rocamadour (fromage de chèvre)	274	
 Valençay (fromage de chèvre)	306	
-Fromage (aliment moyen)	338	
-Abricot, dénoyauté, cru	45.9	
+Fromage (aliment moyen)	338	fromage
+Abricot, dénoyauté, cru	45.9	abricot	45
 Abricot, dénoyauté, sec	239	
-Ananas, pulpe, cru	54.4	
-Avocat, pulpe, cru	205	
-Banane, pulpe, crue	90.5	banane|banane crue
-Cerise, dénoyautée, crue	55.7	
-Citron, pulpe, cru	27.6	
+Ananas, pulpe, cru	54.4	ananas
+Avocat, pulpe, cru	205	avocat	150
+Banane, pulpe, crue	90.5	banane|banane crue	120
+Cerise, dénoyautée, crue	55.7	cerise
+Citron, pulpe, cru	27.6	citron
 Figue, crue	69.4	
-Fraise, crue	38.6	
-Framboise, crue	49.2	
+Fraise, crue	38.6	fraise
+Framboise, crue	49.2	framboise
 Fruit de la passion ou maracudja, pulpe et pépins, cru	101	
 Grenade, pulpe et pépins, crue	80.6	
 Groseille, crue	68.5	
-Kiwi, pulpe et graines, cru	60.5	
+Kiwi, pulpe et graines, cru	60.5	kiwi	75
 Litchi, pulpe, cru	81	
-Clémentine ou Mandarine, pulpe, crue	47.3	
-Mangue, pulpe, crue	73.9	
-Melon cantaloup (par ex.: Charentais, de Cavaillon) pulpe, cru	62.7	
+Clémentine ou Mandarine, pulpe, crue	47.3	clémentine|mandarine	60
+Mangue, pulpe, crue	73.9	mangue
+Melon cantaloup (par ex.: Charentais, de Cavaillon) pulpe, cru	62.7	melon
 Mirabelle, crue	76.9	
-Myrtille, crue	57.7	
+Myrtille, crue	57.7	myrtille
 Mûre (de ronce), crue	47.3	
-Olive verte, en saumure, égouttée	155	
-Orange, pulpe, crue	45.5	
+Olive verte, en saumure, égouttée	155	olives vertes
+Orange, pulpe, crue	45.5	orange	150
 Papaye, pulpe, crue	42.2	
-Pastèque, pulpe, crue	38.9	
-Compote de pomme	102	
-Pomelo (dit Pamplemousse), pulpe, cru	39.8	
-Prune Reine-Claude, crue	71.3	
+Pastèque, pulpe, crue	38.9	pastèque
+Compote de pomme	102	compote de pommes
+Pomelo (dit Pamplemousse), pulpe, cru	39.8	pamplemousse|pomelo
+Prune Reine-Claude, crue	71.3	prune
 Pruneau, sec	229	
-Raisin blanc, à gros grain (type Italia ou Dattier), cru	73.4	
-Raisin, sec	321	
+Raisin blanc, à gros grain (type Italia ou Dattier), cru	73.4	raisin|raisin blanc
+Raisin, sec	321	raisins secs
 Mélange apéritif de fruits exotiques, sec	389	
 Kaki, pulpe, cru	68.6	
 Citron vert ou Lime, pulpe, cru	40.2	
 Pomme Golden, pulpe, crue	54.9	
 Raisin Chasselas, cru	79.1	
-Compote, tout type de fruits	102	
+Compote, tout type de fruits	102	compote
 Compote, tout type de fruits, allégée en sucres	66	
 Pomme Granny Smith, pulpe, crue	53.9	
 Pomme Granny Smith, pulpe et peau, crue	51.5	
-Olive noire, à l'huile (à la grecque)	332	
-Nectarine ou brugnon, jaune, pulpe et peau, crue	51.3	
+Olive noire, à l'huile (à la grecque)	332	olives noires
+Nectarine ou brugnon, jaune, pulpe et peau, crue	51.3	nectarine|brugnon	130
 Nectarine ou brugnon, blanche, pulpe et peau, crue	51.8	
 Compote de pomme, allégée en sucres	65.1	
-Purée de fruits, tout type de fruits, type "compote sans sucres ajoutés"	58.9	
+Purée de fruits, tout type de fruits, type "compote sans sucres ajoutés"	58.9	compote sans sucres ajoutés
 Boisson infantile céréales lactées aux légumes pour dîner dès 4/6 mois	82.1	
 Boisson infantile céréales lactées aux fruits pour le goûter dès 4/6 mois	67.6	
 Boisson infantile céréales lactées pour le petit déjeuner dès 4/6 mois	83.7	
@@ -733,22 +733,22 @@ Boisson infantile lactées aux fruits pour le goûter dès 4/6 mois (sans céré
 Boisson infantile céréales lactées pour le petit déjeuner	85.5	
 Canneberge ou cranberry, séchée, sucrée	333	
 Boisson infantile céréales lactées (aliment moyen)	86.3	
-Olive (aliment moyen)	162	
+Olive (aliment moyen)	162	olive
 Compote ou assimilé, tout type de fruits, teneur en sucre (allégée en sucres ou non, sans sucres ajoutés...) inconnue (aliment moyen)	80.1	
-Purée de pommes, type "compote sans sucres ajoutés"	56.4	
+Purée de pommes, type "compote sans sucres ajoutés"	56.4	compote de pommes sans sucres ajoutés
 Poire Conférence, pulpe, crue	53.1	
-Poire Williams, pulpe, crue	54.1	
+Poire Williams, pulpe, crue	54.1	poire	150
 Pomme Chantecler, pulpe, crue	51.8	
 Pomme Gala, pulpe, crue	54.5	
 Pomme Pink lady, pulpe, crue	60.1	
 Pêche blanche, pulpe et peau, crue	47.2	
 Pêche blanche, pulpe, crue	46.1	
-Pêche jaune, pulpe, crue	46.3	
+Pêche jaune, pulpe, crue	46.3	pêche	130
 Mangue José, pulpe, crue, prélevée à La Réunion (Mangifera indica L.)	88.8	
 Ananas Victoria ou ananas Queen Victoria, pulpe crue, prélevé à La Réunion Ananas comosus (L.) merr var. Queen)	71.8	
 Papaye Colombo (fruit mûr), pulpe sans pépin, crue, prélevée à La Réunion (Carica papaya L.)	40	
-Pomme Golden, pulpe et peau, crue	57.1	
-Raisin noir Muscat, cru	90.1	
+Pomme Golden, pulpe et peau, crue	57.1	pomme	150
+Raisin noir Muscat, cru	90.1	raisin noir
 Abricot, dénoyauté, sec, moelleux (réhydraté à 35-45%)	200	
 Poire au sirop léger, appertisée, égouttée	64.9	
 Fruit cru (aliment moyen)	59.5	
@@ -762,7 +762,7 @@ Cerf, rôti/cuit au four	150
 Gibier à poil, cuit (aliment moyen)	152	
 Mélange apéritif de graines salées et raisins secs	560	
 Mélange apéritif de graines (non salées) et raisins secs	541	
-Noix de cajou, grillée, non salée	618	
+Noix de cajou, grillée, non salée	618	noix de cajou|cajou
 Noix de cajou, grillée à sec, non salée	630	
 Pâte d'amande, préemballée	432	
 Huile ou beurre de cacao	900	
@@ -775,7 +775,7 @@ Huile de palme, sans précision	900
 Huile de palme raffinée	900	
 Huile ou graisse de palmiste, sans précision	900	
 Beurre à 82% MG, doux	753	beurre|beurre doux
-Beurre à 80% MG, demi-sel	738	
+Beurre à 80% MG, demi-sel	738	beurre demi-sel|beurre salé
 Beurre à 80% MG, salé	732	
 Beurre à 82% MG, doux, tendre	755	
 Beurre à 60-62% MG, à teneur réduite en matière grasse, doux	550	
@@ -791,7 +791,7 @@ Graisse de canard	898
 Graisse d'oie	898	
 Graisse de dinde	898	
 Matière grasse végétale (type margarine) à 80% MG, salée	722	
-Matière grasse végétale ou margarine, 80% MG, doux	726	
+Matière grasse végétale ou margarine, 80% MG, doux	726	margarine
 Matière grasse végétale (type margarine) à 70% MG, doux	631	
 Matière grasse végétale (type margarine) à 60% de MG, allégée, au tournesol, doux	548	
 Matière grasse laitière à 25% MG, légère, "à tartiner", doux	247	
@@ -824,7 +824,7 @@ Huile de lin	900
 Huile de maïs	900	
 Huile de noisette	900	
 Huile de noix	900	
-Huile d'olive vierge extra	900	
+Huile d'olive vierge extra	900	huile d'olive
 Huile de pavot	900	
 Huile de pépins de raisin	900	
 Huile de son de riz	900	
@@ -836,7 +836,7 @@ Huile de sardine	900
 Huile de saumon	900	
 Huile de hareng	900	
 Huile combinée (mélange d'huiles)	896	
-Huile combinée, mélange d'huile d'olive et de graines	900	
+Huile combinée, mélange d'huile d'olive et de graines	900	huile
 Huile d'argan ou d'argane	889	
 Huile de paraffine	0	
 Café, moulu	397	
@@ -846,29 +846,29 @@ Eau de source, embouteillée (aliment moyen)	0
 Eau minérale, embouteillée, faiblement minéralisée (aliment moyen)	0	
 Eau de coco	15.2	
 Sirop à diluer, sucré	255	
-Cola, sucré	41.8	
+Cola, sucré	41.8	coca|coca-cola|cola
 Boisson gazeuse aux fruits (de 10 à 50% de jus), sucrée	46.6	
-Thé infusé, non sucré	0.063	
-Tisane infusée, non sucrée	0.87	
+Thé infusé, non sucré	0.063	thé
+Tisane infusée, non sucrée	0.87	tisane|infusion
 Kombucha, préemballé	9.46	
 Boisson gazeuse, sans jus de fruit, sucrée	37.1	
 Lait de coco ou Crème de coco	188	
-Eau minérale (aliment moyen)	0	
+Eau minérale (aliment moyen)	0	eau
 Eau minérale, plate (aliment moyen)	0	
 Eau minérale, gazeuse (aliment moyen)	0	
 Boisson gazeuse aux fruits (teneur en jus non spécifiée), sucrée (aliment moyen)	46.6	
 Boisson concentrée à diluer, sans sucres ajoutés, avec édulcorants, type "sirop 0%"	21.7	
-Cola, non sucré, avec édulcorants	1.3	
+Cola, non sucré, avec édulcorants	1.3	coca zéro|coca light|cola zéro
 Boisson au thé, aromatisée, teneur en sucre et édulcorant inconnue (aliment moyen)	27.3	
 Cola, teneur en sucre et édulcorant inconnue (aliment moyen)	30.7	
-Eau du robinet	0	
+Eau du robinet	0	eau du robinet
 Cola, sucré, sans caféine	43.8	
 Cola, non sucré, avec édulcorants, sans caféine	0.87	
 Café, décaféiné, poudre soluble	357	
 Café décaféiné, non instantané, non sucré, prêt à boire	4.42	
 Café expresso, non instantané, non sucré, prêt à boire	7.64	
 Café décaféiné, instantané, non sucré, prêt à boire	2.1	
-Café, instantané, non sucré, prêt à boire	1.64	
+Café, instantané, non sucré, prêt à boire	1.64	café|café noir|expresso
 Boisson au thé, aromatisée, sucrée	27.3	
 Thé, feuille	232	
 Cacao, non sucré, poudre soluble	387	
@@ -905,17 +905,17 @@ Lait de croissance infantile, liquide (aliment lacté destiné aux enfants en ba
 Lait 1er âge, prêt à consommer (préparation pour nourrissons)	71.8	
 Lait 2e âge, prêt à consommer (préparation pour nourrissons)	65.1	
 Lait en poudre, entier	499	
-Lait entier, UHT	65.1	
+Lait entier, UHT	65.1	lait entier
 Lait entier, pasteurisé	56.5	
 Lait concentré non sucré, entier	122	
 Lait concentré sucré, entier	323	
 Lait demi-écrémé, UHT, enrichi en vitamine D seulement	46.6	
 Lait à 1,2% de matière grasse, UHT, enrichi en plusieurs vitamines	44.1	
 Lait, teneur en matière grasse inconnue, UHT (aliment moyen)	47.3	
-Lait demi-écrémé, UHT	47	
+Lait demi-écrémé, UHT	47	lait|lait demi-écrémé
 Lait demi-écrémé, pasteurisé	46.4	
 Lait en poudre, demi-écrémé	459	
-Lait écrémé, UHT	33.4	
+Lait écrémé, UHT	33.4	lait écrémé
 Lait écrémé, pasteurisé	34.5	
 Lait en poudre, écrémé	361	
 Lait demi-écrémé (ou à teneur en matière grasse légèrement inférieure) à teneur réduite en lactose	44.4	
@@ -927,11 +927,11 @@ Lait de chèvre, entier, cru	57.4
 Lait de jument, entier	50	
 Lait de brebis, entier	103	
 Crème de lait ou spécialité à base de crème légère, teneur en matière grasse inconnue (aliment moyen)	269	
-Crème de lait, 30% MG, épaisse, rayon frais	304	
+Crème de lait, 30% MG, épaisse, rayon frais	304	crème fraîche|crème|crème épaisse|crème fraîche épaisse
 Crème de lait, 30% MG, semi-épaisse, UHT	297	
-Crème chantilly, sous pression, UHT	308	
+Crème chantilly, sous pression, UHT	308	chantilly|crème chantilly
 Crème de lait, 15 à 20% MG, légère, semi-épaisse, UHT	194	
-Crème de lait, 15 à 20% MG, légère, épaisse, rayon frais	166	
+Crème de lait, 15 à 20% MG, légère, épaisse, rayon frais	166	crème légère|crème fraîche légère|crème allégée
 Spécialité à base de crème légère 8% MG, fluide ou épaisse	76.2	
 Fromage blanc nature ou aux fruits (aliment moyen)	87.7	
 Boisson lactée, lait fermenté ou yaourt à boire, aromatisé, sucré	73.7	
@@ -944,27 +944,27 @@ Yaourt à la grecque, au lait de brebis	69.1
 Yaourt au lait de brebis, aromatisé, sucré	93.7	
 Yaourt au lait de chèvre, nature, 5% MG environ	73.4	
 Yaourt, lait fermenté ou spécialité laitière, aromatisé, avec édulcorants, 0% MG	54.5	
-Yaourt, lait fermenté ou spécialité laitière, aromatisé, sucré	89.1	
+Yaourt, lait fermenté ou spécialité laitière, aromatisé, sucré	89.1	yaourt aromatisé|yaourt à la vanille|yaourt vanille	125
 Yaourt, lait fermenté ou spécialité laitière, aux copeaux de chocolat, à la crème, sucré	122	
 Yaourt, lait fermenté ou spécialité laitière, aux fruits, avec édulcorants, 0% MG	38.9	
 Yaourt, lait fermenté ou spécialité laitière, aux fruits, sucré	95.7	
 Yaourt, lait fermenté ou spécialité laitière, aux fruits, sucré, à la crème	109	
-Mozzarella au lait de vache	227	
-Mozzarella au lait de bufflonne ou buflesse ("di bufala")	260	
-Yaourt, lait fermenté ou spécialité laitière, nature	45.5	
-Yaourt, lait fermenté ou spécialité laitière, nature, 0% MG	39.4	
+Mozzarella au lait de vache	227	mozzarella
+Mozzarella au lait de bufflonne ou buflesse ("di bufala")	260	mozzarella di bufala|mozza di bufala
+Yaourt, lait fermenté ou spécialité laitière, nature	45.5	yaourt|yaourt nature|yogourt	125
+Yaourt, lait fermenté ou spécialité laitière, nature, 0% MG	39.4	yaourt 0%|yaourt nature 0%	125
 Yaourt, lait fermenté ou spécialité laitière, nature, à la crème	115	
-Yaourt, lait fermenté ou spécialité laitière, nature, sucré	84.3	
+Yaourt, lait fermenté ou spécialité laitière, nature, sucré	84.3	yaourt sucré|yaourt nature sucré	125
 Yaourt ou spécialité laitière nature (aliment moyen)	56.8	
 Yaourt ou spécialité laitière nature ou aux fruits (aliment moyen)	69.4	
-Yaourt ou spécialité laitière aux fruits (aliment moyen)	93.1	
+Yaourt ou spécialité laitière aux fruits (aliment moyen)	93.1	yaourt aux fruits|yaourt à la fraise	125
 Faisselle, 6% MG environ	84.2	
-Fromage blanc nature, 0% MG	49.4	
-Fromage blanc nature, 3% MG environ	76.9	
+Fromage blanc nature, 0% MG	49.4	fromage blanc 0%
+Fromage blanc nature, 3% MG environ	76.9	fromage blanc|fromage blanc nature
 Fromage blanc nature, gourmand, 8% MG environ	116	
-Fromage frais type petit suisse, aux fruits, 2-3% MG	92.7	
-Fromage frais type petit suisse, nature, 4% MG environ	88.8	
-Fromage frais type petit suisse, nature, 10% MG environ	149	
+Fromage frais type petit suisse, aux fruits, 2-3% MG	92.7	petit suisse aux fruits	60
+Fromage frais type petit suisse, nature, 4% MG environ	88.8	petit suisse|petit suisse nature	60
+Fromage frais type petit suisse, nature, 10% MG environ	149	petit suisse|petit suisse nature	60
 Fromage frais type petit suisse, aromatisé ou aux fruits, 2-3% MG, enrichi en calcium et vitamine D	90.4	
 Spécialité laitière type encas, riche en protéines, sur lit de fruits, sucrée	98.3	
 Yaourt, lait fermenté ou spécialité laitière, aromatisé ou aux fruits, 0% MG (aliment moyen)	42.4	
@@ -988,35 +988,35 @@ Tiramisu, préemballé	241
 Lait fermenté à boire, nature, maigre	33.6	
 Lait fermenté à boire, nature, au lait entier	55.7	
 Mousse à la crème de marrons, préemballée	207	
-Betterave rouge, cuite	42.8	
+Betterave rouge, cuite	42.8	betterave
 Bette ou blette, crue	16.4	
 Bette ou blette, cuite	14.7	
 Carotte, appertisée, égouttée	21.9	
-Carotte, cuite	18.9	
-Carotte, crue	40.2	
+Carotte, cuite	18.9	carottes cuites
+Carotte, crue	40.2	carotte|carottes râpées
 Champignon, tout type, cru	21.7	
 Champignon, tout type, appertisé, égoutté	24.9	
 Chou rouge, cru	30	
 Chou-fleur, cru	26.2	
-Chou-fleur, cuit	20.9	
-Concombre, pulpe et peau, cru	15.6	
+Chou-fleur, cuit	20.9	chou-fleur
+Concombre, pulpe et peau, cru	15.6	concombre
 Courgette, pulpe et peau, crue	16.5	
-Courgette, pulpe et peau, cuite	15.5	
+Courgette, pulpe et peau, cuite	15.5	courgette
 Céleri branche, cru	17.6	
-Endive, crue	20.2	
+Endive, crue	20.2	endive
 Fenouil, cru	21.8	
-Haricot vert, cuit	29.4	
+Haricot vert, cuit	29.4	haricots verts
 Petits pois, appertisés, égouttés	81.5	
 Poireau, cru	32.3	
-Radis rouge, cru	14.5	
-Tomate, crue	19.3	
+Radis rouge, cru	14.5	radis
+Tomate, crue	19.3	tomate	110
 Tomate, pelée, appertisée, égouttée	18.3	
 Topinambour, cuit	81.9	
 Macédoine de légumes, appertisée, égouttée	40.4	
 Céleri-rave, cru	29.3	
-Champignon de Paris ou champignon de couche, cru	28	
+Champignon de Paris ou champignon de couche, cru	28	champignons|champignons de paris
 Haricot vert, appertisé, égoutté	23.1	
-Maïs doux, appertisé, égoutté	106	
+Maïs doux, appertisé, égoutté	106	maïs
 Tomate, concentré, appertisé	99.2	
 Haricot vert, surgelé, cru	34	
 Haricot vert, surgelé, cuit	36.3	
@@ -1024,7 +1024,7 @@ Artichaut, cuit à la vapeur sous pression	47.3
 Céleri branche, appertisé, égoutté	13.1	
 Champignon de Paris ou champignon de couche, appertisé, égoutté	19.4	
 Poivron vert, cru	26	
-Poivron rouge, cru	36.6	
+Poivron rouge, cru	36.6	poivron
 Radis noir, cru	29.2	
 Petits pois et carottes, appertisés, égouttés	49	
 Échalote, crue	63.6	
@@ -1048,7 +1048,7 @@ Champignon, rosé des prés, cru	25.3
 Poivron jaune, cru	30.7	
 Tomate, pulpe, appertisée	26.1	
 Tomate, purée, appertisée	47.1	
-Tomate cerise, crue	33.7	
+Tomate cerise, crue	33.7	tomate cerise	15
 Panais, cru	58.3	
 Tomate côtelée ou coeur de boeuf, crue	19.8	
 Topinambour, cru	60.7	
@@ -1061,7 +1061,7 @@ Pois mange-tout ou pois gourmand, bouilli/cuit à l'eau	30.5
 Champignon de Paris ou champignon de couche, surgelé, cru	15.9	
 Poireau, surgelé, cru	26.7	
 Oignon rouge, cru	36.3	
-Oignon jaune, cru	37.8	
+Oignon jaune, cru	37.8	oignon
 Petit pot légumes, dès 4-6 mois	26.3	
 Petit pot légumes, avec féculent, dès 4/6 mois	41.7	
 Plat légumes, avec féculent, dès 6-8 mois	42.9	
@@ -1081,7 +1081,7 @@ Tomate, double concentré, appertisé	92.8
 Macédoine de légumes, surgelée, pré-cuite (à recuire)	54.5	
 Tomate ronde, crue	20.3	
 Asperge blanche, bouillie/cuite à l'eau	18.6	
-Salade sucrine, crue	17.9	
+Salade sucrine, crue	17.9	salade|salade verte|laitue
 Tomate, pulpe et peau, rôtie/cuite au four	31.1	
 Chou romanesco ou brocoli à pomme, cuit	35.8	
 Potimarron, pulpe, cuit à l'étouffée	44.8	
@@ -1092,11 +1092,11 @@ Brèdes chou de Chine ou bok choy ou pak choï, tiges et feuilles, cuites à la 
 Chayote ou christophine ou chouchou, pulpe avec pépins, cuite à la vapeur, prélevée à La Réunion (Sechium edule)	22.2	
 Carotte, purée cuisinée à la crème, préemballée	44.4	
 Asperge verte, bouillie/cuite à l'eau	26.6	
-Aubergine, pulpe et peau, rôtie/cuite au four	33.8	
+Aubergine, pulpe et peau, rôtie/cuite au four	33.8	aubergine
 Bette ou blette, côte et feuille, bouillie/cuite à l'eau	16.9	
 Brocoli, bouilli/cuit à l'eau, croquant	23.5	
 Brocoli, bouilli/cuit à l'eau, fondant	23.1	
-Brocoli, cuit à la vapeur	37.6	
+Brocoli, cuit à la vapeur	37.6	brocoli
 Carotte, bouillie/cuite à l'eau, croquante	35.7	
 Carotte, bouillie/cuite à l'eau, fondante	31.6	
 Carotte, cuite à la vapeur	41.6	
@@ -1117,8 +1117,8 @@ Oignon blanc ou jaune, sauté/poêlé sans matière grasse	40.2
 Oignon nouveau ou oignon frais ou cébette, sauté/poêlé sans matière grasse	27.6	
 Oignon rouge, sauté/poêlé sans matière grasse	42.4	
 Panais, cuit à l'étouffée	90.8	
-Petits pois, bouillis/cuits à l'eau	80.3	
-Poireau, bouilli/cuit à l'eau	27.4	
+Petits pois, bouillis/cuits à l'eau	80.3	petits pois
+Poireau, bouilli/cuit à l'eau	27.4	poireau
 Poivron jaune, sauté/poêlé sans matière grasse	35.8	
 Poivron rouge, sauté/poêlé sans matière grasse	35.7	
 Poivron vert, sauté/poêlé sans matière grasse	28.6	
@@ -1127,23 +1127,23 @@ Potiron, rôti/cuit au four	30.2
 Salsifis, bouilli/cuit à l'eau	57.9	
 Tomate, rôtie/cuite au four	25.3	
 Échalote, sautée/poêlée sans matière grasse	66.9	
-Épinard, bouilli/cuit à l'eau	28.1	
+Épinard, bouilli/cuit à l'eau	28.1	épinards
 Saucisse végétale au tofu (convient aux véganes ou végétaliens), préemballée	231	
 Quenelle au tofu (ne convient pas aux véganes ou végétaliens), préemballée	136	
 Légumes pour couscous, surgelés, crus	46.5	
 Légume cuit (aliment moyen)	43.5	
 Fève, bouillie/cuite à l'eau	82.9	
-Haricot blanc, bouilli/cuit à l'eau	112	
-Haricot rouge, bouilli/cuit à l'eau	116	
-Pois chiche, bouilli/cuit à l'eau	147	
+Haricot blanc, bouilli/cuit à l'eau	112	haricots blancs
+Haricot rouge, bouilli/cuit à l'eau	116	haricots rouges
+Pois chiche, bouilli/cuit à l'eau	147	pois chiches cuits
 Haricot flageolet, bouilli/cuit à l'eau	112	
 Tomate grappe, crue	20.1	
-Lentille verte, bouillie/cuite à l'eau	127	
+Lentille verte, bouillie/cuite à l'eau	127	lentilles cuites
 Crosne, cuit	50.8	
 Protéine de soja texturée, réhydratée	150	
 Farine de soja	460	
 Soja, graine entière	432	
-Tofu nature, préemballé	148	
+Tofu nature, préemballé	148	tofu
 Tofu soyeux, préemballé	54.3	
 Dessert au soja, aromatisé, sucré, enrichi en calcium, préemballé	95	
 Tofu fumé, préemballé	164	
@@ -1197,22 +1197,22 @@ Agneau, côte ou côtelette, grillée/poêlée (aliment moyen)	157
 Agneau, côte découverte, crue	205	
 Chevreau, cru	103	
 Chevreau, cuit	136	
-Oeuf, cru	140	
+Oeuf, cru	140	oeuf|œuf|oeuf cru	50
 Oeuf, blanc (blanc d'oeuf), cru	48.1	
 Oeuf, jaune (jaune d'oeuf), cru	307	
 Oeuf, jaune (jaune d'oeuf), en poudre	660	
 Oeuf, blanc (blanc d'oeuf), en poudre	356	
 Oeuf, blanc (blanc d'oeuf), cuit	47.3	
 Oeuf, jaune (jaune d'oeuf), cuit	340	
-Oeuf, dur	134	œuf dur|oeuf dur
-Oeuf, poché	138	
+Oeuf, dur	134	œuf dur|oeuf dur	50
+Oeuf, poché	138	œuf poché	50
 Oeuf, en poudre	582	
-Oeuf, à la coque	142	
+Oeuf, à la coque	142	œuf à la coque|œuf mollet	50
 Oeuf de caille, cru	154	
 Oeuf de cane, cru	181	
 Oeuf d'oie, cru	180	
 Oeuf de dinde, cru	166	
-Oeuf, au plat, frit, salé	204	
+Oeuf, au plat, frit, salé	204	œuf au plat|œuf sur le plat	50
 Oeuf, brouillé, avec matière grasse	145	
 Oeuf, au plat, sans matière grasse	147	
 Omelette au fromage	255	
@@ -1220,8 +1220,8 @@ Omelette aux lardons	267
 Omelette aux champignons	125	
 Omelette aux fines herbes	147	
 Tortilla espagnole aux oignons (omelette aux pommes de terre et oignons), préemballée	165	
-Omelette, garnitures diverses : légumes, fromages, viandes... (aliment moyen)	184	
-Brownie au chocolat, préemballé	458	
+Omelette, garnitures diverses : légumes, fromages, viandes... (aliment moyen)	184	omelette
+Brownie au chocolat, préemballé	458	brownie
 Pâte à pizza fine, crue	279	
 Pâte brisée, crue	377	
 Pâte brisée, matière grasse végétale, cuite	505	
@@ -1244,7 +1244,7 @@ Pâte sablée pur beurre, cuite	469
 Chouquette	381	
 Profiterole avec glace vanille et sauce chocolat	286	
 Profiteroles (crème pâtissière et sauce chocolat), préemballées	273	
-Chausson aux pommes	338	
+Chausson aux pommes	338		100
 Tarte normande aux pommes (garniture farine, oeufs, crème, sucre, calvados)	313	
 Gâteau de semoule aux raisins et caramel, rayon frais	146	
 Gâteau de semoule, appertisé	150	
@@ -1266,7 +1266,7 @@ Biscuit pour bébé	439
 Blanquette de veau	113	
 Cassoulet, appertisé	129	
 Choucroute garnie, préemballée	109	
-Hachis parmentier à la viande, préemballé	138	
+Hachis parmentier à la viande, préemballé	138	hachis parmentier
 Petit salé ou saucisse aux lentilles, préemballé	118	
 Pot-au-feu, préemballé	77.5	
 Ravioli à la viande, sauce tomate, appertisé	95.3	
@@ -1283,11 +1283,11 @@ Lapin à la moutarde, préemballé	108
 Boeuf aux carottes	96.6	
 Potée auvergnate (chou et porc)	82.1	
 Saumon à l'oseille, préemballé	133	
-Lasagnes ou cannelloni à la viande (bolognaise)	134	
-Pâtes à la bolognaise (spaghetti, tagliatelles…)	116	
+Lasagnes ou cannelloni à la viande (bolognaise)	134	lasagnes|lasagnes bolognaise
+Pâtes à la bolognaise (spaghetti, tagliatelles…)	116	pâtes bolognaise|spaghetti bolognaise
 Poisson blanc à la bordelaise, préemballé	176	
 Riz cantonais	164	
-Cordon bleu de volaille, préemballé	226	
+Cordon bleu de volaille, préemballé	226	cordon bleu	100
 Cassoulet au porc, appertisé	132	
 Cassoulet au canard ou oie, appertisé	161	
 Tomate farcie	122	
@@ -1305,7 +1305,7 @@ Paupiette de volaille	164
 Couscous royal (avec plusieurs viandes), préemballé	132	
 Poisson blanc à la provençale ou niçoise (sauce tomate), préemballé	75.2	
 Lasagnes ou cannellonis aux légumes, préemballées, cuits	103	
-Pâtes à la carbonara (spaghetti, tagliatelles…)	161	
+Pâtes à la carbonara (spaghetti, tagliatelles…)	161	pâtes carbonara|spaghetti carbonara
 Tartiflette, préemballée	161	
 Couscous au poulet	130	
 Lasagnes ou cannellonis au poisson, préemballées	148	
@@ -1377,21 +1377,21 @@ Feuilleté ou Friand au fromage	302
 Feuilleté ou Friand à la viande, préemballé	348	
 Hot-dog, préemballé	278	
 Pizza au fromage ou Pizza margherita, préemballée	227	
-Quiche lorraine, préemballée	274	
+Quiche lorraine, préemballée	274	quiche|quiche lorraine
 Crêpe ou Galette fourrée béchamel jambon, préemballée	136	
 Crêpe ou Galette fourrée béchamel jambon fromage, préemballée	182	
 Crêpe ou Galette fourrée béchamel champignon, préemballée	150	
 Bouchée à la reine, à la viande/volaille/quenelle	292	
-Hamburger, provenant de fast food	246	
-Cheeseburger, provenant de fast food	268	
+Hamburger, provenant de fast food	246	hamburger|burger
+Cheeseburger, provenant de fast food	268	cheeseburger
 Double cheeseburger, provenant de fast food	299	
 Burger au poisson, provenant de fast food	263	
 Tarte aux légumes, préemballée	216	
 Croissant au jambon	243	
 Rouleau de printemps	103	
-Nem ou Pâté impérial	216	
-Sandwich grec ou Kebab, pita, crudités	233	
-Sandwich grec ou Kebab, baguette, crudités	246	
+Nem ou Pâté impérial	216	nem
+Sandwich grec ou Kebab, pita, crudités	233	kebab
+Sandwich grec ou Kebab, baguette, crudités	246	kebab
 Sandwich baguette, thon, crudités (tomate, salade), mayonnaise	274	
 Accra de poisson	275	
 Sandwich panini, jambon cru, mozzarella, tomates	243	
@@ -1400,7 +1400,7 @@ Gougère	399
 Brick garni (garniture : crevettes, légumes, volaille, viande, poisson, etc.), fait maison, cuit	187	
 Tarte au fromage, préemballée	289	
 Tarte à la provençale, préemballée	241	
-Sushi ou Maki aux produits de la mer	171	
+Sushi ou Maki aux produits de la mer	171	sushi|maki
 Pizza à la viande, type bolognaise, préemballée	227	
 Burritos	170	
 Fajitas	158	
@@ -1428,13 +1428,13 @@ Gnocchi à la pomme de terre, cuit	177
 Légumes farcis (sauf tomate)	69.8	
 Volaille, croquette panée ou nuggets	239	
 Pan bagnat	215	
-Pizza (aliment moyen)	233	
-Sandwich baguette, jambon, beurre	285	
+Pizza (aliment moyen)	233	pizza
+Sandwich baguette, jambon, beurre	285	jambon-beurre|sandwich jambon beurre
 Sandwich baguette, camembert, beurre	339	
 Sandwich baguette, pâté, cornichons	298	
 Sandwich baguette, saucisson, beurre	383	
 Sandwich baguette, jambon, emmental, beurre	286	
-Sandwich (aliment moyen)	243	
+Sandwich (aliment moyen)	243	sandwich
 Toasts ou Canapés salés, garnitures diverses, préemballés	233	
 Pizza, sauce garniture pour	38.5	
 Pissaladière, préemballée	284	
@@ -1454,7 +1454,7 @@ Croque-madame	264
 Sandwich baguette (aliment moyen)	277	
 Sandwich pain de mie, garnitures diverses, préemballé	267	
 Fromage pané au jambon	263	
-Croque-monsieur, préemballé	273	
+Croque-monsieur, préemballé	273	croque-monsieur
 Pizza jambon fromage champignons ou pizza royale, reine ou regina, préemballée	205	
 Crêpe ou Galette fourrée béchamel fromage, préemballée	149	
 Flammenkueche ou Tarte flambée aux lardons, préemballée	300	
@@ -1473,7 +1473,7 @@ Yakitori (brochettes japonaises grillées en sauce)	172
 Brochette de porc, crue	131	
 Pastilla au poulet, préemballée	218	
 Pizza aux lardons, oignons et fromage, préemballée	255	
-Falafel ou Boulette de pois-chiche et/ou fève, frite	252	
+Falafel ou Boulette de pois-chiche et/ou fève, frite	252	falafel
 Crêpe ou Galette aux noix de St Jacques, préemballée	168	
 Tarte ou quiche salée (aliment moyen)	267	
 Sandwich pain de mie complet, jambon, crudités, fromage optionnel, préemballé	243	
@@ -1481,7 +1481,7 @@ Sandwich pain de mie complet, thon, crudités, mayonnaise, préemballé	240
 Sandwich pain de mie complet, jambon, fromage, préemballé	292	
 Sandwich pain de mie complet, poulet, crudités, mayonnaise, préemballé	232	
 Feuilleté salé (aliment moyen)	301	
-Gnocchi, cuit (aliment moyen)	181	
+Gnocchi, cuit (aliment moyen)	181	gnocchi
 Bouchée à la reine, garnie (aliment moyen)	249	
 Crêpe ou Galette fourrée béchamel champignon, cuite, préemballée	172	
 Nem ou Pâté impérial, au poulet, préemballé, cuit	197	
@@ -1501,7 +1501,7 @@ Galette ou pavé au soja et légumes, préemballé	175
 Galette ou pavé au soja, fromage et légumes, préemballé	180	
 Seitan, préemballé	134	
 Céleri rémoulade, préemballé	113	
-Taboulé ou Salade de couscous, préemballé	179	
+Taboulé ou Salade de couscous, préemballé	179	taboulé
 Salade de pomme de terre à la piémontaise, préemballée	130	
 Museau de boeuf en vinaigrette	167	
 Crudité, sans assaisonnement (aliment moyen)	29.9	
@@ -1554,13 +1554,13 @@ Soupe aux légumes verts, déshydratée reconstituée	34.8
 Soupe aux pois cassés, préemballée à réchauffer	56.7	
 Soupe froide type Gaspacho ou Gazpacho, préemballée	32.8	
 Soupe aux asperges, préemballée à réchauffer	133	
-Soupe (aliment moyen)	37.4	
+Soupe (aliment moyen)	37.4	soupe|potage
 Bouillon de viande et légumes type pot-au-feu, non dégraissé, déshydraté	212	
 Bouillon de viande et légumes type pot-au-feu, dégraissé, déshydraté	197	
 Soupe miso, déshydratée reconstituée	17.1	
 Maquereau, filet grillé, appertisé, nature, égoutté	246	
-Saumon, cuit, sans précision (aliment moyen)	205	
-Cabillaud, cuit, sans précision (aliment moyen)	98.9	
+Saumon, cuit, sans précision (aliment moyen)	205	saumon|pavé de saumon
+Cabillaud, cuit, sans précision (aliment moyen)	98.9	cabillaud
 Hareng fumé, filet, doux	162	
 Anchois, filets roulés aux câpres, semi-conserve, égoutté	198	
 Anchois, filets à l'huile, semi-conserve, égoutté	182	
@@ -1592,21 +1592,21 @@ Mulet, rôti/cuit au four	143
 Pilchard, sauce tomate, appertisé, égoutté	167	
 Poisson, croquette ou beignet ou nuggets, frit	255	
 Poisson pané, surgelé, cru	162	
-Poisson pané, frit	193	
+Poisson pané, frit	193	poisson pané
 Raie, rôtie/cuite au four	96.3	
 Roussette ou petite roussette ou saumonette, cuite	256	
-Sardine, à l'huile, appertisée, égouttée	207	
+Sardine, à l'huile, appertisée, égouttée	207	sardines|sardines à l'huile
 Sardine, sauce tomate, appertisée, égouttée	193	
-Saumon, cru, élevage	194	
+Saumon, cru, élevage	194	saumon|pavé de saumon|saumon cru
 Saumon fumé	178	
 Saumon, cuit à la vapeur	195	
-Thon, au naturel, appertisé, égoutté	111	
+Thon, au naturel, appertisé, égoutté	111	thon|thon en boîte|thon au naturel
 Sardine, à l'huile d'olive, appertisée, égouttée	202	
-Thon, rôti/cuit au four	136	
+Thon, rôti/cuit au four	136	thon
 Turbot sauvage, cru	91.5	
-Cabillaud, cru	77.6	
+Cabillaud, cru	77.6	cabillaud
 Merlu, cru	82.6	
-Surimi, bâtonnets, tranche ou râpé saveur crabe	125	
+Surimi, bâtonnets, tranche ou râpé saveur crabe	125	surimi|bâtonnets de surimi
 Lieu noir, surgelé, cru	82.4	
 Merlu, filet, surgelé, cru	82	
 Maquereau, cru	194	
@@ -1678,7 +1678,7 @@ Tacaud, cru	81.6
 Lieu noir, cru	82.5	
 Limande-sole, crue	80.6	
 Sardine, grillée	194	
-Poisson cuit (aliment moyen)	144	
+Poisson cuit (aliment moyen)	144	poisson
 Foie de morue, cru	619	
 Foie de morue, appertisé, égoutté	433	
 Vivaneau, cru	94.1	
@@ -1739,7 +1739,7 @@ Rouget-barbet, filet avec peau, surgelé, cru (Thaïlande, Sénégal…)	96.7
 Thon à l'huile de tournesol, miettes, appertisées, égouttées	227	
 Flétan du Groënland ou flétan noir ou flétan commun, cuit à la vapeur	173	
 Sole, poêlée	96.7	
-Poisson blanc, cuit (aliment moyen)	107	
+Poisson blanc, cuit (aliment moyen)	107	poisson blanc
 Poisson blanc, de mer, cuit (aliment moyen)	106	
 Ficelle picarde, préemballée	151	
 Salade de chou ou Coleslaw, avec sauce, préemballée	105	
@@ -1789,18 +1789,18 @@ Porc, longe, cuite	240
 Porc, palette, crue	208	
 Porc, épaule, cuite	253	
 Porc, côte, crue	164	
-Porc, côte, grillée	211	
+Porc, côte, grillée	211	porc|côte de porc
 Porc, rouelle de jambon, crue	149	
 Porc, rouelle de jambon, cuite	266	
 Porc, carré, cru	146	
 Porc, carré, cuit	206	
 Porc, filet, maigre, cru	117	
 Porc, filet, maigre, en rôti, cuit	198	
-Porc, filet mignon, cuit	168	
+Porc, filet mignon, cuit	168	porc|filet mignon
 Porc, filet mignon, cru	123	
 Porc, viande, cuite (aliment moyen)	205	
 Porc, rôti, cru	153	
-Porc, rôti, cuit	163	
+Porc, rôti, cuit	163	porc|rôti de porc
 Porc, échine, crue	198	
 Porc, travers, cru	237	
 Porc, travers, braisé	333	
@@ -1826,22 +1826,22 @@ Oreille de porc demi-sel	228
 Pied de porc demi-sel	137	
 Poitrine de porc demi-sel	268	
 Jambon de porc à cuire ou Jambon à rôtir/cuire au four	161	
-Lardon fumé, cru	275	
-Lardon fumé, cuit	261	
-Filet de bacon	118	
-Jambon cru	225	
+Lardon fumé, cru	275	lardons|lardons fumés
+Lardon fumé, cuit	261	lardons|lardons fumés
+Filet de bacon	118	bacon
+Jambon cru	225	jambon cru
 Jambon cru, fumé	246	
 Jambon sec, découenné, dégraissé	192	
 Jambon cuit, fumé	135	
 Jambon cru, fumé, allégé en matière grasse	142	
 Jambon de Bayonne	228	
-Jambon sec	230	
+Jambon sec	230	jambon sec
 Jambon sec de Parme	248	
 Jambon sec Serrano	235	
 Coppa	284	
 Pancetta ou Poitrine roulée sèche	342	
 Viande des Grisons	209	
-Jambon cuit, supérieur	125	
+Jambon cuit, supérieur	125	jambon|jambon blanc|jambon cuit|jambon de paris
 Jambon cuit, supérieur, avec couenne	137	
 Jambon cuit, supérieur, découenné	117	
 Jambon à l'os braisé	238	
@@ -1858,11 +1858,11 @@ Jambon cuit, de Paris, découenné dégraissé	115
 Haché de volaille	137	
 Dés, allumettes, râpé ou haché de jambon de volaille	132	
 Jambonneau, cuit	162	
-Jambon de poulet ou Blanc de poulet en tranche	106	
-Jambon de dinde ou Blanc de dinde en tranche	104	
+Jambon de poulet ou Blanc de poulet en tranche	106	jambon de poulet
+Jambon de dinde ou Blanc de dinde en tranche	104	jambon de dinde|blanc de dinde
 Rôti de volaille en salaison, cuit	110	
 Boisson au soja et jus de fruits concentrés, préemballée	56.2	
-Chipolata, cuite	282	
+Chipolata, cuite	282	chipolata
 Saucisse de Toulouse, cuite	274	
 Chair à saucisse, crue	323	
 Chair à saucisse, pur porc, crue	273	
@@ -1876,11 +1876,11 @@ Saucisse de volaille, façon charcutière	231
 Saucisse de volaille, type Knack	236	
 Saucisse de Francfort	271	
 Merguez, crue	316	
-Merguez, boeuf et mouton, cuite	283	
+Merguez, boeuf et mouton, cuite	283	merguez
 Merguez, boeuf et mouton, crue	315	
 Saucisse de foie	374	
 Haché végétal à base de soja, préemballé	143	
-Saucisson sec	418	
+Saucisson sec	418	saucisson
 Saucisson sec pur porc	417	
 Saucisson sec pur porc, qualité supérieure	366	
 Rosette ou Fuseau	380	
@@ -1901,10 +1901,10 @@ Saucisson brioché, cuit	309
 Cervelas	278	
 Cervelas obernois	305	
 Cervelas à l'ail, pur porc	297	
-Saucisse de Strasbourg ou Knack	291	
+Saucisse de Strasbourg ou Knack	291	saucisse de strasbourg|knack
 Saucisse cocktail	290	
 Saucisse de jambon pur porc	224	
-Saucisse (aliment moyen)	281	
+Saucisse (aliment moyen)	281	saucisse
 Mortadelle	305	
 Mortadelle, pur porc	298	
 Mortadelle, porc et boeuf	297	
@@ -1914,18 +1914,18 @@ Confiture ou Marmelade, tout type de fruits, teneur en sucre inconnue (aliment m
 Barre chocolatée biscuitée	523	
 Barre chocolatée non biscuitée enrobée	496	
 Barre à la noix de coco, enrobée de chocolat	475	
-Chocolat au lait, tablette	537	
-Confiture ou Marmelade, tout type de fruits (aliment moyen)	249	
+Chocolat au lait, tablette	537	chocolat au lait
+Confiture ou Marmelade, tout type de fruits (aliment moyen)	249	confiture|marmelade
 Chewing-gum, sucré	372	
 Barres ou confiserie chocolatées au lait	551	
 Pâte de fruits	336	
 Chocolat au lait sans sucres ajoutés, avec édulcorants, tablette	487	
 Marron glacé	324	
-Confiture de fraise (extra ou classique)	251	
+Confiture de fraise (extra ou classique)	251	confiture de fraise
 Fruit confit	298	
 Chocolat noir sans sucres ajoutés, avec édulcorants, en tablette	525	
 Barre glacée chocolatée	359	
-Confiture d'abricot (extra ou classique)	247	
+Confiture d'abricot (extra ou classique)	247	confiture d'abricot
 Marmelade d'orange	246	
 Confiserie au chocolat dragéifiée	505	
 Cacahuètes enrobées de chocolat dragéifiées	499	
@@ -1934,7 +1934,7 @@ Chewing-gum, sans sucre	228
 Confiture de myrtilles (extra ou classique)	246	
 Chocolat noir aux fruits secs (noisettes, amandes, raisins, praline), tablette	567	
 Barre chocolatée aux fruits secs	494	
-Chocolat noir à 70% cacao minimum, extra, dégustation, tablette	591	
+Chocolat noir à 70% cacao minimum, extra, dégustation, tablette	591	chocolat noir|chocolat noir 70%
 Édulcorant à base d'extrait de stévia	238	
 Calissons d'Aix en Provence	440	
 Gelée de groseille (extra ou classique)	246	
@@ -1949,13 +1949,13 @@ Confiture, tout type de fruits, allégée en sucres (extra ou classique)	162
 Pollen,frais	285	
 Barre céréalière aux fruits	377	
 Barre céréalière aux amandes ou noisettes	444	
-Chocolat, en tablette (aliment moyen)	557	
+Chocolat, en tablette (aliment moyen)	557	chocolat
 Chewing-gum, teneur en sucre inconnue (aliment moyen)	279	
 Grains de blé soufflés au miel ou caramel, enrichis en vitamines et minéraux	391	
 Céréales pour petit déjeuner chocolatées, non fourrées, enrichies en vitamines et minéraux	408	
 Céréales pour petit déjeuner riches en fibres, avec ou sans fruits, enrichies en vitamines et minéraux	360	
-Céréales pour petit déjeuner (aliment moyen)	398	
-Muesli (aliment moyen)	418	
+Céréales pour petit déjeuner (aliment moyen)	398	céréales|céréales petit déjeuner
+Muesli (aliment moyen)	418	muesli
 Pétales de maïs natures, enrichis en vitamines et minéraux	377	
 Riz soufflé nature, enrichi en vitamines et minéraux	391	
 Céréales pour petit déjeuner riches en fibres, au chocolat, enrichies en vitamines et minéraux	386	
@@ -2008,21 +2008,21 @@ Poule, viande et peau, crue	215
 Poule, viande ,crue	124	
 Poulet, cuisse, viande et peau, cru	192	
 Poulet, viande, crue	113	
-Poulet, cuisse, viande et peau, rôtie/cuite au four	213	
-Poulet, viande et peau, rôti/cuit au four	213	
+Poulet, cuisse, viande et peau, rôtie/cuite au four	213	poulet|cuisse de poulet
+Poulet, viande et peau, rôti/cuit au four	213	poulet rôti|poulet
 Poulet, cuisse, viande, rôti/cuit au four	171	
 Poulet (var. blanc), viande et peau, cru	123	
 Poulet fermier, viande et peau, cru	135	
 Poule, cuisse, crue	131	
 Poulet, viande et peau, cru	173	
-Poulet, filet, sans peau, cru	110	
-Poulet, filet, sans peau, sauté/poêlé	141	
+Poulet, filet, sans peau, cru	110	poulet|blanc de poulet|filet de poulet|escalope de poulet|poulet cru
+Poulet, filet, sans peau, sauté/poêlé	141	poulet|blanc de poulet|filet de poulet|escalope de poulet
 Poulet, haut de cuisse, viande, cru	116	
 Poulet éviscéré sans abats, cru	210	
 Poulet, pilon, cru	155	
 Poulet, aile, viande et peau, cru	181	
 Poulet, cuisse, viande, cru	114	
-Poulet, croquette panée ou nuggets	250	
+Poulet, croquette panée ou nuggets	250	nuggets|nuggets de poulet	20
 Poulet, poitrine, viande et peau, cru	157	
 Poulet, cuisse, viande, bouilli/cuit à l'eau	188	
 Poulet, cuisse, viande et peau, bouilli/cuit à l'eau	188	
@@ -2050,9 +2050,9 @@ Canard, magret, cru	340
 Dinde, viande et peau, crue	132	
 Dinde, viande, crue	110	
 Dinde, viande, rôtie/cuite au four	151	
-Dinde, escalope, crue	109	
+Dinde, escalope, crue	109	dinde|escalope de dinde|filet de dinde
 Dinde, cuisse, viande et peau, crue	150	
-Dinde, escalope, sautée/poêlée	124	
+Dinde, escalope, sautée/poêlée	124	dinde|escalope de dinde|filet de dinde
 Dinde, cuisse, viande sans peau, crue	109	
 Dinde, escalope, rôtie/cuite au four	128	
 Dinde, aile, crue	192	
@@ -2094,12 +2094,12 @@ Crêpe dentelle (pour apéritif) au fromage, préemballée	555
 Croûton à l'ail aux fines herbes ou aux oignons, préemballé	492	
 Milk-shake, provenant de fast food	126	
 Crème dessert au chocolat, rayon frais	130	
-Mousse au chocolat (base laitière), rayon frais	150	
-Crème caramel, rayon frais	132	
+Mousse au chocolat (base laitière), rayon frais	150	mousse au chocolat
+Crème caramel, rayon frais	132	crème caramel
 Mousse au chocolat traditionnelle, préemballée	303	
 Crème aux oeufs (petit pot de crème chocolat, vanille, etc.), rayon frais	176	
-Riz au lait, rayon frais	126	
-Crème brûlée, rayon frais	272	
+Riz au lait, rayon frais	126	riz au lait
+Crème brûlée, rayon frais	272	crème brûlée
 Crème dessert à la vanille, appertisée	132	
 Ile flottante, rayon frais	129	
 Clafoutis aux fruits, préemballé	192	

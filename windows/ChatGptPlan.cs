@@ -127,7 +127,7 @@ internal sealed class ChatGptPlan
             if (item?["index"] is not JsonValue id || !id.TryGetValue(out int index) || index < 0 || index >= output.Length
                 || output[index].Per100.HasValue || item["kcal"] is not JsonValue energy || !energy.TryGetValue(out double kcal)
                 || kcal is < 0 or > 1000 || !double.IsFinite(kcal)) continue;
-            output[index] = output[index] with { Per100 = kcal };
+            output[index] = output[index] with { Per100 = kcal, Source = "ChatGPT" };
         }
         return output;
     }
