@@ -5,12 +5,18 @@ namespace Pause;
 
 internal sealed record DriveEdit(string Key, JsonNode? Before, JsonNode? After, bool Resolve = false);
 internal sealed record DriveConflict(string Key, JsonNode? Local, JsonNode? Cloud, IReadOnlyList<JsonNode?> Alternatives);
-
-internal sealed class DriveJournal
+internal sealed record DriveSnapshot(long Generation, long Reset, string[] Batches, Dictionary<string, JsonNode> Entries,
+    Dictionary<string, List<JsonNode?>> Alternatives)
 {
-    private readonly Dictionary<string, JsonNode> entries = new(StringComparer.Ordinal);
-    private readonly Dictionary<string, List<JsonNode?>> alternatives = new(StringComparer.Ordinal);
-    private readonly HashSet<string> replayed = new(StringComparer.Ordinal);
+    internal static DriveSnapshot Empty => new(0, 0, [], new(StringComparer.Ordinal), new(StringComparer.Ordinal));
+}
+
+internal sealed class DriveJournal(DriveSnapshot start)
+{
+    private readonly Dictionary<string, JsonNode> entries = new(start.Entries, StringComparer.Ordinal);
+    private readonly Dictionary<string, List<JsonNode?>> alternatives =
+        start.Alternatives.ToDictionary(item => item.Key, item => item.Value.ToList(), StringComparer.Ordinal);
+    private readonly HashSet<string> replayed = new(start.Batches, StringComparer.Ordinal);
     internal bool HasBatch(string id) => replayed.Contains(id);
     internal bool HasConflict(string key) => alternatives.ContainsKey(key);
 
@@ -72,10 +78,35 @@ internal sealed class DriveJournal
         return (apply, next);
     }
 
+    internal DriveSnapshot Snapshot(long generation, long reset) =>
+        new(generation, reset, replayed.Order(StringComparer.Ordinal).ToArray(), entries, alternatives);
+
+    internal static JsonObject Encode(DriveSnapshot snapshot) => new()
+    {
+        ["v"] = 1, ["generation"] = snapshot.Generation, ["reset"] = snapshot.Reset,
+        ["batches"] = new JsonArray(snapshot.Batches.Select(id => (JsonNode?)id).ToArray()),
+        ["entries"] = new JsonObject(snapshot.Entries.Select(item => KeyValuePair.Create(item.Key, (JsonNode?)item.Value.DeepClone()))),
+        ["alternatives"] = new JsonObject(snapshot.Alternatives.Select(item =>
+            KeyValuePair.Create(item.Key, (JsonNode?)new JsonArray(item.Value.Select(value => value?.DeepClone()).ToArray()))))
+    };
+
+    internal static DriveSnapshot ParseSnapshot(JsonObject content)
+    {
+        if (content["v"]?.GetValue<int>() != 1 || content["batches"] is not JsonArray batches
+            || content["entries"] is not JsonObject values || content["alternatives"] is not JsonObject conflicts)
+            throw new InvalidDataException("État Drive illisible.");
+        return new(content["generation"]!.GetValue<long>(), content["reset"]!.GetValue<long>(),
+            batches.Select(id => id!.GetValue<string>()).ToArray(),
+            values.ToDictionary(item => item.Key, item => JournalStore.Normalize(item.Key, item.Value)
+                ?? throw new InvalidDataException("État Drive illisible."), StringComparer.Ordinal),
+            conflicts.ToDictionary(item => item.Key, item => item.Value!.AsArray()
+                .Select(value => JournalStore.Normalize(item.Key, value)).ToList(), StringComparer.Ordinal));
+    }
+
     internal static (string Id, DriveEdit[] Edits) Parse(JsonObject batch)
     {
         if (batch["v"]?.GetValue<int>() != 1 || batch["id"]?.GetValue<string>() is not string id
-            || id.Length != 64 || !id.All(Uri.IsHexDigit) || batch["edits"] is not JsonArray edits)
+            || id.Length != 32 || !id.All(Uri.IsHexDigit) || batch["edits"] is not JsonArray edits)
             throw new InvalidDataException("Historique Drive illisible.");
         var normalized = new List<DriveEdit>(edits.Count);
         var keys = new HashSet<string>(StringComparer.Ordinal);

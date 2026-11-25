@@ -21,6 +21,7 @@ internal sealed class DriveConnection
     private string? access;
     private DateTimeOffset expires;
     internal bool Connected => session is not null;
+    internal string? Account => session?.AccountId;
 
     private sealed record Session(string ClientId, string ClientSecret, string Refresh, string AccountId);
 

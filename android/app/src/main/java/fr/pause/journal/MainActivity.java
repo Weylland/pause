@@ -1072,6 +1072,10 @@ public final class MainActivity extends Activity {
                 add(cloud, link("Vérifier · " + driveEntryLabel(conflict.key()), () -> reviewDriveConflict(conflict)), 3);
             add(cloud, button(driveNeedsConsent ? "Reconnecter Google Drive" : "Synchroniser maintenant", BRAND, WHITE,
                     () -> startDrive(driveNeedsConsent, null)), 9);
+            add(cloud, link("Remplacer le contenu de Drive", () -> new PaperStyle.DialogBuilder(this)
+                    .setTitle("Remplacer le contenu de Drive")
+                    .setMessage("Drive repartira du journal de ce téléphone. Tes autres appareils garderont le leur : les différences y seront à vérifier.")
+                    .setNegativeButton("Annuler", null).setPositiveButton("Remplacer", (dialog, which) -> startDrive(false, true, null)).show()), 4);
             add(cloud, link("Déconnecter Google Drive", () -> {
                 if (driveBusy) return;
                 drive.disconnect();
@@ -1107,7 +1111,9 @@ public final class MainActivity extends Activity {
         add(settings, link("Dissocier ce PC", this::forgetPc), 0);
     }
 
-    private void startDrive(boolean interactive, DriveJournal.Resolution resolution) {
+    private void startDrive(boolean interactive, DriveJournal.Resolution resolution) { startDrive(interactive, false, resolution); }
+
+    private void startDrive(boolean interactive, boolean replace, DriveJournal.Resolution resolution) {
         if (driveBusy || (!interactive && !drive.connected())) return;
         driveBusy = true;
         if (tab == PC) render(true);
@@ -1122,17 +1128,17 @@ public final class MainActivity extends Activity {
                 }
                 try { startIntentSenderForResult(result.getPendingIntent().getIntentSender(), DRIVE_PERMISSION, null, 0, 0, 0); }
                 catch (IntentSender.SendIntentException error) { finishDrive("Impossible d’ouvrir l’autorisation Google."); }
-            } else runDrive(result, interactive, resolution);
+            } else runDrive(result, interactive, replace, resolution);
         }).addOnFailureListener(error -> finishDrive("Connexion Google indisponible sur ce téléphone. Essaie à nouveau."));
     }
 
-    private void runDrive(AuthorizationResult result, boolean interactive, DriveJournal.Resolution resolution) {
+    private void runDrive(AuthorizationResult result, boolean interactive, boolean replace, DriveJournal.Resolution resolution) {
         String token = result.getAccessToken();
         if (token == null || token.isBlank()) { finishDrive("Google n’a pas donné accès au dossier de Fil des jours."); return; }
         driveNeedsConsent = false;
         driveWorker.execute(() -> {
             String errorMessage = null;
-            try { drive.sync(token, interactive, resolution); }
+            try { drive.sync(token, interactive, replace, resolution); }
             catch (Exception error) {
                 errorMessage = error instanceof IOException && error.getMessage() != null ? error.getMessage()
                         : "La synchronisation Drive a été interrompue. Ton journal reste sur le téléphone.";
@@ -1575,7 +1581,7 @@ public final class MainActivity extends Activity {
         super.onActivityResult(request, result, data);
         if (request == DRIVE_PERMISSION) {
             if (result != RESULT_OK || data == null) finishDrive("Connexion Google annulée.");
-            else try { runDrive(driveAuthorization.getAuthorizationResultFromIntent(data), true, null); }
+            else try { runDrive(driveAuthorization.getAuthorizationResultFromIntent(data), true, false, null); }
             catch (Exception error) { finishDrive("Google n’a pas donné accès à Fil des jours."); }
         } else if (request == CAMERA) {
             String path = photoPath;

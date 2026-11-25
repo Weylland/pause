@@ -30,4 +30,5 @@ dependencies {
     implementation 'com.google.mlkit:text-recognition:16.0.1'
     implementation files('libs/zxing-core-3.5.4.jar')
     testImplementation 'junit:junit:4.13.2'
+    testImplementation 'org.json:json:20240303'
 }

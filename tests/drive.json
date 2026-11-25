@@ -1,0 +1,44 @@
+{
+  "snapshot": {
+    "v": 1,
+    "generation": 4,
+    "reset": 0,
+    "batches": ["00000000000000000000000000000001", "00000000000000000000000000000002"],
+    "entries": {
+      "goal": { "start": "2026-11-01", "duration": 30 },
+      "weight/2026-11-01": 80,
+      "weight/2026-11-02": 81.5,
+      "pause/2026-11-03": "tenu"
+    },
+    "alternatives": { "weight/2026-11-02": [82, null] }
+  },
+  "batches": [
+    { "v": 1, "id": "00000000000000000000000000000002", "edits": [{ "key": "weight/2026-11-01", "before": 80, "after": 10, "resolve": false }] },
+    { "v": 1, "id": "00000000000000000000000000000003", "edits": [
+      { "key": "weight/2026-11-01", "before": 80.0, "after": 79, "resolve": false },
+      { "key": "weight/2026-11-04", "before": null, "after": 78.4, "resolve": false },
+      { "key": "weight/2026-11-02", "before": 81.5, "after": 82, "resolve": true }
+    ] },
+    { "v": 1, "id": "00000000000000000000000000000004", "edits": [
+      { "key": "weight/2026-11-01", "before": 80, "after": 77, "resolve": false },
+      { "key": "pause/2026-11-03", "before": "tenu", "after": null, "resolve": false }
+    ] }
+  ],
+  "expected": {
+    "v": 1,
+    "generation": 5,
+    "reset": 0,
+    "batches": ["00000000000000000000000000000001", "00000000000000000000000000000002", "00000000000000000000000000000003", "00000000000000000000000000000004"],
+    "entries": {
+      "goal": { "start": "2026-11-01", "duration": 30 },
+      "weight/2026-11-01": 79,
+      "weight/2026-11-02": 82,
+      "weight/2026-11-04": 78.4
+    },
+    "alternatives": { "weight/2026-11-01": [77] }
+  },
+  "baseline": { "goal": { "start": "2026-11-01", "duration": 30 }, "weight/2026-11-01": 80, "weight/2026-11-02": 82, "weight/2026-11-04": 78.4 },
+  "local": { "goal": { "start": "2026-11-01", "duration": 45 }, "weight/2026-11-01": 80, "weight/2026-11-02": 82, "weight/2026-11-05": 78 },
+  "upload": ["goal", "weight/2026-11-04", "weight/2026-11-05"],
+  "conflicts": ["weight/2026-11-01"]
+}

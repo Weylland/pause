@@ -213,10 +213,13 @@ public partial class MainWindow : Window
         }
     }
 
-    private async Task SyncDriveAsync(DriveConflict? conflict = null, JsonNode? choice = null)
+    private Task SyncDriveAsync(DriveConflict? conflict = null, JsonNode? choice = null) =>
+        RunDriveAsync(() => drive.SyncAsync(estimateLifetime.Token, conflict, choice));
+
+    private async Task RunDriveAsync(Func<Task> exchange)
     {
         if (!drive.Connected || drive.Busy) return;
-        try { await drive.SyncAsync(estimateLifetime.Token, conflict, choice); }
+        try { await exchange(); }
         catch (OperationCanceledException) when (estimateLifetime.IsCancellationRequested) { return; }
         SyncStatus.Text = drive.Status;
         SyncDot.Fill = (Brush)FindResource(drive.Conflicts.Count == 0 ? "BlueInk" : "ApricotInk");
@@ -271,6 +274,13 @@ public partial class MainWindow : Window
             foreach (DriveConflict conflict in drive.Conflicts)
                 editor.AddAction("Vérifier · " + DriveEntryLabel(conflict.Key), () => ResolveDriveConflict(conflict));
             editor.AddAction("Reconnecter le compte", async () => await AuthorizeAsync(null));
+            editor.AddAction("Remplacer le contenu de Drive par ce PC", async () =>
+            {
+                if (MessageBox.Show(Window.GetWindow(editor.Content)!, "Drive repartira du journal de ce PC. Tes autres appareils garderont le leur : les différences y seront à vérifier. Continuer ?",
+                    "Fil des jours", MessageBoxButton.YesNo, MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
+                await RunDriveAsync(() => drive.ReplaceAsync(estimateLifetime.Token));
+                status.Text = drive.Status;
+            });
             editor.AddAction("Déconnecter ce PC", () =>
             {
                 drive.Disconnect();

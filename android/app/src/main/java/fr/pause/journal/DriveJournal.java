@@ -5,7 +5,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -23,7 +23,38 @@ final class DriveJournal {
 
     private final JSONObject entries = new JSONObject();
     private final Map<String, List<Object>> alternatives = new HashMap<>();
-    private final Set<String> replayed = new HashSet<>();
+    private final Set<String> replayed = new TreeSet<>();
+
+    DriveJournal() {}
+
+    DriveJournal(JSONObject snapshot) throws JSONException {
+        JSONArray batches = snapshot.getJSONArray("batches");
+        for (int i = 0; i < batches.length(); i++) replayed.add(batches.getString(i));
+        JSONObject values = snapshot.getJSONObject("entries");
+        for (String key : WindowsSync.keys(values)) entries.put(key, values.get(key));
+        JSONObject conflicts = snapshot.getJSONObject("alternatives");
+        for (String key : WindowsSync.keys(conflicts)) {
+            JSONArray rows = conflicts.getJSONArray(key);
+            List<Object> choices = new ArrayList<>(rows.length());
+            for (int i = 0; i < rows.length(); i++) choices.add(rows.get(i));
+            alternatives.put(key, choices);
+        }
+    }
+
+    JSONObject snapshot(long generation, long reset) throws JSONException {
+        JSONObject conflicts = new JSONObject();
+        for (Map.Entry<String, List<Object>> item : alternatives.entrySet()) {
+            JSONArray rows = new JSONArray();
+            for (Object value : item.getValue()) rows.put(withNull(value));
+            conflicts.put(item.getKey(), rows);
+        }
+        return snapshot(generation, reset, replayed, entries, conflicts);
+    }
+
+    static JSONObject snapshot(long generation, long reset, Collection<String> batches, JSONObject entries, JSONObject alternatives) throws JSONException {
+        return new JSONObject().put("v", 1).put("generation", generation).put("reset", reset)
+                .put("batches", new JSONArray(batches)).put("entries", entries).put("alternatives", alternatives);
+    }
 
     boolean hasBatch(String id) { return replayed.contains(id); }
     boolean hasConflict(String key) { return alternatives.containsKey(key); }
@@ -75,15 +106,9 @@ final class DriveJournal {
         return new Received(combined, next);
     }
 
-    static void verifyHistory(String previous, String current) throws JSONException {
-        Set<String> ids = new HashSet<>(Arrays.asList(current.split(",")));
-        for (String id : previous.split(","))
-            if (!id.isEmpty() && !ids.contains(id)) throw new JSONException("Des fichiers de synchro Drive manquent. Ton journal local est conservé.");
-    }
-
     static Batch parse(JSONObject batch) throws JSONException {
         String id = batch.getString("id");
-        if (batch.getInt("v") != 1 || !id.matches("[0-9a-f]{64}")) throw new JSONException("Historique Drive illisible.");
+        if (batch.getInt("v") != 1 || !id.matches("[0-9a-f]{32}")) throw new JSONException("Historique Drive illisible.");
         JSONArray rows = batch.getJSONArray("edits");
         List<Edit> edits = new ArrayList<>(rows.length());
         Set<String> keys = new HashSet<>();
